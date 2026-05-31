@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useLanguage } from '@/context/LanguageContext';
+import { supabase } from '@/lib/supabase';
 
 interface GoogleLoginProps {
   redirectTo?: string;
@@ -13,7 +13,6 @@ export default function GoogleLogin({
   redirectTo,
   className = '',
 }: GoogleLoginProps) {
-  const supabase = createClientComponentClient();
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

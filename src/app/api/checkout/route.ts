@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createSupabaseRouteClient } from '@/lib/supabase-route';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -26,11 +25,11 @@ interface CheckoutBody {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createSupabaseRouteClient();
     const body: CheckoutBody = await request.json();
 
     // ─── Validate required fields ───────────────────────────────────────────
-    const { customer_name, customer_phone, shipping_address, items, total_amount, deposit_amount } = body;
+    const { customer_name, customer_phone, shipping_address, items, deposit_amount } = body;
 
     if (!customer_name || !customer_phone || !shipping_address) {
       return NextResponse.json(
@@ -66,7 +65,7 @@ export async function POST(request: NextRequest) {
     const orderIds: string[] = [];
     const createdAts: string[] = [];
 
-    for (const [partnerId, partnerItems] of partnerGroups) {
+    for (const [partnerId, partnerItems] of Array.from(partnerGroups.entries())) {
       const partnerSubtotal = partnerItems.reduce(
         (sum, i) => sum + i.selling_price_at_time * i.quantity,
         0

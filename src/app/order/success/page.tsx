@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useLanguage } from '@/context/LanguageContext';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -70,13 +70,14 @@ function resolveCollectiveState(orders: OrderRow[]): {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function OrderSuccessPage() {
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const idsParam = searchParams.get('ids');
-  const orderIds = idsParam ? idsParam.split(',').filter(Boolean) : [];
-  const { t, language } = useLanguage();
-  const supabase = createClientComponentClient();
-  const isRTL = language === 'ar';
+  const orderIds = useMemo(
+    () => (idsParam ? idsParam.split(',').filter(Boolean) : []),
+    [idsParam]
+  );
+  const { t, isRTL } = useLanguage();
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [timerState, setTimerState] = useState<TimerState>('loading');
@@ -159,7 +160,7 @@ export default function OrderSuccessPage() {
       setConfirmedCount(rows.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length);
       initFromOrders(rows);
     })();
-  }, [orderIds, supabase, initFromOrders]);
+  }, [orderIds, initFromOrders]);
 
   // ── Real-time subscriptions for ALL order IDs ─────────────────────────────
   useEffect(() => {
@@ -213,7 +214,7 @@ export default function OrderSuccessPage() {
       channels.forEach((ch) => supabase.removeChannel(ch));
       channelsRef.current = [];
     };
-  }, [orderIds, supabase, stopTimer, startTimer]);
+  }, [orderIds, stopTimer, startTimer]);
 
   // ── Cleanup on unmount ────────────────────────────────────────────────────
   useEffect(() => {
@@ -221,7 +222,7 @@ export default function OrderSuccessPage() {
       stopTimer();
       channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
     };
-  }, [stopTimer, supabase]);
+  }, [stopTimer]);
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -275,6 +276,14 @@ export default function OrderSuccessPage() {
   );
 }
 
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center bg-background text-foreground" />}>
+      <OrderSuccessContent />
+    </Suspense>
+  );
+}
+
 // ─── Sub-views ────────────────────────────────────────────────────────────────
 
 interface ViewProps {
@@ -290,7 +299,6 @@ function CountdownView({
   confirmedCount,
   totalCount,
   t,
-  isRTL,
 }: ViewProps & {
   secondsLeft: number;
   confirmedCount: number;
@@ -382,7 +390,7 @@ function CountdownView({
 }
 
 // Confirmed view — all orders approved
-function ConfirmedView({ orders, t, isRTL }: ViewProps) {
+function ConfirmedView({ orders, t }: ViewProps) {
   return (
     <div className="flex flex-col items-center gap-6 w-full">
       <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
@@ -414,7 +422,7 @@ function ConfirmedView({ orders, t, isRTL }: ViewProps) {
 }
 
 // Expired view — timeout or error
-function ExpiredView({ fetchError, orders, t, isRTL }: ViewProps & { fetchError: string | null }) {
+function ExpiredView({ fetchError, orders, t }: ViewProps & { fetchError: string | null }) {
   return (
     <div className="flex flex-col items-center gap-6 w-full">
       <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">

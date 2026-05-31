@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useLanguage } from '@/context/LanguageContext';
-import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const BOOKING_WINDOW_SECONDS = 20 * 60;
@@ -66,11 +65,9 @@ function resolveCollectiveState(orders: OrderRow[]): {
   return { state: 'countdown', anchorCreatedAt: earliest.created_at };
 }
 
-export default function TrackPage() {
+function TrackContent() {
   const searchParams = useSearchParams();
-  const { t, language } = useLanguage();
-  const supabase = createClientComponentClient();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
 
   // Support both single and multi-ID: ?orderId=xxx OR ?ids=id1,id2
   const initialIds = searchParams.get('ids')?.split(',').filter(Boolean) ?? [];
@@ -161,19 +158,24 @@ export default function TrackPage() {
                 if (!prev.find((o) => o.id === updated.id)) {
                   next.push(updated);
                 }
-                return next;
-              });
-              // Re-compute collective state
-              setOrders((current) => {
-                const { state, anchorCreatedAt } = resolveCollectiveState(current);
+
+                const { state, anchorCreatedAt } = resolveCollectiveState(next);
                 setConfirmedCount(
-                  current.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length
+                  next.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length
                 );
+
                 if (state === 'confirmed') {
                   stopTimer();
                   setTimerState('confirmed');
+                } else if (state === 'expired') {
+                  stopTimer();
+                  setTimerState('expired');
+                } else if (state === 'countdown' && anchorCreatedAt && !intervalRef.current) {
+                  setTimerState('countdown');
+                  startTimer(anchorCreatedAt);
                 }
-                return current;
+
+                return next;
               });
             }
           )
@@ -182,7 +184,7 @@ export default function TrackPage() {
 
       channelsRef.current = channels;
     },
-    [supabase, stopTimer]
+    [stopTimer, startTimer]
   );
 
   const fetchOrders = useCallback(
@@ -211,7 +213,7 @@ export default function TrackPage() {
       initFromOrders(data as OrderRow[]);
       subscribeToOrders(data.map((o: OrderRow) => o.id));
     },
-    [supabase, initFromOrders, subscribeToOrders, stopTimer]
+    [initFromOrders, subscribeToOrders, stopTimer]
   );
 
   // Auto-fetch if IDs provided in URL
@@ -409,6 +411,14 @@ export default function TrackPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function TrackPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center bg-background text-foreground" />}>
+      <TrackContent />
+    </Suspense>
   );
 }
 
