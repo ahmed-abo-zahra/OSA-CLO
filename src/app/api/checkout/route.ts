@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     const orderIds: string[] = [];
     const createdAts: string[] = [];
 
-    for (const [partnerId, partnerItems] of Array.from(partnerGroups.entries())) {
+    for (const [, partnerItems] of Array.from(partnerGroups.entries())) {
       const partnerSubtotal = partnerItems.reduce((sum, item) => {
         const product = productMap.get(item.product_id as string)!;
         return sum + product.selling_price * item.quantity;
