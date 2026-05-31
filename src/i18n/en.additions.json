@@ -1,0 +1,69 @@
+{
+  "___comment": "ADD these keys to your existing src/i18n/en.json — merge with existing file, do not replace it.",
+
+  "currency": "EGP",
+
+  "auth": {
+    "google": {
+      "button": "Continue with Google",
+      "loading": "Signing in...",
+      "error": "Sign-in failed. Please try again."
+    }
+  },
+
+  "order": {
+    "trackOrder": "Track your order",
+
+    "timer": {
+      "heading": "Your Order Is Under Review",
+      "description": "Our team is manually reviewing your deposit receipt. Your booking will be confirmed within this window.",
+      "minutes": "min"
+    },
+
+    "payment": {
+      "instructions": {
+        "title": "Manual Payment Instructions",
+        "body": "Please send your deposit receipt (Vodafone Cash / Bank Transfer) to our support team via WhatsApp to confirm your booking."
+      }
+    },
+
+    "confirmed": {
+      "heading": "Booking Confirmed Successfully! ✓",
+      "description": "Your order has been reviewed and payment verified. We'll be in touch shortly."
+    },
+
+    "expired": {
+      "heading": "Booking Time Window Expired",
+      "description": "Booking time window expired. Please contact support to confirm your booking.",
+      "fetchError": "We could not load your order details. Please try again or contact support.",
+      "contactSupport": "Contact Support via WhatsApp"
+    },
+
+    "summary": {
+      "orderId": "Order ID",
+      "customer": "Name",
+      "phone": "Phone",
+      "address": "Address",
+      "total": "Total Amount",
+      "deposit": "Deposit"
+    },
+
+    "status": {
+      "pending": "Pending Review",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "closed": "Completed",
+      "unknown": "Unknown"
+    }
+  },
+
+  "track": {
+    "heading": "Track Your Order",
+    "subheading": "Enter your order ID to see its current status",
+    "inputPlaceholder": "Order ID (UUID)",
+    "inputLabel": "Enter Order ID",
+    "searchButton": "Search",
+    "notFound": "No order found with this ID.",
+    "viewSuccess": "View Order Confirmation Page"
+  }
+}
