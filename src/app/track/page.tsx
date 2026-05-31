@@ -21,6 +21,7 @@ interface OrderRow {
   total_amount: number;
   deposit_amount: number;
   shipping_address: string;
+  partner_id?: string;
 }
 
 function computeSecondsLeft(createdAt: string): number {
@@ -39,19 +40,55 @@ const STATUS_LABEL_MAP: Record<string, string> = {
   closed: 'order.status.closed',
 };
 
+/**
+ * Compute collective timer state from multiple orders.
+ */
+function resolveCollectiveState(orders: OrderRow[]): {
+  state: 'confirmed' | 'expired' | 'countdown';
+  anchorCreatedAt: string | null;
+} {
+  if (orders.length === 0) return { state: 'expired', anchorCreatedAt: null };
+
+  const pending = orders.filter((o) => !CONFIRMED_STATUSES.has(o.payment_status));
+
+  if (pending.length === 0) {
+    return { state: 'confirmed', anchorCreatedAt: null };
+  }
+
+  const earliest = pending.reduce((earliest, o) =>
+    o.created_at < earliest.created_at ? o : earliest
+  );
+
+  if (computeSecondsLeft(earliest.created_at) === 0) {
+    return { state: 'expired', anchorCreatedAt: null };
+  }
+
+  return { state: 'countdown', anchorCreatedAt: earliest.created_at };
+}
+
 export default function TrackPage() {
   const searchParams = useSearchParams();
   const { t, language } = useLanguage();
   const supabase = createClientComponentClient();
   const isRTL = language === 'ar';
 
-  const [inputId, setInputId] = useState(searchParams.get('orderId') ?? '');
-  const [order, setOrder] = useState<OrderRow | null>(null);
-  const [timerState, setTimerState] = useState<TimerState>('idle');
+  // Support both single and multi-ID: ?orderId=xxx OR ?ids=id1,id2
+  const initialIds = searchParams.get('ids')?.split(',').filter(Boolean) ?? [];
+  const singleId = searchParams.get('orderId');
+  const initialRaw = initialIds.length > 0
+    ? initialIds.join(',')
+    : (singleId ?? '');
+
+  const [inputRaw, setInputRaw] = useState(initialRaw);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [timerState, setTimerState] = useState<TimerState>(
+    initialRaw ? 'loading' : 'idle'
+  );
   const [secondsLeft, setSecondsLeft] = useState(BOOKING_WINDOW_SECONDS);
+  const [confirmedCount, setConfirmedCount] = useState(0);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelsRef = useRef<ReturnType<typeof supabase.channel>[]>([]);
 
   const stopTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -68,7 +105,7 @@ export default function TrackPage() {
         setSecondsLeft(left);
         if (left === 0) {
           stopTimer();
-          setTimerState((prev) => (prev === 'countdown' ? 'expired' : prev));
+          setTimerState('expired');
         }
       };
       tick();
@@ -77,99 +114,122 @@ export default function TrackPage() {
     [stopTimer]
   );
 
-  const resolveState = useCallback(
-    (row: OrderRow) => {
-      if (CONFIRMED_STATUSES.has(row.payment_status)) {
+  const initFromOrders = useCallback(
+    (fetchedOrders: OrderRow[]) => {
+      const { state, anchorCreatedAt } = resolveCollectiveState(fetchedOrders);
+      setConfirmedCount(
+        fetchedOrders.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length
+      );
+
+      if (state === 'confirmed') {
         stopTimer();
         setTimerState('confirmed');
-        return;
-      }
-      const left = computeSecondsLeft(row.created_at);
-      if (left === 0) {
+      } else if (state === 'expired') {
+        stopTimer();
         setTimerState('expired');
-      } else {
+      } else if (state === 'countdown' && anchorCreatedAt) {
         setTimerState('countdown');
-        startTimer(row.created_at);
+        startTimer(anchorCreatedAt);
       }
     },
     [startTimer, stopTimer]
   );
 
-  const subscribeToOrder = useCallback(
-    (orderId: string) => {
-      // Remove previous channel
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
+  const subscribeToOrders = useCallback(
+    (ids: string[]) => {
+      // Clean up previous channels
+      channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
+      channelsRef.current = [];
 
-      channelRef.current = supabase
-        .channel(`track-order-${orderId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'orders',
-            filter: `id=eq.${orderId}`,
-          },
-          (payload) => {
-            const updated = payload.new as OrderRow;
-            setOrder((prev) => ({ ...(prev ?? updated), ...updated }));
-            if (CONFIRMED_STATUSES.has(updated.payment_status)) {
-              stopTimer();
-              setTimerState('confirmed');
+      const channels = ids.map((id) =>
+        supabase
+          .channel(`track-order-${id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'orders',
+              filter: `id=eq.${id}`,
+            },
+            (payload) => {
+              const updated = payload.new as OrderRow;
+              setOrders((prev) => {
+                const next = prev.map((o) =>
+                  o.id === updated.id ? { ...o, ...updated } : o
+                );
+                if (!prev.find((o) => o.id === updated.id)) {
+                  next.push(updated);
+                }
+                return next;
+              });
+              // Re-compute collective state
+              setOrders((current) => {
+                const { state, anchorCreatedAt } = resolveCollectiveState(current);
+                setConfirmedCount(
+                  current.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length
+                );
+                if (state === 'confirmed') {
+                  stopTimer();
+                  setTimerState('confirmed');
+                }
+                return current;
+              });
             }
-          }
-        )
-        .subscribe();
+          )
+          .subscribe()
+      );
+
+      channelsRef.current = channels;
     },
     [supabase, stopTimer]
   );
 
-  const fetchOrder = useCallback(
-    async (id: string) => {
-      if (!id.trim()) return;
+  const fetchOrders = useCallback(
+    async (raw: string) => {
+      const ids = raw.split(',').map((s) => s.trim()).filter(Boolean);
+      if (ids.length === 0) return;
+
       setTimerState('loading');
-      setOrder(null);
+      setOrders([]);
       stopTimer();
+      channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
 
       const { data, error } = await supabase
         .from('orders')
         .select(
-          'id, payment_status, created_at, customer_name, customer_phone, total_amount, deposit_amount, shipping_address'
+          'id, payment_status, created_at, customer_name, customer_phone, total_amount, deposit_amount, shipping_address, partner_id'
         )
-        .eq('id', id.trim())
-        .single();
+        .in('id', ids);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         setTimerState('not_found');
         return;
       }
 
-      setOrder(data as OrderRow);
-      resolveState(data as OrderRow);
-      subscribeToOrder(data.id);
+      setOrders(data as OrderRow[]);
+      initFromOrders(data as OrderRow[]);
+      subscribeToOrders(data.map((o: OrderRow) => o.id));
     },
-    [supabase, resolveState, subscribeToOrder, stopTimer]
+    [supabase, initFromOrders, subscribeToOrders, stopTimer]
   );
 
-  // Auto-fetch if orderId in URL
+  // Auto-fetch if IDs provided in URL
   useEffect(() => {
-    const id = searchParams.get('orderId');
-    if (id) {
-      setInputId(id);
-      fetchOrder(id);
+    if (initialRaw) {
+      setInputRaw(initialRaw);
+      fetchOrders(initialRaw);
     }
     return () => {
       stopTimer();
-      if (channelRef.current) supabase.removeChannel(channelRef.current);
+      channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputId.trim()) fetchOrder(inputId.trim());
+    if (inputRaw.trim()) fetchOrders(inputRaw.trim());
   };
 
   const percentage = (secondsLeft / BOOKING_WINDOW_SECONDS) * 100;
@@ -197,8 +257,8 @@ export default function TrackPage() {
         <form onSubmit={handleSearch} className="flex gap-2">
           <input
             type="text"
-            value={inputId}
-            onChange={(e) => setInputId(e.target.value)}
+            value={inputRaw}
+            onChange={(e) => setInputRaw(e.target.value)}
             placeholder={t('track.inputPlaceholder')}
             className="
               flex-1 px-4 py-3 rounded-xl
@@ -213,7 +273,7 @@ export default function TrackPage() {
           />
           <button
             type="submit"
-            disabled={timerState === 'loading' || !inputId.trim()}
+            disabled={timerState === 'loading' || !inputRaw.trim()}
             className="
               px-5 py-3 rounded-xl
               bg-zinc-800 dark:bg-zinc-100
@@ -236,13 +296,20 @@ export default function TrackPage() {
           </div>
         )}
 
-        {order && timerState !== 'idle' && timerState !== 'loading' && timerState !== 'not_found' && (
+        {orders.length > 0 && timerState !== 'idle' && timerState !== 'loading' && timerState !== 'not_found' && (
           <div className="flex flex-col items-center gap-6 w-full">
 
-            {/* ── Status badge ── */}
-            <StatusBadge status={order.payment_status} t={t} />
+            {/* ── Collective progress: confirmed / total ── */}
+            {orders.length > 1 && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-green-600 dark:text-green-400 font-semibold">
+                  {confirmedCount}/{orders.length}
+                </span>
+                <span className="text-zinc-400">{t('order.confirmedCount')}</span>
+              </div>
+            )}
 
-            {/* ── Countdown clock (only when pending) ── */}
+            {/* ── Countdown clock (only when some pending) ── */}
             {timerState === 'countdown' && (
               <div className="flex flex-col items-center gap-3">
                 <div className="relative w-36 h-36" role="timer" aria-live="polite">
@@ -267,7 +334,10 @@ export default function TrackPage() {
                   </div>
                 </div>
                 <p className="text-sm text-center text-zinc-500 dark:text-zinc-400 max-w-xs">
-                  {t('order.timer.description')}
+                  {orders.length > 1
+                    ? t('order.timer.descriptionMulti')
+                        .replace('{count}', String(orders.length - confirmedCount))
+                    : t('order.timer.description')}
                 </p>
               </div>
             )}
@@ -279,7 +349,9 @@ export default function TrackPage() {
                   ✓ {t('order.confirmed.heading')}
                 </p>
                 <p className="text-sm text-green-600 dark:text-green-500">
-                  {t('order.confirmed.description')}
+                  {orders.length > 1
+                    ? t('order.confirmed.descriptionMulti').replace('{count}', String(orders.length))
+                    : t('order.confirmed.description')}
                 </p>
               </div>
             )}
@@ -304,31 +376,35 @@ export default function TrackPage() {
               </div>
             )}
 
-            {/* ── Order details card ── */}
-            <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 divide-y divide-zinc-200 dark:divide-zinc-700">
-              {[
-                { label: 'order.summary.orderId', value: order.id, mono: true },
-                { label: 'order.summary.customer', value: order.customer_name },
-                { label: 'order.summary.phone', value: order.customer_phone },
-                { label: 'order.summary.address', value: order.shipping_address },
-                { label: 'order.summary.total', value: `${order.total_amount} ${t('currency')}`, bold: true },
-                { label: 'order.summary.deposit', value: `${order.deposit_amount} ${t('currency')}` },
-              ].map(({ label, value, mono, bold }) => (
-                <div key={label} className="flex items-start justify-between px-4 py-3 text-sm gap-4">
-                  <span className="text-zinc-500 dark:text-zinc-400 shrink-0">{t(label)}</span>
-                  <span className={`text-right break-all ${mono ? 'font-mono text-xs' : ''} ${bold ? 'font-bold' : 'font-medium'} text-zinc-800 dark:text-zinc-100`}>
-                    {value}
-                  </span>
+            {/* ── Individual order cards ── */}
+            {orders.map((order) => (
+              <div key={order.id} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 divide-y divide-zinc-200 dark:divide-zinc-700">
+                {/* Status badge */}
+                <div className="px-4 py-2 flex items-center justify-between">
+                  <StatusBadge status={order.payment_status} t={t} />
+                  {order.partner_id && (
+                    <span className="text-xs text-zinc-400 font-mono">
+                      {order.partner_id}
+                    </span>
+                  )}
                 </div>
-              ))}
-            </div>
-
-            <Link
-              href={`/order/success?orderId=${order.id}`}
-              className="text-sm text-zinc-400 underline underline-offset-4 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-            >
-              {t('track.viewSuccess')}
-            </Link>
+                {[
+                  { label: 'order.summary.orderId', value: order.id, mono: true },
+                  { label: 'order.summary.customer', value: order.customer_name },
+                  { label: 'order.summary.phone', value: order.customer_phone },
+                  { label: 'order.summary.address', value: order.shipping_address },
+                  { label: 'order.summary.total', value: `${order.total_amount} ${t('currency')}`, bold: true },
+                  { label: 'order.summary.deposit', value: `${order.deposit_amount} ${t('currency')}` },
+                ].map(({ label, value, mono, bold }) => (
+                  <div key={label} className="flex items-start justify-between px-4 py-3 text-sm gap-4">
+                    <span className="text-zinc-500 dark:text-zinc-400 shrink-0">{t(label)}</span>
+                    <span className={`text-right break-all ${mono ? 'font-mono text-xs' : ''} ${bold ? 'font-bold' : 'font-medium'} text-zinc-800 dark:text-zinc-100`}>
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         )}
       </div>

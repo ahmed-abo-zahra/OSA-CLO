@@ -110,16 +110,23 @@ Replace `"YOUR_SUPPORT_NUMBER"` in both success/track pages with your actual Wha
 
 ## Step 7 — Checkout Page (`src/app/checkout/page.tsx`)
 
-Update the form submission to pass `orderId` on success:
+The checkout API now splits orders by partner and returns an array of IDs:
+
+```json
+// POST /api/checkout response:
+{ "success": true, "orderIds": ["uuid-1", "uuid-2"], "createdAt": "..." }
+```
+
+Update the checkout page to handle multiple order IDs:
 
 ```tsx
 // After successful POST to /api/checkout:
-const { orderId } = await res.json();
-router.push(`/order/success?orderId=${orderId}`);
+const { orderIds } = await res.json();
+router.push(`/order/success?ids=${orderIds.join(',')}`);
 ```
 
 Remove any Paymob integration code (payment intent creation, webhook references, etc.)
-from the checkout page. The checkout flow is now: **form → pending order → manual timer**.
+from the checkout page. The checkout flow is now: **form → pending orders (split by vendor) → collective timer**.
 
 ---
 
@@ -140,22 +147,29 @@ import GoogleLogin from '@/components/GoogleLogin';
 ## Architecture Summary
 
 ```
-Customer places order
+Customer places order (may contain products from Safia, Aisha, etc.)
         │
         ▼
 POST /api/checkout
-  └─ Creates order with payment_status = "pending"
-  └─ Returns { orderId, createdAt }
+  ├─ Groups items by partner_id
+  ├─ Creates one order PER partner (each with own total + deposit)
+  ├─ All orders start with payment_status = "pending"
+  └─ Returns { orderIds: ["id1","id2"], createdAt }
         │
         ▼
-/order/success?orderId=xxx
-  ├─ Fetches order from Supabase
-  ├─ Starts 20-min countdown from created_at
-  ├─ Subscribes to real-time updates on orders table
+/order/success?ids=id1,id2
+  ├─ Fetches ALL orders from Supabase
+  ├─ Computes collective state:
+  │    • ALL confirmed → "confirmed"
+  │    • ANY pending + expired → "expired"
+  │    • Otherwise → "countdown" (earliest pending order's window)
+  ├─ Subscribes to real-time updates on ALL orders
   │
-  ├─ If admin updates status → processing/shipped/closed
-  │      └─ Timer stops → "✓ Booking Confirmed" UI
+  ├─ If ALL orders confirmed → "✓ Booking Confirmed" UI
   │
-  └─ If timer hits 00:00 and still "pending"
-         └─ "Expired" UI → WhatsApp support link
+  └─ If timer expires on earliest pending order → "Expired" UI
+         └─ WhatsApp support link
+
+/track?ids=id1,id2
+  └─ Same collective timer + individual order cards with status badges
 ```

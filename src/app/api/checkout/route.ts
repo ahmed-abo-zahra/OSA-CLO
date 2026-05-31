@@ -46,71 +46,103 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ─── Create order — payment_status ALWAYS starts as "pending" ───────────
-    // No Paymob, no automated payment: manual deposit verification only.
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        customer_name,
-        customer_phone,
-        shipping_address,
-        customer_address: body.customer_address ?? shipping_address,
-        total_amount,
-        deposit_amount,
-        payment_status: 'pending',       // ← ALWAYS manual/pending
-        order_source: 'online_store',
-      })
-      .select('id, created_at')
-      .single();
-
-    if (orderError || !order) {
-      console.error('[checkout] order insert error:', orderError);
-      return NextResponse.json(
-        { error: 'Failed to create order. Please try again.' },
-        { status: 500 }
-      );
-    }
-
-    // ─── Insert order items ─────────────────────────────────────────────────
-    const orderItems = items.map((item) => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      partner_id: item.partner_id,
-      quantity: item.quantity,
-      cost_price_at_time: item.cost_price_at_time,
-      selling_price_at_time: item.selling_price_at_time,
-    }));
-
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems);
-
-    if (itemsError) {
-      console.error('[checkout] order_items insert error:', itemsError);
-      // Order created but items failed — return partial success with orderId
-      // so the timer page can still render; admin sees incomplete order.
-      return NextResponse.json(
-        { error: 'Order created but items could not be saved. Contact support.' },
-        { status: 500 }
-      );
-    }
-
-    // ─── Decrement stock for each product ───────────────────────────────────
+    // ─── Multi-Vendor: group items by partner_id ───────────────────────────
+    // Each partner gets their own order so they can independently
+    // track inventory, deposits, and fulfillment.
+    const partnerGroups = new Map<string, OrderItem[]>();
     for (const item of items) {
-      await supabase.rpc('decrement_stock', {
-        p_product_id: item.product_id,
-        p_quantity: item.quantity,
-      });
+      const list = partnerGroups.get(item.partner_id) ?? [];
+      list.push(item);
+      partnerGroups.set(item.partner_id, list);
     }
 
-    // ─── Success: return orderId + createdAt for the booking timer ──────────
+    // ─── Calculate per-partner amounts ─────────────────────────────────────
+    const grandTotal = items.reduce((sum, i) => sum + i.selling_price_at_time * i.quantity, 0);
+
+    // Distribute deposit proportionally
+    const depositRatio = grandTotal > 0 ? deposit_amount / grandTotal : 0;
+
+    // ─── Create one order per partner ──────────────────────────────────────
+    const orderIds: string[] = [];
+    const createdAts: string[] = [];
+
+    for (const [partnerId, partnerItems] of partnerGroups) {
+      const partnerSubtotal = partnerItems.reduce(
+        (sum, i) => sum + i.selling_price_at_time * i.quantity,
+        0
+      );
+      const partnerDeposit = Math.round(partnerSubtotal * depositRatio);
+
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name,
+          customer_phone,
+          shipping_address,
+          customer_address: body.customer_address ?? shipping_address,
+          total_amount: partnerSubtotal,
+          deposit_amount: partnerDeposit,
+          payment_status: 'pending',   // ← always manual/pending
+          order_source: 'online_store',
+          partner_id: partnerId,
+        })
+        .select('id, created_at, partner_id')
+        .single();
+
+      if (orderError || !order) {
+        console.error('[checkout] order insert error for partner:', partnerId, orderError);
+        // Rollback? For now, return what we have and let admin reconcile
+        return NextResponse.json(
+          {
+            success: true,
+            orderIds,
+            partial: true,
+            error: `Order for partner ${partnerId} failed. ${orderIds.length} orders created.`,
+          },
+          { status: 207 }
+        );
+      }
+
+      orderIds.push(order.id);
+      createdAts.push(order.created_at);
+
+      // ─── Insert order_items for this partner's order ──────────────────
+      const orderItems = partnerItems.map((item) => ({
+        order_id: order.id,
+        product_id: item.product_id,
+        partner_id: item.partner_id,
+        quantity: item.quantity,
+        cost_price_at_time: item.cost_price_at_time,
+        selling_price_at_time: item.selling_price_at_time,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) {
+        console.error('[checkout] order_items insert error for order:', order.id, itemsError);
+      }
+
+      // ─── Decrement stock ──────────────────────────────────────────────
+      for (const item of partnerItems) {
+        await supabase.rpc('decrement_stock', {
+          p_product_id: item.product_id,
+          p_quantity: item.quantity,
+        });
+      }
+    }
+
+    // ─── Success: return all order IDs + earliest createdAt for timer ───
+    const earliestCreatedAt = createdAts.sort()[0] ?? new Date().toISOString();
+
     return NextResponse.json(
       {
         success: true,
-        orderId: order.id,
-        createdAt: order.created_at,
+        orderIds,
+        createdAt: earliestCreatedAt,
         message:
-          'Order placed successfully. Awaiting manual deposit verification.',
+          `${orderIds.length} order(s) placed. Awaiting manual deposit verification.`,
       },
       { status: 201 }
     );

@@ -7,7 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import Link from 'next/link';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const BOOKING_WINDOW_SECONDS = 20 * 60; // 20 minutes
+const BOOKING_WINDOW_SECONDS = 20 * 60;
 const CONFIRMED_STATUSES = new Set(['processing', 'shipped', 'closed']);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -20,6 +20,7 @@ interface OrderRow {
   customer_name: string;
   total_amount: number;
   deposit_amount: number;
+  partner_id?: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -35,20 +36,57 @@ function formatMMSS(seconds: number): string {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+/**
+ * Compute collective timer state across multiple orders.
+ *
+ * Rules:
+ *  - ALL confirmed → "confirmed"
+ *  - ANY pending + beyond window → "expired"
+ *  - Otherwise → "countdown" (using the earliest pending order's created_at)
+ */
+function resolveCollectiveState(orders: OrderRow[]): {
+  state: 'confirmed' | 'expired' | 'countdown';
+  anchorCreatedAt: string | null;
+} {
+  if (orders.length === 0) return { state: 'expired', anchorCreatedAt: null };
+
+  const pending = orders.filter((o) => !CONFIRMED_STATUSES.has(o.payment_status));
+
+  if (pending.length === 0) {
+    // All confirmed
+    return { state: 'confirmed', anchorCreatedAt: null };
+  }
+
+  // Find the earliest pending order
+  const earliest = pending.reduce((earliest, o) =>
+    o.created_at < earliest.created_at ? o : earliest
+  );
+
+  if (computeSecondsLeft(earliest.created_at) === 0) {
+    return { state: 'expired', anchorCreatedAt: null };
+  }
+
+  return { state: 'countdown', anchorCreatedAt: earliest.created_at };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId');
+  const idsParam = searchParams.get('ids');
+  const orderIds = idsParam ? idsParam.split(',').filter(Boolean) : [];
   const { t, language } = useLanguage();
   const supabase = createClientComponentClient();
   const isRTL = language === 'ar';
 
-  const [order, setOrder] = useState<OrderRow | null>(null);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
   const [timerState, setTimerState] = useState<TimerState>('loading');
   const [secondsLeft, setSecondsLeft] = useState(BOOKING_WINDOW_SECONDS);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [confirmedCount, setConfirmedCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const channelsRef = useRef<ReturnType<typeof supabase.channel>[]>([]);
 
   // ── Stop the countdown interval ───────────────────────────────────────────
   const stopTimer = useCallback(() => {
@@ -67,40 +105,37 @@ export default function OrderSuccessPage() {
         setSecondsLeft(left);
         if (left === 0) {
           stopTimer();
-          setTimerState((prev) =>
-            prev === 'countdown' ? 'expired' : prev
-          );
+          setTimerState('expired');
         }
       };
-      tick(); // run immediately
+      tick();
       intervalRef.current = setInterval(tick, 1000);
     },
     [stopTimer]
   );
 
-  // ── Resolve initial timer state from order ────────────────────────────────
-  const resolveTimerState = useCallback(
-    (row: OrderRow) => {
-      if (CONFIRMED_STATUSES.has(row.payment_status)) {
+  // ── Initialize timer from collective state ────────────────────────────────
+  const initFromOrders = useCallback(
+    (fetchedOrders: OrderRow[]) => {
+      const { state, anchorCreatedAt } = resolveCollectiveState(fetchedOrders);
+
+      if (state === 'confirmed') {
         stopTimer();
         setTimerState('confirmed');
-        return;
-      }
-      // Still pending — start countdown
-      const left = computeSecondsLeft(row.created_at);
-      if (left === 0) {
+      } else if (state === 'expired') {
+        stopTimer();
         setTimerState('expired');
-      } else {
+      } else if (state === 'countdown' && anchorCreatedAt) {
         setTimerState('countdown');
-        startTimer(row.created_at);
+        startTimer(anchorCreatedAt);
       }
     },
     [startTimer, stopTimer]
   );
 
-  // ── Fetch order on mount ───────────────────────────────────────────────────
+  // ── Fetch all orders on mount ─────────────────────────────────────────────
   useEffect(() => {
-    if (!orderId) {
+    if (orderIds.length === 0) {
       setFetchError('no_order_id');
       setTimerState('expired');
       return;
@@ -109,56 +144,84 @@ export default function OrderSuccessPage() {
     (async () => {
       const { data, error } = await supabase
         .from('orders')
-        .select('id, payment_status, created_at, customer_name, total_amount, deposit_amount')
-        .eq('id', orderId)
-        .single();
+        .select('id, payment_status, created_at, customer_name, total_amount, deposit_amount, partner_id')
+        .in('id', orderIds);
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         setFetchError('fetch_failed');
         setTimerState('expired');
         return;
       }
 
-      setOrder(data as OrderRow);
-      resolveTimerState(data as OrderRow);
+      const rows = data as OrderRow[];
+      setOrders(rows);
+      setTotalCount(rows.length);
+      setConfirmedCount(rows.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length);
+      initFromOrders(rows);
     })();
-  }, [orderId, supabase, resolveTimerState]);
+  }, [orderIds, supabase, initFromOrders]);
 
-  // ── Real-time subscription — admin status changes ─────────────────────────
+  // ── Real-time subscriptions for ALL order IDs ─────────────────────────────
   useEffect(() => {
-    if (!orderId) return;
+    if (orderIds.length === 0) return;
 
-    const channel = supabase
-      .channel(`order-status-${orderId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'orders',
-          filter: `id=eq.${orderId}`,
-        },
-        (payload) => {
-          const updated = payload.new as OrderRow;
-          setOrder((prev) => ({ ...(prev ?? updated), ...updated }));
+    const channels = orderIds.map((id) =>
+      supabase
+        .channel(`order-status-${id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `id=eq.${id}`,
+          },
+          (payload) => {
+            const updated = payload.new as OrderRow;
+            setOrders((prev) => {
+              const next = prev.map((o) => (o.id === updated.id ? { ...o, ...updated } : o));
+              // Add newly appearing orders (shouldn't happen, but safe)
+              if (!prev.find((o) => o.id === updated.id)) {
+                next.push(updated);
+              }
 
-          if (CONFIRMED_STATUSES.has(updated.payment_status)) {
-            stopTimer();
-            setTimerState('confirmed');
+              // Re-compute collective state from the updated list
+              const { state, anchorCreatedAt } = resolveCollectiveState(next);
+              setConfirmedCount(next.filter((o) => CONFIRMED_STATUSES.has(o.payment_status)).length);
+
+              if (state === 'confirmed') {
+                stopTimer();
+                setTimerState('confirmed');
+              } else if (state === 'countdown' && anchorCreatedAt) {
+                setTimerState('countdown');
+                // Only restart timer if anchor changed or timer was stopped
+                const currentAnchor = intervalRef.current ? null : anchorCreatedAt;
+                if (currentAnchor) startTimer(anchorCreatedAt);
+              }
+              // expired stays expired — don't transition back
+
+              return next;
+            });
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe()
+    );
+
+    channelsRef.current = channels;
 
     return () => {
-      supabase.removeChannel(channel);
+      channels.forEach((ch) => supabase.removeChannel(ch));
+      channelsRef.current = [];
     };
-  }, [orderId, supabase, stopTimer]);
+  }, [orderIds, supabase, stopTimer, startTimer]);
 
   // ── Cleanup on unmount ────────────────────────────────────────────────────
   useEffect(() => {
-    return () => stopTimer();
-  }, [stopTimer]);
+    return () => {
+      stopTimer();
+      channelsRef.current.forEach((ch) => supabase.removeChannel(ch));
+    };
+  }, [stopTimer, supabase]);
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -180,7 +243,9 @@ export default function OrderSuccessPage() {
         {timerState === 'countdown' && (
           <CountdownView
             secondsLeft={secondsLeft}
-            order={order}
+            orders={orders}
+            confirmedCount={confirmedCount}
+            totalCount={totalCount}
             t={t}
             isRTL={isRTL}
           />
@@ -188,18 +253,18 @@ export default function OrderSuccessPage() {
 
         {/* ── CONFIRMED ── */}
         {timerState === 'confirmed' && (
-          <ConfirmedView order={order} t={t} isRTL={isRTL} />
+          <ConfirmedView orders={orders} t={t} isRTL={isRTL} />
         )}
 
         {/* ── EXPIRED ── */}
         {timerState === 'expired' && (
-          <ExpiredView fetchError={fetchError} order={order} t={t} isRTL={isRTL} />
+          <ExpiredView fetchError={fetchError} orders={orders} t={t} isRTL={isRTL} />
         )}
 
-        {/* ── Track order link ── */}
-        {orderId && timerState !== 'loading' && (
+        {/* ── Track orders link ── */}
+        {orderIds.length > 0 && timerState !== 'loading' && (
           <Link
-            href={`/track?orderId=${orderId}`}
+            href={`/track?ids=${orderIds.join(',')}`}
             className="text-sm text-zinc-500 dark:text-zinc-400 underline underline-offset-4 hover:text-zinc-800 dark:hover:text-zinc-100 transition-colors"
           >
             {t('order.trackOrder')}
@@ -213,7 +278,7 @@ export default function OrderSuccessPage() {
 // ─── Sub-views ────────────────────────────────────────────────────────────────
 
 interface ViewProps {
-  order: OrderRow | null;
+  orders: OrderRow[];
   t: (key: string) => string;
   isRTL: boolean;
 }
@@ -221,20 +286,36 @@ interface ViewProps {
 // Countdown view with premium clock display
 function CountdownView({
   secondsLeft,
-  order,
+  orders,
+  confirmedCount,
+  totalCount,
   t,
   isRTL,
-}: ViewProps & { secondsLeft: number }) {
-  const urgency = secondsLeft < 120; // last 2 minutes
+}: ViewProps & {
+  secondsLeft: number;
+  confirmedCount: number;
+  totalCount: number;
+}) {
+  const urgency = secondsLeft < 120;
   const percentage = (secondsLeft / BOOKING_WINDOW_SECONDS) * 100;
-  const circumference = 2 * Math.PI * 54; // r=54
+  const circumference = 2 * Math.PI * 54;
+  const pendingCount = totalCount - confirmedCount;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full">
+      {/* Progress indicator: confirmed / total */}
+      {totalCount > 1 && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-green-600 dark:text-green-400 font-semibold">
+            {confirmedCount}/{totalCount}
+          </span>
+          <span className="text-zinc-400">{t('order.confirmedCount')}</span>
+        </div>
+      )}
+
       {/* Circular countdown clock */}
       <div className="relative w-40 h-40" role="timer" aria-live="polite">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-          {/* Track */}
           <circle
             cx="60" cy="60" r="54"
             fill="none"
@@ -242,7 +323,6 @@ function CountdownView({
             strokeWidth="6"
             className="text-zinc-200 dark:text-zinc-700"
           />
-          {/* Progress */}
           <circle
             cx="60" cy="60" r="54"
             fill="none"
@@ -254,7 +334,6 @@ function CountdownView({
             className="transition-all duration-1000 ease-linear"
           />
         </svg>
-        {/* Time text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             className={`text-3xl font-mono font-bold tabular-nums tracking-tight ${
@@ -277,14 +356,17 @@ function CountdownView({
           {t('order.timer.heading')}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-sm">
-          {t('order.timer.description')}
+          {totalCount > 1
+            ? t('order.timer.descriptionMulti')
+                .replace('{count}', String(pendingCount))
+            : t('order.timer.description')}
         </p>
       </div>
 
-      {/* Order summary card */}
-      {order && (
-        <OrderSummaryCard order={order} t={t} isRTL={isRTL} />
-      )}
+      {/* Order summary cards */}
+      {orders.map((order) => (
+        <OrderSummaryCard key={order.id} order={order} t={t} />
+      ))}
 
       {/* Manual payment instructions */}
       <div className="w-full rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-4 space-y-1.5">
@@ -299,11 +381,10 @@ function CountdownView({
   );
 }
 
-// Confirmed view — admin approved
-function ConfirmedView({ order, t, isRTL }: ViewProps) {
+// Confirmed view — all orders approved
+function ConfirmedView({ orders, t, isRTL }: ViewProps) {
   return (
     <div className="flex flex-col items-center gap-6 w-full">
-      {/* Success icon */}
       <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
         <svg
           className="w-10 h-10 text-green-600 dark:text-green-400"
@@ -319,20 +400,23 @@ function ConfirmedView({ order, t, isRTL }: ViewProps) {
           {t('order.confirmed.heading')}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {t('order.confirmed.description')}
+          {orders.length > 1
+            ? t('order.confirmed.descriptionMulti').replace('{count}', String(orders.length))
+            : t('order.confirmed.description')}
         </p>
       </div>
 
-      {order && <OrderSummaryCard order={order} t={t} isRTL={isRTL} />}
+      {orders.map((order) => (
+        <OrderSummaryCard key={order.id} order={order} t={t} />
+      ))}
     </div>
   );
 }
 
 // Expired view — timeout or error
-function ExpiredView({ fetchError, order, t, isRTL }: ViewProps & { fetchError: string | null }) {
+function ExpiredView({ fetchError, orders, t, isRTL }: ViewProps & { fetchError: string | null }) {
   return (
     <div className="flex flex-col items-center gap-6 w-full">
-      {/* Warning icon */}
       <div className="w-20 h-20 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
         <svg
           className="w-10 h-10 text-orange-500 dark:text-orange-400"
@@ -356,9 +440,10 @@ function ExpiredView({ fetchError, order, t, isRTL }: ViewProps & { fetchError: 
         </p>
       </div>
 
-      {order && <OrderSummaryCard order={order} t={t} isRTL={isRTL} />}
+      {orders.map((order) => (
+        <OrderSummaryCard key={order.id} order={order} t={t} />
+      ))}
 
-      {/* Support CTA */}
       <a
         href="https://wa.me/YOUR_SUPPORT_NUMBER"
         target="_blank"
@@ -377,7 +462,7 @@ function ExpiredView({ fetchError, order, t, isRTL }: ViewProps & { fetchError: 
 }
 
 // Shared order summary card
-function OrderSummaryCard({ order, t }: Omit<ViewProps, 'isRTL'>) {
+function OrderSummaryCard({ order, t }: { order: OrderRow; t: (k: string) => string }) {
   return (
     <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-4 space-y-2">
       <div className="flex items-center justify-between text-sm">
@@ -386,6 +471,14 @@ function OrderSummaryCard({ order, t }: Omit<ViewProps, 'isRTL'>) {
           {order.id}
         </span>
       </div>
+      {order.partner_id && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-zinc-500 dark:text-zinc-400">{t('order.summary.partner')}</span>
+          <span className="font-medium text-zinc-800 dark:text-zinc-100 text-xs">
+            {order.partner_id}
+          </span>
+        </div>
+      )}
       <div className="flex items-center justify-between text-sm">
         <span className="text-zinc-500 dark:text-zinc-400">{t('order.summary.customer')}</span>
         <span className="font-medium text-zinc-800 dark:text-zinc-100">{order.customer_name}</span>

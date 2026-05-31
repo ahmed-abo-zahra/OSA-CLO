@@ -17,6 +17,7 @@
     "timer": {
       "heading": "Your Order Is Under Review",
       "description": "Our team is manually reviewing your deposit receipt. Your booking will be confirmed within this window.",
+      "descriptionMulti": "Our team is manually reviewing deposit receipts for {count} orders. Your booking will be confirmed within this window.",
       "minutes": "min"
     },
 
@@ -27,9 +28,12 @@
       }
     },
 
+    "confirmedCount": "orders confirmed",
+
     "confirmed": {
       "heading": "Booking Confirmed Successfully! ✓",
-      "description": "Your order has been reviewed and payment verified. We'll be in touch shortly."
+      "description": "Your order has been reviewed and payment verified. We'll be in touch shortly.",
+      "descriptionMulti": "All {count} orders have been confirmed. We'll be in touch shortly."
     },
 
     "expired": {
@@ -41,6 +45,7 @@
 
     "summary": {
       "orderId": "Order ID",
+      "partner": "Partner",
       "customer": "Name",
       "phone": "Phone",
       "address": "Address",
@@ -59,8 +64,8 @@
 
   "track": {
     "heading": "Track Your Order",
-    "subheading": "Enter your order ID to see its current status",
-    "inputPlaceholder": "Order ID (UUID)",
+    "subheading": "Enter your order ID or comma-separated IDs to track multiple orders",
+    "inputPlaceholder": "Order ID or id1,id2,...",
     "inputLabel": "Enter Order ID",
     "searchButton": "Search",
     "notFound": "No order found with this ID.",
