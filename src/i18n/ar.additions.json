@@ -1,0 +1,69 @@
+{
+  "___comment": "ADD these keys to your existing src/i18n/ar.json — merge with existing file, do not replace it.",
+
+  "currency": "ج.م",
+
+  "auth": {
+    "google": {
+      "button": "تسجيل الدخول بـ Google",
+      "loading": "جاري التسجيل...",
+      "error": "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى."
+    }
+  },
+
+  "order": {
+    "trackOrder": "تتبع طلبك",
+
+    "timer": {
+      "heading": "طلبك قيد المراجعة",
+      "description": "يراجع الفريق إيصال الدفع يدوياً. سيتم تأكيد حجزك خلال هذه المدة.",
+      "minutes": "دقيقة"
+    },
+
+    "payment": {
+      "instructions": {
+        "title": "تعليمات السداد اليدوي",
+        "body": "يرجى إرسال إيصال الإيداع (فودافون كاش / تحويل بنكي) إلى الدعم عبر واتساب لتأكيد حجزك."
+      }
+    },
+
+    "confirmed": {
+      "heading": "تم تأكيد حجزك بنجاح!",
+      "description": "تم مراجعة طلبك والتحقق من الدفع. سنتواصل معك قريباً."
+    },
+
+    "expired": {
+      "heading": "انتهت مهلة التأكيد التلقائي",
+      "description": "انتهت مهلة التأكيد التلقائي. يرجى التواصل مع الدعم لتأكيد حجزك.",
+      "fetchError": "لم نتمكن من تحميل بيانات الطلب. يرجى المحاولة لاحقاً أو التواصل مع الدعم.",
+      "contactSupport": "تواصل مع الدعم عبر واتساب"
+    },
+
+    "summary": {
+      "orderId": "رقم الطلب",
+      "customer": "الاسم",
+      "phone": "رقم الهاتف",
+      "address": "العنوان",
+      "total": "المبلغ الإجمالي",
+      "deposit": "العربون"
+    },
+
+    "status": {
+      "pending": "قيد المراجعة",
+      "processing": "جاري التجهيز",
+      "shipped": "تم الشحن",
+      "closed": "مكتمل",
+      "unknown": "غير محدد"
+    }
+  },
+
+  "track": {
+    "heading": "تتبع طلبك",
+    "subheading": "أدخل رقم الطلب للاطلاع على حالته الحالية",
+    "inputPlaceholder": "رقم الطلب (UUID)",
+    "inputLabel": "أدخل رقم الطلب",
+    "searchButton": "بحث",
+    "notFound": "لم يتم العثور على طلب بهذا الرقم.",
+    "viewSuccess": "عرض صفحة تأكيد الطلب"
+  }
+}
