@@ -40,6 +40,15 @@ const EGYPT_GOVERNORATES: Record<string, string[]> = {
   "الوادي الجديد": ["الخارجة", "الداخلة", "الفرافرة", "باريس"],
 };
 
+// ── Profile type ──────────────────────────────────────────────────────────────
+interface CustomerProfile {
+  full_name?: string;
+  phone?: string;
+  governorate?: string;
+  city?: string;
+  detailed_address?: string;
+}
+
 // ── Validation helpers ────────────────────────────────────────────────────────
 function isValidPhone(phone: string) {
   return /^(010|011|012|015)\d{8}$/.test(phone.replace(/[\s\-()]/g, ""));
@@ -84,13 +93,55 @@ export default function CheckoutPage() {
   const [discountLoading, setDiscountLoading] = useState(false);
   const [discountError,   setDiscountError]   = useState("");
 
+  // ── Profile autofill state ─────────────────────────────────────────────────
+  const [profileLoaded,  setProfileLoaded]  = useState(false);
+  const [originalProfile, setOriginalProfile] = useState<CustomerProfile | null>(null);
+
   const discountedTotal = Math.max(0, total - discountAmount);
   const availableCities = governorate ? (EGYPT_GOVERNORATES[governorate] ?? []) : [];
 
-  // Reset city when governorate changes
-  useEffect(() => { setCity(""); }, [governorate]);
+  // Reset city when governorate changes (except during autofill)
+  useEffect(() => { if (!profileLoaded) setCity(""); }, [governorate, profileLoaded]);
 
-  // ── Cart Realtime Sync: auto-remove deleted/out-of-stock items ──────────────
+  // ── Autofill from customer profile (Google OAuth) ───────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProfile() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user || cancelled) return;
+
+      const { data: profile, error } = await supabase
+        .from('customers')
+        .select('full_name, phone, governorate, city, detailed_address')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error || !profile || cancelled) return;
+
+      // Autofill only fields that have stored values
+      if (profile.full_name && !name) setName(profile.full_name);
+      if (profile.phone && !phone) setPhone(profile.phone);
+      if (profile.governorate && !governorate) setGovernorate(profile.governorate);
+      // City autofill must come after governorate is set (to avoid clearing)
+      if (profile.city && profile.governorate) {
+        // Set governorate first so city doesn't get cleared
+        if (!governorate) setGovernorate(profile.governorate);
+        // Then set city in next tick
+        setTimeout(() => { if (!cancelled) setCity(profile.city); }, 0);
+      }
+      if (profile.detailed_address && !detailedAddress) setDetailedAddress(profile.detailed_address);
+
+      setOriginalProfile(profile);
+      setProfileLoaded(true);
+    }
+
+    loadProfile();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Cart Realtime Sync ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!isHydrated || items.length === 0) return;
 
@@ -207,6 +258,33 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) { setErrors({ server: data.error }); setLoading(false); return; }
 
+      // ── Save/update customer profile if anything changed ──────────────────
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const previous = originalProfile ?? {};
+        const hasChanged =
+          name.trim() !== (previous.full_name ?? '') ||
+          phone.trim() !== (previous.phone ?? '') ||
+          governorate !== (previous.governorate ?? '') ||
+          city !== (previous.city ?? '') ||
+          detailedAddress.trim() !== (previous.detailed_address ?? '');
+
+        if (hasChanged) {
+          await supabase.from('customers').upsert(
+            {
+              id: session.user.id,
+              full_name: name.trim(),
+              phone: phone.trim(),
+              governorate,
+              city,
+              detailed_address: detailedAddress.trim(),
+              last_login: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+          );
+        }
+      }
+
       clearCart();
       const ids = (data.orderIds as string[]).join(",");
       router.push(`/order/success?ids=${ids}`);
@@ -243,6 +321,16 @@ export default function CheckoutPage() {
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t("storefront.checkout.subtitle")}</p>
             </div>
+
+            {/* ── Profile Autofill Badge ───────────────────────────────────── */}
+            {profileLoaded && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <span className="text-green-600 dark:text-green-400 text-sm">✓</span>
+                <span className="text-xs text-green-700 dark:text-green-300 font-medium">
+                  {t("profile.autofillBadge")}
+                </span>
+              </div>
+            )}
 
             {/* Name */}
             <Field label={t("storefront.checkout.customerName")} error={errors.name}>

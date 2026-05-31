@@ -15,19 +15,26 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
-      // Upsert customer record linked to Google identity
+      // Upsert customer profile linked to Google identity
+      const fullName =
+        data.user.user_metadata?.full_name ??
+        data.user.user_metadata?.name ??
+        null;
+
       await supabase.from('customers').upsert(
         {
           id: data.user.id,
           email: data.user.email ?? null,
-          name:
-            data.user.user_metadata?.full_name ??
-            data.user.user_metadata?.name ??
-            null,
+          full_name: fullName,
           phone: data.user.phone ?? null,
           last_login: new Date().toISOString(),
+          // Preserve existing profile fields on re-login
+          // (governorate, city, detailed_address are only set during checkout)
         },
-        { onConflict: 'id' }
+        {
+          onConflict: 'id',
+          ignoreDuplicates: false,
+        }
       );
     }
   }

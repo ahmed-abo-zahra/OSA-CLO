@@ -1,6 +1,10 @@
 {
   "___comment": "ADD these keys to your existing src/i18n/ar.json — merge with existing file, do not replace it.",
 
+  "profile": {
+    "autofillBadge": "تم ملء البيانات تلقائياً من حسابك"
+  },
+
   "currency": "ج.م",
 
   "auth": {

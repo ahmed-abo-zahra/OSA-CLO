@@ -1,6 +1,10 @@
 {
   "___comment": "ADD these keys to your existing src/i18n/en.json — merge with existing file, do not replace it.",
 
+  "profile": {
+    "autofillBadge": "Autofilled from your profile"
+  },
+
   "currency": "EGP",
 
   "auth": {
