@@ -1,4 +1,5 @@
 "use client";
+import ProductImage from "@/components/ProductImage";
 
 import { useState, useCallback, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -271,7 +272,7 @@ export default function OrderDetailsModal({
                               <div className="flex items-center gap-2">
                                 {item.products?.image_url && (
                                   // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={item.products.image_url} alt="" className="w-7 h-7 object-cover bg-gray-100 dark:bg-brand-black shrink-0" />
+                                  <div className="w-7 h-7 shrink-0"><ProductImage src={item.products.image_url} alt="Product" sizes="320px" /></div>
                                 )}
                                 <span className="font-semibold text-[#1A1A1A]">{item.products?.name_en ?? "—"}</span>
                               </div>

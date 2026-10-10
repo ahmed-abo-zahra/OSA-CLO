@@ -1,3 +1,5 @@
+import { DEMO_MODE } from "@/lib/demo-mode";
+import { saveDemoImage } from "@/lib/demo-upload";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +19,7 @@ async function uploadToStorage(
   file: File,
   partnerId: string
 ): Promise<string | null> {
+  if (DEMO_MODE) return saveDemoImage(file);
   try {
     const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
     const fileName = `${partnerId}/${Date.now()}.${ext}`;
@@ -117,11 +120,11 @@ export async function POST(request: NextRequest) {
     const costNum    = parseFloat(cost_price);
     const sellingNum = parseFloat(selling_price);
 
-    if (isNaN(costNum) || costNum < 0) {
+    if (!Number.isFinite(costNum) || costNum < 0) {
       LOG("❌ Validation failed: cost_price invalid", cost_price);
       return NextResponse.json({ error: "سعر الشراء غير صالح" }, { status: 400 });
     }
-    if (isNaN(sellingNum) || sellingNum < 0) {
+    if (!Number.isFinite(sellingNum) || sellingNum <= 0 || !Number.isInteger(Number(stock_qty)) || Number(stock_qty) < 0) {
       LOG("❌ Validation failed: selling_price invalid", selling_price);
       return NextResponse.json({ error: "سعر البيع غير صالح" }, { status: 400 });
     }
@@ -175,11 +178,12 @@ export async function POST(request: NextRequest) {
           cost_price:    costNum,
           selling_price: sellingNum,
           sizes:         normalizedSizes,
-          stock_quantity: parseInt(stock_qty) || 0,
+          colors: (String(formData.get("colors")??"")).split(",").map(c=>c.trim()).filter(Boolean),
+          stock_quantity: Number(stock_qty),
           image_url:     image_url,
           image_urls:    image_urls,
           is_available:  true,
-          in_stock:      true,
+          in_stock:      Number(stock_qty)>0,
         },
       ])
       .select()
@@ -201,6 +205,7 @@ export async function POST(request: NextRequest) {
     LOG("✅ Product created successfully:", data.id);
     // Revalidate the storefront so new visitors also see the new product
     revalidatePath("/");
+
     return NextResponse.json({ success: true, product: data }, { status: 201 });
 
   } catch (err) {

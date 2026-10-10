@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { getPartnerDbId } from "@/lib/partners";
 import DashboardShell from "./DashboardShell";
 
@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   if (!session) redirect("/admin/login");
   const dbPartnerId = getPartnerDbId(session.partnerId);
 
-  const isSuperAdmin = session.partnerId === "admin" || session.partnerName.toLowerCase() === "admin";
+  const isSuperAdmin = false;
 
   // ── Fetch Partner's Products ────────────────────────────────────────────
   let productsQuery = supabase

@@ -55,7 +55,7 @@ body {
 
 /* ── RTL Support ── */
 [dir="rtl"] {
-  font-family: "Cairo", "Tajawal", var(--font-geist-sans), sans-serif;
+  font-family: var(--font-cairo), var(--font-geist-sans), ui-sans-serif, sans-serif;
   letter-spacing: 0;
 }
 [dir="rtl"] input,
@@ -263,9 +263,15 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Custom Cursor — Desktop Only ─────────────────────────────── */
 @media (pointer: fine) {
-  * { cursor: none !important; }
+  /* Native cursor keeps controls predictable and accessible. */
 }
 
 .dark [data-cursor-ring] {
   border-color: rgba(250, 249, 246, 0.35) !important;
 }
+
+#collections {scroll-margin-top: 80px;}
+button, input, select {min-height:44px;}
+html[dir="rtl"] .tracking-widest {letter-spacing:normal;}
+
+.dark .text-brand-muted { color: #a6a6a6; }

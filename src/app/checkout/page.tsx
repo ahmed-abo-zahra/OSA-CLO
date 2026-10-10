@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCart, type CartItem } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
+import ProductImage from "@/components/ProductImage";
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { supabase } from "@/lib/supabase";
 
 const WA_NUMBER = "201038856486";
@@ -86,6 +88,8 @@ export default function CheckoutPage() {
   const [errors,          setErrors]          = useState<FormErrors>({});
   const [loading,         setLoading]         = useState(false);
 
+  const submitted = useRef(false);
+
   // Discount
   const [discountCode,    setDiscountCode]    = useState("");
   const [discountAmount,  setDiscountAmount]  = useState(0);
@@ -105,6 +109,7 @@ export default function CheckoutPage() {
 
   // ── Autofill from customer profile (Google OAuth) ───────────────────────────
   useEffect(() => {
+    if(DEMO_MODE)return;
     let cancelled = false;
 
     async function loadProfile() {
@@ -143,7 +148,7 @@ export default function CheckoutPage() {
 
   // ── Cart Realtime Sync ──────────────────────────────────────────────────────
   useEffect(() => {
-    if (!isHydrated || items.length === 0) return;
+    if (DEMO_MODE || !isHydrated || items.length === 0) return;
 
     const channel = supabase
       .channel("cart-validation-realtime")
@@ -201,7 +206,7 @@ export default function CheckoutPage() {
 
   // Redirect to home if cart is empty
   useEffect(() => {
-    if (isHydrated && items.length === 0) router.push("/");
+    if (isHydrated && items.length === 0 && !submitted.current) router.push("/");
   }, [isHydrated, items.length, router]);
 
   const paidNow   = payType === "deposit" ? Math.round(discountedTotal * 0.5) : discountedTotal;
@@ -249,6 +254,7 @@ export default function CheckoutPage() {
             productId: i.productId,
             partnerId: i.partnerId,
             size:      i.size,
+            color:     i.color,
             quantity:  i.quantity,
             price:     i.price,
           })),
@@ -285,6 +291,7 @@ export default function CheckoutPage() {
         }
       }
 
+      submitted.current = true;
       clearCart();
       const ids = (data.orderIds as string[]).join(",");
       router.push(`/order/success?ids=${ids}`);
@@ -428,8 +435,10 @@ export default function CheckoutPage() {
 
             {/* Payment Method */}
             <div className="flex flex-col gap-2">
-              <label className="label-style">{t("storefront.checkout.payment")}</label>
+              {DEMO_MODE && <p role="note" className="text-sm mb-4 p-3 border border-brand-border">{lang==='ar'?'طلب تجريبي فقط. لا تدفع أو تحول أي مبلغ؛ الدفع الإلكتروني غير مفعل.':'Demo order only. Do not pay or transfer money; online payment is disabled.'}</p>}
+              {!DEMO_MODE && <label className="label-style">{t("storefront.checkout.payment")}</label>}
 
+              {!DEMO_MODE && <>
               {/* Vodafone Cash badge */}
               <div className="flex items-center gap-2 px-4 py-3 border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
                 <span className="text-lg">📱</span>
@@ -454,7 +463,8 @@ export default function CheckoutPage() {
                 </button>
               </div>
 
-              {/* Deposit breakdown */}
+                </>}
+            {/* Deposit breakdown */}
               {payType === "deposit" && (
                 <div className="grid grid-cols-3 gap-2 border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 p-3">
                   <FinLine label={t("storefront.checkout.total")}     value={fmtP(total)}     />
@@ -479,7 +489,7 @@ export default function CheckoutPage() {
             {errors.terms && <p className="text-xs text-red-600 -mt-3">{errors.terms}</p>}
 
             {/* Discount Code */}
-            <div className="flex flex-col gap-2">
+            {!DEMO_MODE && <div className="flex flex-col gap-2">
               <label className="label-style">{t("storefront.checkout.discountOptional")}</label>
               <div className="flex gap-2">
                 <input
@@ -497,7 +507,7 @@ export default function CheckoutPage() {
               </div>
               {discountError && <p className="text-xs text-red-500">{discountError}</p>}
               {discountLabel && <p className="text-xs text-green-600 font-bold">✓ {discountLabel} {t("storefront.checkout.applied")}</p>}
-            </div>
+            </div>}
 
             {/* Server error */}
             {errors.server && (
@@ -573,7 +583,7 @@ function OrderSummary({ items, total, discountAmount = 0, discountLabel, paidNow
             <div className="w-10 h-12 bg-gray-100 dark:bg-brand-black shrink-0 overflow-hidden">
               {item.imageUrl
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={item.imageUrl} alt={item.nameEn} className="w-full h-full object-cover" />
+                ? <ProductImage src={item.imageUrl} alt={item.nameEn} sizes="320px" />
                 : <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-gray-300">{item.nameEn.slice(0,2)}</div>
               }
             </div>

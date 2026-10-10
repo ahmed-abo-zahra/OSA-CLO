@@ -1,3 +1,5 @@
+import { DEMO_MODE } from '@/lib/demo-mode';
+import { placeDemoOrder } from '@/lib/demo-fetch';
 import { createSupabaseRouteClient } from '@/lib/supabase-route';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -32,6 +34,7 @@ function toNumber(value: unknown, fallback = 0) {
 }
 
 export async function POST(request: NextRequest) {
+  if(DEMO_MODE){try{return NextResponse.json(placeDemoOrder(await request.json()),{status:201});}catch(error){return NextResponse.json({error:error instanceof Error?error.message:'Invalid order'},{status:400});}}
   try {
     const supabase = createSupabaseRouteClient();
     const body: CheckoutBody = await request.json();

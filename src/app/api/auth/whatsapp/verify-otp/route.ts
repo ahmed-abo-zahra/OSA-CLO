@@ -1,3 +1,4 @@
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
@@ -10,6 +11,7 @@ function normalizePhone(phone: string): string {
 
 // ── POST /api/auth/whatsapp/verify-otp ───────────────────────────────────────
 export async function POST(request: NextRequest) {
+  if(DEMO_MODE)return NextResponse.json({error:"External authentication disabled in demo"},{status:503});
   try {
     const { phone, otp } = await request.json() as { phone: string; otp: string };
 

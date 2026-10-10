@@ -1,14 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = "https://espqrrunhekvjsoxdfbx.supabase.co";
-
-const supabaseServiceKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzcHFycnVuaGVrdmpzb3hkZmJ4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3OTMwOTEzMywiZXhwIjoyMDk0ODg1MTMzfQ.yrppVT3mrBaJMmztMr05ETfdOCPh5JrcIfW5C8B1vy8";
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
+import 'server-only';
+import { createClient } from '@supabase/supabase-js';
+import { DEMO_MODE } from './demo-mode';
+import { demoFetch } from './demo-fetch';
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://espqrrunhekvjsoxdfbx.supabase.co';
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!DEMO_MODE && !key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required outside demo mode');
+export const supabaseAdmin = createClient(url, DEMO_MODE ? 'isolated-demo' : key!, {
+ auth: {autoRefreshToken:false,persistSession:false,detectSessionInUrl:false},
+ ...(DEMO_MODE ? {global:{fetch:demoFetch}} : {}),
 });

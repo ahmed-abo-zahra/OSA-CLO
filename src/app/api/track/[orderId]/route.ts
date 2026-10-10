@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 
 // Public order tracking — no auth required, minimal data returned
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { orderId } = params;
 
-  if (!orderId || orderId.length < 8) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) {
     return NextResponse.json({ error: "Invalid Order ID" }, { status: 400 });
   }
 

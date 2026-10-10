@@ -116,7 +116,7 @@ export default function FuzzySearch({
         inputRef.current?.blur();
       }
     },
-    [isOpen, results, highlightIndex]
+    [isOpen, results, highlightIndex, handleSelect]
   );
 
 

@@ -3,7 +3,7 @@
 // Feature 7: Admin page to manage the promotional popup
 
 import { useState, useEffect } from "react";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+
 
 interface PopupSettings {
   enabled: boolean;
@@ -39,24 +39,13 @@ export default function AdminPopupPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
-    supabaseAdmin
-      .from("store_settings")
-      .select("value")
-      .eq("key", "promotional_popup")
-      .single()
-      .then(({ data }) => {
-        if (data?.value) setSettings(data.value as PopupSettings);
-        setLoading(false);
-      });
+    fetch('/api/admin/settings').then(r=>r.json()).then(data=>{if(data.value)setSettings(data.value);}).finally(()=>setLoading(false));
   }, []);
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabaseAdmin
-      .from("store_settings")
-      .upsert({ key: "promotional_popup", value: settings, updated_at: new Date().toISOString() })
-      .eq("key", "promotional_popup");
-
+    const response = await fetch('/api/admin/settings',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(settings)});
+    const error = !response.ok;
     setSaving(false);
     if (!error) {
       setSaved(true);

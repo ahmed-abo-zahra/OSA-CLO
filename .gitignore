@@ -34,5 +34,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-"*.mjs" 
-"repomix-output.txt" 
+"*.mjs"
+"repomix-output.txt"
+
+.demo/
+public/demo/uploads/

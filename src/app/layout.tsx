@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "./transitions.css";
+import DemoNotice from "@/components/DemoNotice";
 import Header from "@/components/Header";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { CartProvider } from "@/context/CartContext";
@@ -10,6 +11,8 @@ import CartDrawer from "@/components/storefront/CartDrawer";
 import Analytics from "@/components/Analytics";
 import PWAInstall from "@/components/PWAInstall";
 import PageTransitionLoader from "@/components/PageTransitionLoader";
+
+const cairo = localFont({ src: "./fonts/Cairo.ttf", variable: "--font-cairo", weight: "200 1000", display: "swap" });
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,7 +29,6 @@ const geistMono = localFont({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   themeColor: "#1A1A1A",
 };
 
@@ -45,7 +47,6 @@ export const metadata: Metadata = {
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import PromotionalPopup from "@/components/PromotionalPopup";
 import { WishlistProvider } from "@/context/WishlistContext";
-import CustomCursor from "@/components/CustomCursor";
 
 export default function RootLayout({
   children,
@@ -56,11 +57,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/aso-logo.png" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-offwhite text-brand-black dark:bg-brand-black dark:text-offwhite transition-colors duration-300`}
+        className={`${cairo.variable} ${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-offwhite text-brand-black dark:bg-brand-black dark:text-offwhite transition-colors duration-300`}
         suppressHydrationWarning
       >
         <Analytics />
-        <CustomCursor />
+
         <ThemeProvider>
           <LanguageProvider>
             <CartProvider>
@@ -88,6 +89,7 @@ export default function RootLayout({
                 <PageTransitionLoader />
                 <PromotionalPopup />
                 <Header />
+                <DemoNotice />
                 <CartDrawer />
                 <main className="min-h-screen page-content relative z-10">{children}</main>
                 <PWAInstall />

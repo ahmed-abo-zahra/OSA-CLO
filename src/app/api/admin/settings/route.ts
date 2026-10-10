@@ -1,0 +1,5 @@
+import { NextResponse, NextRequest } from 'next/server';
+import { getSession } from '@/lib/session';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+export async function GET(){if(!getSession())return NextResponse.json({error:'Unauthorized'},{status:401});const {data}=await supabaseAdmin.from('store_settings').select('value').eq('key','promotional_popup').single();return NextResponse.json({value:data?.value??null});}
+export async function PUT(req:NextRequest){const session=getSession();if(!session)return NextResponse.json({error:'Unauthorized'},{status:401});if(session.partnerId!=='safia')return NextResponse.json({error:'Forbidden'},{status:403});const value=await req.json();if(typeof value.enabled!=='boolean'||typeof value.button_link!=='string'||!value.button_link.startsWith('/')||value.button_link.startsWith('//'))return NextResponse.json({error:'Invalid settings'},{status:400});const {error}=await supabaseAdmin.from('store_settings').upsert({key:'promotional_popup',value,updated_at:new Date().toISOString()},{onConflict:'key'});return NextResponse.json({success:!error},{status:error?500:200});}

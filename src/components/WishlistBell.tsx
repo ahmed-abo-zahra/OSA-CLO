@@ -1,4 +1,5 @@
 "use client";
+import ProductImage from "@/components/ProductImage";
 
 import { useState } from "react";
 import { useWishlist } from "@/context/WishlistContext";
@@ -58,7 +59,7 @@ export default function WishlistBell() {
           />
 
           <div
-            className={`absolute z-50 top-8 ${isRTL ? "left-0" : "right-0"} w-80 bg-white dark:bg-brand-gray border border-gray-200 dark:border-brand-border/30 shadow-xl max-h-[500px] overflow-y-auto`}
+            className={`fixed left-3 right-3 top-16 z-50 w-auto sm:absolute sm:top-8 sm:left-auto sm:right-0 sm:w-80 bg-white dark:bg-brand-gray border border-gray-200 dark:border-brand-border/30 shadow-xl max-h-[500px] overflow-y-auto`}
           >
             {/* Header */}
             <div className="px-4 py-3 border-b border-gray-100 dark:border-brand-border/20 flex items-center justify-between">
@@ -134,11 +135,7 @@ export default function WishlistBell() {
                   >
                     {item.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={item.imageUrl}
-                        alt={item.nameEn}
-                        className="w-10 h-12 object-cover shrink-0 bg-gray-100"
-                      />
+                      <div className="w-12 h-16 shrink-0"><ProductImage src={item.imageUrl} alt={item.nameEn} sizes="320px" /></div>
                     )}
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <p className="text-xs font-bold text-brand-black dark:text-offwhite truncate">

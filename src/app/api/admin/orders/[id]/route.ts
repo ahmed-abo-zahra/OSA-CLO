@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { decodeSessionValue, COOKIE_NAME } from "@/lib/session";
 import { getPartnerById, getPartnerDbId } from "@/lib/partners";
 
