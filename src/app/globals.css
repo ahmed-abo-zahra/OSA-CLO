@@ -275,3 +275,8 @@ button, input, select {min-height:44px;}
 html[dir="rtl"] .tracking-widest {letter-spacing:normal;}
 
 .dark .text-brand-muted { color: #a6a6a6; }
+
+html, body { cursor: auto; }
+button, a, summary, [role="button"] { cursor: pointer; }
+input, textarea { cursor: text; }
+button:disabled { cursor: not-allowed; }

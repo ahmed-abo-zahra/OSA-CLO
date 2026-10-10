@@ -1,3 +1,13 @@
+# ASO CLO — storefront presentations
+
+## Framework-free frontend (client brief)
+
+Live demo: https://aso-clo-frontend-demo.vercel.app
+
+The standalone `frontend-demo/` uses HTML5, CSS3 and vanilla ES6 JavaScript with no backend, payment gateway or framework. It includes 120 fictional ASO products, individual WebP photos, bilingual layouts, responsive 1/2/3/4-column grids, filtering, persistent cart, validated contact and checkout. See [setup and product editing instructions](frontend-demo/README.md). This is an ASO portfolio presentation; the original Ket3a prototype files have not been supplied.
+
+## Separate Next.js presentation
+
 # ASO CLO — isolated presentation demo
 
 A bilingual Arabic/English clothing store presentation preserving ASO's black, lime and ivory identity. Includes 120 ASO sample products: exactly ten in each of the existing twelve subcategories. Studio imagery is AI-generated for this fictional catalog; these are presentation products, not claims of real inventory or suppliers.
