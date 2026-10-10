@@ -57,9 +57,15 @@ The cart stores only product IDs, size, color and quantity in `localStorage`; pr
 
 Upload this folder as the site root to GitHub Pages or Netlify (no build command). `vercel.json` also configures a static Vercel deployment, caching and security headers. If using Netlify, `_headers` provides corresponding headers. No environment variables are needed.
 
+## Client brief acceptance
+
+See [the item-by-item requirements and demo walkthrough](CLIENT-REQUIREMENTS.md). Static deployment is live at https://aso-clo-frontend-demo.vercel.app; Netlify configuration is included.
+
 ## Compatibility and verification
 
 Grid: 320px = one column, 768px = two, 1024px = three, 1440px = four. Images have explicit dimensions, WebP encoding and lazy loading. Native dialog semantics provide focus trapping, Escape and modal background isolation. Input labels, inline errors, keyboard focus, reduced motion and Arabic RTL are supported.
+
+Additional simulated viewports cover 280px, 360px, 390px, 430px, 568×320 landscape and 720×540 foldable proportions. Mobile fields use 16px text to avoid iOS focus zoom; safe-area insets, viewport-fit and dynamic viewport height keep modal controls reachable. These are viewport simulations, not device certification.
 
 Current evergreen browsers are the target. Actual iOS Safari/Android device testing and all named browser engines must be verified separately; do not infer cross-browser certification from Chromium-only checks. A Lighthouse report documents measured results and conditions; lab scores vary with hosting/device/network.
 

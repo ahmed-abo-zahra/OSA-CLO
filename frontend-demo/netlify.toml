@@ -1,0 +1,4 @@
+[build]
+  publish = "."
+
+# Static HTML/CSS/ES6 storefront; no build command or backend.
