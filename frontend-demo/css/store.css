@@ -1493,3 +1493,68 @@ a {
     padding-block: 12px;
   }
 }
+
+/* Reserve a real gutter for the native select indicator in LTR and RTL. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("../img/chevron.svg");
+  background-repeat: no-repeat;
+  background-size: 16px;
+  background-position: right 16px center;
+  padding-inline: 16px 46px;
+  min-height: 50px;
+}
+[dir="rtl"] select {
+  background-position: left 16px center;
+}
+.money {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+.money-amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.money-currency {
+  font-size: 0.75em;
+  font-weight: 500;
+  color: var(--muted);
+}
+.product-card .price-row {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  gap: 16px;
+}
+.product-card .price {
+  font-size: 20px;
+}
+.product-card .card-link {
+  flex-shrink: 0;
+  gap: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.product-card .card-link span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+@media (max-width: 479px) {
+  .product-card .price {
+    font-size: 21px;
+  }
+  .filter-toolbar {
+    gap: 14px 12px;
+  }
+  .field {
+    gap: 8px;
+  }
+}

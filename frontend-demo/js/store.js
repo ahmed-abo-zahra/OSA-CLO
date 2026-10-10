@@ -24,10 +24,14 @@ let products = [],
 const page = document.body.dataset.page;
 // Shareable language/theme previews also make audits reproducible.
 const viewParams = new URLSearchParams(location.search);
-if (["ar", "en"].includes(viewParams.get("lang")))
+if (["ar", "en"].includes(viewParams.get("lang"))) {
   lang = viewParams.get("lang");
-if (["light", "dark"].includes(viewParams.get("theme")))
+  write("aso-language", lang);
+}
+if (["light", "dark"].includes(viewParams.get("theme"))) {
   theme = viewParams.get("theme");
+  write("aso-theme", theme);
+}
 const filters = {
   search: "",
   category: "all",
@@ -44,12 +48,9 @@ const escape = (value) =>
         c
       ],
   );
+// Isolate numeric direction and space the currency consistently in both languages.
 const money = (n) =>
-  new Intl.NumberFormat(lang === "ar" ? "ar-EG" : "en-EG", {
-    style: "currency",
-    currency: "EGP",
-    maximumFractionDigits: 0,
-  }).format(n);
+  `<span class="money"><bdi class="money-amount">${new Intl.NumberFormat("en-EG", { maximumFractionDigits: 0 }).format(n)}</bdi> <span class="money-currency">${text("EGP", "جنيه")}</span></span>`;
 const normalize = (s) =>
   String(s)
     .toLowerCase()
@@ -283,7 +284,7 @@ function renderCart() {
           .join("")
       : `<div class="empty-state"><h2>${text("Your bag is empty", "السلة فارغة")}</h2><p>${text("Choose something from the ASO collection.", "اختر ما يناسبك من مجموعة ASO.")}</p><button class="btn" data-close="cart-dialog">${text("Continue shopping", "متابعة التسوق")}</button></div>`;
   $("#cart-footer").innerHTML = cart.length
-    ? `<div class="total-row"><span>${text("Total", "الإجمالي")}</span><span>${money(cartTotal())}</span></div><p class="help-note">${text("Sample order only. No payment will be collected.", "طلب تجريبي فقط. لن يتم تحصيل أي مبلغ.")}</p><a class="btn accent" href="checkout.html">${text("Continue to checkout", "إتمام الطلب")}</a>`
+    ? `<div class="total-row"><span>${text("Total", "الإجمالي")}</span><span>${money(cartTotal())}</span></div><p class="help-note">${text("Sample order only. No payment will be collected.", "طلب تجريبي فقط. لن يتم تحصيل أي مبلغ.")}</p><a class="btn accent" href="checkout.html">${text("Proceed to checkout", "متابعة لإتمام الطلب")}</a>`
     : "";
 }
 function productCard(p, index = 10) {
@@ -560,7 +561,7 @@ function checkout() {
     return;
   }
   $("#main").innerHTML =
-    `<div class="wrap"><div class="page-intro"><nav class="breadcrumb" aria-label="${text("Breadcrumb", "مسار الصفحة")}"><a href="index.html">${text("Shop", "المتجر")}</a><span aria-hidden="true">/</span><span>${text("Checkout", "إتمام الطلب")}</span></nav><h1>${text("Complete your order", "أكمل طلبك")}</h1><p>${text("Your details, your address. No payment in this presentation.", "بياناتك وعنوانك. لا يوجد دفع في نسخة العرض.")}</p></div><div class="checkout-layout"><form id="checkout-form" class="form-panel" novalidate><fieldset class="form-section"><legend>${text("01 / Your details", "01 / بياناتك")}</legend><div class="form-grid">${field("customer-name", text("Full name", "الاسم الكامل"), { autocomplete: "name", placeholder: text("Your full name", "اسمك الكامل") })}${field("customer-phone", text("Mobile number", "رقم الموبايل"), { type: "tel", autocomplete: "tel", placeholder: "010 0000 0000" })}${field("customer-email", text("Email (optional)", "البريد الإلكتروني (اختياري)"), { type: "email", autocomplete: "email", required: false, full: true })}</div></fieldset><fieldset class="form-section"><legend>${text("02 / Delivery address", "02 / عنوان التوصيل")}</legend><div class="form-grid">${field("governorate", text("Governorate", "المحافظة"), { options: `<option value="">${text("Select governorate", "اختر المحافظة")}</option>` + governorates.map((g, i) => `<option value="${g}">${text(governoratesEn[i], g)}</option>`).join("") })}${field("city", text("City / district", "المدينة / المنطقة"), { autocomplete: "address-level2", placeholder: text("City or district", "المدينة أو المنطقة") })}${field("address", text("Street, building and apartment", "الشارع والمبنى والشقة"), { autocomplete: "street-address", full: true, placeholder: text("Street name, building number, floor and apartment", "اسم الشارع، رقم المبنى، الدور والشقة") })}${field("notes", text("Delivery notes (optional)", "ملاحظات التوصيل (اختياري)"), { full: true, textarea: true, required: false })}</div></fieldset><section class="payment-note" aria-labelledby="payment-heading"><h2 id="payment-heading">${text("03 / Payment is disabled", "03 / الدفع غير مفعّل")}</h2><p>${text("This is a frontend demo. The order is saved only in this browser. Nothing is sent to a seller and no money is collected.", "هذه نسخة عرض للواجهة. الطلب يُحفظ في هذا المتصفح فقط، ولا يُرسل للبائع ولا يتم تحصيل أموال.")}</p></section><label class="check-label"><input type="checkbox" id="demo-agreement" aria-describedby="demo-agreement-error"><span>${text("I understand this is a sample order without payment or delivery.", "أفهم أن هذا طلب تجريبي بدون دفع أو توصيل فعلي.")}</span></label><p id="demo-agreement-error" class="field-error"></p><button type="submit" class="btn accent checkout-submit">${text("Place sample order", "تأكيد الطلب التجريبي")}</button><p id="checkout-error" class="field-error" role="alert"></p></form>${summary()}</div></div>`;
+    `<div class="wrap"><div class="page-intro"><nav class="breadcrumb" aria-label="${text("Breadcrumb", "مسار الصفحة")}"><a href="index.html">${text("Shop", "المتجر")}</a><span aria-hidden="true">/</span><span>${text("Checkout", "إتمام الطلب")}</span></nav><h1>${text("Checkout", "إتمام الطلب")}</h1><p>${text("Enter your contact and delivery details to confirm a sample order. No payment is required.", "أدخل بيانات التواصل وعنوان التوصيل لتأكيد طلب تجريبي. لن يتم تحصيل أي مبلغ.")}</p></div><div class="checkout-layout"><form id="checkout-form" class="form-panel" novalidate><fieldset class="form-section"><legend>${text("01 / Your details", "01 / بياناتك")}</legend><div class="form-grid">${field("customer-name", text("Full name", "الاسم الكامل"), { autocomplete: "name", placeholder: text("Your full name", "اسمك الكامل") })}${field("customer-phone", text("Mobile number", "رقم الموبايل"), { type: "tel", autocomplete: "tel", placeholder: "010 0000 0000" })}${field("customer-email", text("Email (optional)", "البريد الإلكتروني (اختياري)"), { type: "email", autocomplete: "email", required: false, full: true })}</div></fieldset><fieldset class="form-section"><legend>${text("02 / Delivery address", "02 / عنوان التوصيل")}</legend><div class="form-grid">${field("governorate", text("Governorate", "المحافظة"), { options: `<option value="">${text("Select governorate", "اختر المحافظة")}</option>` + governorates.map((g, i) => `<option value="${g}">${text(governoratesEn[i], g)}</option>`).join("") })}${field("city", text("City / district", "المدينة / المنطقة"), { autocomplete: "address-level2", placeholder: text("City or district", "المدينة أو المنطقة") })}${field("address", text("Street, building and apartment", "الشارع والمبنى والشقة"), { autocomplete: "street-address", full: true, placeholder: text("Street name, building number, floor and apartment", "اسم الشارع، رقم المبنى، الدور والشقة") })}${field("notes", text("Delivery notes (optional)", "ملاحظات التوصيل (اختياري)"), { full: true, textarea: true, required: false })}</div></fieldset><section class="payment-note" aria-labelledby="payment-heading"><h2 id="payment-heading">${text("03 / Payment is disabled", "03 / الدفع غير مفعّل")}</h2><p>${text("This is a frontend demo. The order is saved only in this browser. Nothing is sent to a seller and no money is collected.", "هذه نسخة عرض للواجهة. الطلب يُحفظ في هذا المتصفح فقط، ولا يُرسل للبائع ولا يتم تحصيل أموال.")}</p></section><label class="check-label"><input type="checkbox" id="demo-agreement" aria-describedby="demo-agreement-error"><span>${text("I understand this is a sample order without payment or delivery.", "أفهم أن هذا طلب تجريبي بدون دفع أو توصيل فعلي.")}</span></label><p id="demo-agreement-error" class="field-error"></p><button type="submit" class="btn accent checkout-submit">${text("Place sample order", "تأكيد الطلب التجريبي")}</button><p id="checkout-error" class="field-error" role="alert"></p></form>${summary()}</div></div>`;
   attachValidation($("#checkout-form"), validateCheckout, (values) => {
     const order = {
       id: crypto.randomUUID(),
