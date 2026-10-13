@@ -1,3 +1,4 @@
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
@@ -56,6 +57,7 @@ async function sendWhatsAppOTP(phone: string, otp: string): Promise<boolean> {
 }
 
 export async function POST(request: NextRequest) {
+  if(DEMO_MODE)return NextResponse.json({error:"External authentication disabled in demo"},{status:503});
   try {
     const { phone } = await request.json() as { phone: string };
 

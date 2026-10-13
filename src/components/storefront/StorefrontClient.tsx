@@ -2,12 +2,13 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import ProductImage from "@/components/ProductImage";
+import { DEMO_MODE } from "@/lib/demo-mode";
+import { CATEGORY_GROUPS, getSubcategoryLabel } from "@/lib/categories";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { supabase } from "@/lib/supabase";
-import FuzzySearch from "@/components/FuzzySearch";
 import CategoryFilter from "@/components/CategoryFilter";
 import Fuse from "fuse.js";
 import WishlistButton from "@/components/WishlistButton";
@@ -32,6 +33,7 @@ export interface StorefrontProduct {
 interface Props {
   products: StorefrontProduct[];
   categories: string[];
+  loadError?: boolean;
 }
 
 const WA_NUMBER = "201038856486";
@@ -45,7 +47,7 @@ function bustImageCache(url: string | null | undefined): string | undefined {
 }
 
 // ── Main Client Component ─────────────────────────────────────────────────────
-export default function StorefrontClient({ products: initialProducts }: Props) {
+export default function StorefrontClient({ products: initialProducts, loadError }: Props) {
   const { t, lang, isRTL } = useLanguage();
   const { addItem }        = useCart();
   const { success, info }  = useToast();
@@ -53,6 +55,8 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
   const [products,  setProducts]  = useState<StorefrontProduct[]>(initialProducts);
   const [search,    setSearch]    = useState("");
   const [category,  setCategory]  = useState("all");
+  const [sort, setSort] = useState("featured");
+  const [maxPrice, setMaxPrice] = useState("");
   const [mounted,   setMounted]   = useState(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
@@ -60,6 +64,7 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
 
   // ── Supabase Realtime Subscription ─────────────────────────────────────────
   useEffect(() => {
+    if (DEMO_MODE) return;
     // Subscribe to all changes on the products table
     const channel = supabase
       .channel("storefront-products-realtime")
@@ -87,7 +92,7 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
                   return prev.filter((p) => p.id !== updated.id);
                 }
                 // Otherwise update in place
-                return prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p));
+                return prev.some(p=>p.id===updated.id) ? prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p)) : [updated,...prev];
               }
 
               case "DELETE": {
@@ -117,7 +122,8 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
 
     // Category filter
     if (category !== "all") {
-      result = result.filter((p) => p.category === category);
+      const group = CATEGORY_GROUPS.find(g=>g.key===category);
+      result = result.filter((p) => group ? group.subcategories.some(sub=>sub.key===p.category) : p.category === category);
     }
 
     // Fuzzy search filter
@@ -130,14 +136,16 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
       result = fuse.search(search).map((r) => r.item);
     } else if (search.trim().length > 0) {
       const q = search.toLowerCase().trim();
-      result = result.filter(p => 
-        p.name_en.toLowerCase().includes(q) || 
+      result = result.filter(p =>
+        p.name_en.toLowerCase().includes(q) ||
         (p.name_ar?.includes(q) ?? false)
       );
     }
 
+    if(maxPrice!=="" && Number.isFinite(Number(maxPrice))) result=result.filter(p=>p.selling_price<=Number(maxPrice));
+    if(sort!=="featured")result=[...result].sort((a,b)=>(a.selling_price-b.selling_price)*(sort==="price-asc"?1:-1));
     return result;
-  }, [products, search, category]);
+  }, [products, search, category, maxPrice, sort]);
 
   const handleShare = useCallback(async (p: StorefrontProduct) => {
     const url  = `${window.location.origin}/product/${p.id}`;
@@ -152,8 +160,8 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
   // Skeleton loading
   if (!mounted) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-6">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i}>
               <div className="aspect-[3/4] skeleton mb-3" />
@@ -169,37 +177,28 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
       {/* ── Hero Section ── */}
-      <section className="bg-offwhite dark:bg-brand-black border-b border-brand-border dark:border-brand-border/20 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <div className="max-w-2xl">
-            <p className="text-[10px] font-bold tracking-[0.3em] uppercase text-brand-muted mb-4">
-              {t("hero_season")}
-            </p>
-            <h1 className="text-5xl sm:text-7xl font-black tracking-[-0.04em] leading-none text-brand-black dark:text-offwhite mb-6 transition-colors duration-300">
-              {lang === "ar" ? (
-                <>المعيار<br/>الجديد.</>
-              ) : (
-                <>THE<br/>NEW<br/>STANDARD.</>
-              )}
-            </h1>
-            <p className="text-sm text-brand-muted leading-relaxed max-w-md">
-              {t("hero_subtitle")}
-            </p>
+      <section className="border-b border-brand-border dark:border-brand-border/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-brand-muted mb-3">ASO / THE EVERYDAY COLLECTION</p>
+            <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] mb-4">{lang === "ar" ? <>أسلوبك.<br/>بمعيار جديد.</> : <>YOUR STYLE.<br/>A NEW STANDARD.</>}</h1>
+            <p className="text-sm text-brand-muted max-w-md leading-relaxed">{lang==="ar"?"ملابس وقطع مختارة بتفاصيل مدروسة. اكتشف مجموعات ASO واختر ما يشبهك.":"Considered clothing. Everyday essentials. Discover the ASO collections and make them your own."}</p>
+            <a href="#collections" className="inline-flex items-center gap-4 mt-5 px-6 py-3 bg-brand-black text-white dark:bg-offwhite dark:text-brand-black text-xs font-bold">{lang==="ar"?"اكتشف المجموعة":"EXPLORE THE COLLECTION"}<span aria-hidden="true">↗</span></a>
+          </div>
+          <div className="hidden md:grid grid-cols-3 gap-2 h-64 lg:h-72" aria-label={lang==="ar"?"مختارات ASO":"ASO collection preview"}>
+            {['tshirts','dresses','abayas'].map((c,i)=><div key={c} className="h-full overflow-hidden bg-[#eae3d9]"><ProductImage src={`/demo/${c}.png#tile=${i}`} alt={`ASO ${c}`} priority /></div>)}
           </div>
         </div>
       </section>
 
       {/* ── Search + Filter bar ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
+      <div id="collections" className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2 scroll-mt-24">
         <div className={`flex flex-col sm:flex-row gap-4 mb-4 ${isRTL ? "sm:flex-row-reverse" : ""}`}>
           {/* Feature 3: Fuzzy Search */}
           <div className="flex-1">
-            <FuzzySearch
-              products={products}
-              onResultClick={(p) => setSearch(p.name_en)}
-              placeholder_en="Search products..."
-              placeholder_ar="ابحث عن المنتجات..."
-            />
+            <label className="sr-only" htmlFor="product-search">{lang==="ar"?"ابحث عن منتج":"Search products"}</label>
+            <input id="product-search" type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder={lang==="ar"?"ابحث عن منتج أو فئة…":"Search products or categories…"} className="input-style w-full" />
+
           </div>
         </div>
 
@@ -213,16 +212,22 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
             }}
           />
         </div>
-        
+
+        <div className="flex flex-wrap gap-3 items-end mb-4">
+          <label className="text-xs flex flex-col gap-2">{lang==="ar"?"الترتيب":"Sort by"}<select aria-label={lang==="ar"?"الترتيب":"Sort by"} value={sort} onChange={e=>setSort(e.target.value)} className="input-style"><option value="featured">{lang==="ar"?"المختارات":"Featured"}</option><option value="price-asc">{lang==="ar"?"السعر: من الأقل للأعلى":"Price: low to high"}</option><option value="price-desc">{lang==="ar"?"السعر: من الأعلى للأقل":"Price: high to low"}</option></select></label>
+          <label className="text-xs flex flex-col gap-2">{lang==="ar"?"أقصى سعر (ج.م)":"Maximum price (EGP)"}<input type="number" min="0" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="input-style w-40" /></label>
+          {(search||category!=="all"||maxPrice)&&<button className="text-xs underline p-3" onClick={()=>{setSearch("");setCategory("all");setMaxPrice("");}}>{lang==="ar"?"مسح الفلاتر":"Clear filters"}</button>}
+        </div>
+        {loadError && <div role="alert" className="p-4 border border-red-200 text-sm mb-4">{lang==="ar"?"تعذر تحميل المنتجات. حاول مرة أخرى.":"Products could not be loaded. Please try again."}<button className="underline ms-3" onClick={()=>window.location.reload()}>{lang==="ar"?"إعادة المحاولة":"Retry"}</button></div>}
         {/* Results count */}
         <p className="text-xs text-brand-muted mb-2 tracking-wider">
           {filtered.length} {lang === "ar" ? "منتج" : "products"}
-          {category !== "all" && ` — ${category}`}
+          {category !== "all" && ` — ${getSubcategoryLabel(category,lang)}`}
         </p>
       </div>
 
       {/* ── Product Grid ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-8">
         {filtered.length === 0 ? (
           <div className="py-24 text-center">
             <p className="text-2xl mb-3">🔍</p>
@@ -235,7 +240,7 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-6">
             {filtered.map((p, idx) => (
               <div key={`${p.id}-${p.image_url ?? "no-img"}`} className="product-grid-item" style={{ animationDelay: `${Math.min(idx * 40, 320)}ms` }}>
                 <ProductCard
@@ -244,7 +249,7 @@ export default function StorefrontClient({ products: initialProducts }: Props) {
                   isRTL={isRTL}
                   t={t}
                   onShare={handleShare}
-                  onAdd={(item) => { addItem(item); success("✓ " + (lang === "ar" && p.name_ar ? p.name_ar : p.name_en) + " — added to cart"); }}
+                  onAdd={(item) => { addItem(item); success("✓ " + (lang === "ar" && p.name_ar ? p.name_ar : p.name_en) + (lang === "ar" ? " — أضيف للسلة" : " — added to cart")); }}
                 />
               </div>
             ))}
@@ -300,6 +305,7 @@ function ProductCard({
       imageUrl:  product.image_url ?? undefined,
       size:      "",
       quantity:  1,
+      maxStock: product.stock_quantity,
     });
   }
 
@@ -310,14 +316,7 @@ function ProductCard({
         {/* Link covers the full image area — valid HTML, no nested interactive elements */}
         <Link href={`/product/${product.id}`} className="block absolute inset-0">
           {imageSrc ? (
-            <Image
-              src={imageSrc}
-              alt={displayName}
-              fill
-              sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              unoptimized={imageSrc.includes("supabase.co")}
-            />
+            <ProductImage src={imageSrc} alt={displayName} className="group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-brand-gray">
               <span className="text-2xl font-black text-gray-300">{displayName.slice(0, 2).toUpperCase()}</span>
@@ -334,7 +333,7 @@ function ProductCard({
           )}
           {hasSizes && (
             <span className="bg-brand-black dark:bg-offwhite text-white dark:text-brand-black text-[9px] font-bold px-2 py-0.5 tracking-wide">
-              {t("storefront.products.preorderBadge")}
+              {lang==="ar"?"جاهز للشحن":"READY TO SHIP"}
             </span>
           )}
         </div>
@@ -379,10 +378,10 @@ function ProductCard({
         </Link>
 
         {product.category && (
-          <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">{product.category}</p>
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">{getSubcategoryLabel(product.category,lang as "en"|"ar")}</p>
         )}
 
-        <div className="flex items-center justify-between mt-auto pt-1">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between mt-auto pt-1">
           <p className="text-sm font-black text-brand-black dark:text-offwhite font-mono tracking-tight">
             EGP {product.selling_price.toLocaleString("en-EG")}
           </p>

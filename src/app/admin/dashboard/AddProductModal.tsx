@@ -1,5 +1,6 @@
 "use client";
 
+import ProductImage from "@/components/ProductImage";
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -13,6 +14,7 @@ export interface ProductForModal {
   cost_price: number;
   selling_price: number;
   sizes?: string[] | null;
+  colors?: string[] | null;
   stock_quantity: number;
   image_url?: string | null;
   in_stock?: boolean;
@@ -34,7 +36,7 @@ const SIZE_PRESETS = ["XS", "S", "M", "L", "XL", "XXL", "Oversized", "One Size"]
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ProductModal({ product, partnerName, onSuccess, onClose }: Props) {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, lang } = useLanguage();
   const isEdit = !!product;
 
   let allowedCategories = [
@@ -55,6 +57,7 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
 
   const fileRef      = useRef<HTMLInputElement>(null);
   const extraFileRef  = useRef<HTMLInputElement>(null);
+  const [colors,setColors]=useState(product?.colors?.join(", ")??"");
   const [preview, setPreview]             = useState<string | null>(product?.image_url ?? null);
   const [extraPreviews, setExtraPreviews] = useState<{ url: string; file: File }[]>([]);
   const [loading, setLoading]             = useState(false);
@@ -76,6 +79,7 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
   // Pre-fill when editing
   useEffect(() => {
     if (product) {
+      setColors(product.colors?.join(", ") ?? "");
       const cost          = product.cost_price ?? 0;
       const selling       = product.selling_price ?? 0;
       const derivedProfit = Math.max(0, selling - cost);
@@ -160,6 +164,7 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
       fd.append("cost_price",     String(cost));
       fd.append("selling_price",  String(sellingPrice)); // auto-calculated
       fd.append("sizes",          allSizes.join(","));
+      fd.append("colors", colors);
       fd.append("stock_quantity", form.stock_quantity || "0");
 
       // Attach primary image
@@ -252,7 +257,7 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
             >
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                <ProductImage src={preview} alt="Preview" />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-gray-400 group-hover:text-gray-600">
                   <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -266,6 +271,7 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleFileChange} />
           </div>
 
+          <label className="label-style">{lang==="ar"?"الألوان (افصل بفاصلة)":"Colors (comma separated)"}<input className="input-style mt-2" value={colors} onChange={e=>setColors(e.target.value)} /></label>
           {/* Extra Images (Gallery) */}
           <div className="flex flex-col gap-2">
             <label className="label-style">Extra Images — Gallery (optional)</label>

@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default async function StorefrontPage() {
-  const { data: products } = await supabaseAdmin
+  const { data: products, error } = await supabaseAdmin
     .from("products")
-    .select("id, partner_id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, is_available, in_stock")
+    .select("id, partner_id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar, is_available, in_stock")
     .eq("is_available", true)
     .eq("in_stock", true)
     .order("created_at", { ascending: false });
@@ -32,6 +32,6 @@ export default async function StorefrontPage() {
   );
 
   return (
-    <StorefrontClient products={products ?? []} categories={categories} />
+    <StorefrontClient products={products ?? []} categories={categories} loadError={Boolean(error)} />
   );
 }

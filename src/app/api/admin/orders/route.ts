@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { decodeSessionValue, COOKIE_NAME } from "@/lib/session";
 import { getPartnerById, getPartnerDbId } from "@/lib/partners";
 
@@ -50,10 +50,11 @@ export async function POST(request: NextRequest) {
       .in("id", productIds)
       .eq("partner_id", dbPartnerId);
 
-    if (fetchError || !products?.length) {
+    if (fetchError || !products?.length || products.length !== new Set(productIds).size || items.some(i=>!Number.isInteger(i.quantity)||i.quantity<1)) {
       return NextResponse.json({ error: "بعض المنتجات غير موجودة أو لا تنتمي لحسابك" }, { status: 404 });
     }
 
+    if(products.some(p=>items.filter(i=>i.product_id===p.id).reduce((sum,i)=>sum+i.quantity,0)>p.stock_quantity))return NextResponse.json({error:"Quantity exceeds stock"},{status:400});
     const priceMap = Object.fromEntries(
       products.map((p) => [p.id, { selling: p.selling_price, cost: p.cost_price }])
     );

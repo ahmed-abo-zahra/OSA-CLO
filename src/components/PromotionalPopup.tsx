@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { useLang } from "@/context/LanguageContext";
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { supabase } from "@/lib/supabase";
 
 interface PopupSettings {
@@ -25,6 +26,7 @@ export default function PromotionalPopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if(DEMO_MODE)return;
     // Check if user already dismissed this session
     const dismissed = sessionStorage.getItem("popup_dismissed");
     if (dismissed) return;

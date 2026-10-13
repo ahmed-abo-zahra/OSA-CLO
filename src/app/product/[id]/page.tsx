@@ -1,5 +1,7 @@
+import LocalizedProductName from "@/components/LocalizedProductName";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import ProductImage from "@/components/ProductImage";
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import ProductDetailClient, { type PDPProduct } from "./ProductDetailClient";
@@ -42,7 +44,7 @@ export async function generateMetadata(
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const { data } = await supabaseAdmin
     .from("products")
-    .select("id, partner_id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls")
+    .select("id, partner_id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar")
     .eq("id", params.id)
     .eq("is_available", true)
     .single();
@@ -52,7 +54,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   // ── Upsell: fetch 4 related products from same category ──────────────────
   const { data: relatedRaw } = await supabaseAdmin
     .from("products")
-    .select("id, name_en, selling_price, image_url, category, stock_quantity")
+    .select("id, name_en, name_ar, selling_price, image_url, category, stock_quantity")
     .eq("is_available", true)
     .eq("in_stock", true)
     .eq("category", data.category ?? "")
@@ -64,7 +66,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
   if (related.length < 2) {
     const { data: fallback } = await supabaseAdmin
       .from("products")
-      .select("id, name_en, selling_price, image_url, category, stock_quantity")
+      .select("id, name_en, name_ar, selling_price, image_url, category, stock_quantity")
       .eq("is_available", true)
       .eq("in_stock", true)
       .neq("id", data.id)
@@ -90,15 +92,14 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 <div className="aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-brand-gray">
                   {p.image_url
                     // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={p.image_url} alt={p.name_en}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    ? <ProductImage src={p.image_url} alt={p.name_en} />
                     : <div className="w-full h-full flex items-center justify-center text-gray-200 text-2xl font-black">
                         {p.name_en.slice(0, 2).toUpperCase()}
                       </div>
                   }
                 </div>
                 <div className="p-3">
-                  <p className="text-xs font-bold text-brand-black dark:text-offwhite truncate leading-tight">{p.name_en}</p>
+                  <p className="text-xs font-bold text-brand-black dark:text-offwhite truncate leading-tight"><LocalizedProductName en={p.name_en} ar={p.name_ar} /></p>
                   <p className="text-[11px] font-mono font-bold text-brand-black dark:text-offwhite mt-1">
                     EGP {p.selling_price.toLocaleString("en-EG")}
                   </p>

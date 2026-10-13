@@ -1,0 +1,3054 @@
+[
+  {
+    "id": "431f6fd0-c6bb-5f4c-b32c-7f78b48c081f",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Minimal Crepe Abaya — Black",
+    "name_ar": "ASO — عباية كريب بسيطة — أسود",
+    "description": "ASO Minimal Crepe Abaya — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية كريب بسيطة — أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 253,
+    "selling_price": 460,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/abayas.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "f1433d1d-3829-5369-b073-b827f8fe8573",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Pearl-Button Abaya — Ivory",
+    "name_ar": "ASO — عباية بأزرار لؤلؤ — عاجي",
+    "description": "ASO Pearl-Button Abaya — Ivory. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية بأزرار لؤلؤ — عاجي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 280,
+    "selling_price": 510,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/abayas.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "c1f0eaf9-5512-583a-8383-743ebcb28512",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Belted Kimono Abaya — Sage",
+    "name_ar": "ASO — عباية كيمونو بحزام — سيج",
+    "description": "ASO Belted Kimono Abaya — Sage. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية كيمونو بحزام — سيج. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 314,
+    "selling_price": 570,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Sage"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/abayas.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "1206d63c-3e65-5ffe-810e-17309d24b5be",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Pleated Abaya — Navy",
+    "name_ar": "ASO — عباية بكسرات — كحلي",
+    "description": "ASO Pleated Abaya — Navy. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية بكسرات — كحلي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 336,
+    "selling_price": 610,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Navy"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/abayas.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "0adaffc0-6bc8-53a1-9de9-3ac803b003d6",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Butterfly-Sleeve Abaya — Dusty Rose",
+    "name_ar": "ASO — عباية بأكمام فراشة — وردي هادئ",
+    "description": "ASO Butterfly-Sleeve Abaya — Dusty Rose. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية بأكمام فراشة — وردي هادئ. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 457,
+    "selling_price": 830,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Dusty Rose"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/abayas.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "48df426f-2273-5588-a347-96e0eb5688f5",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Linen-Look Abaya — Taupe",
+    "name_ar": "ASO — عباية بملمس الكتان — تاوب",
+    "description": "ASO Linen-Look Abaya — Taupe. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية بملمس الكتان — تاوب. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 270,
+    "selling_price": 490,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Taupe"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/abayas.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "4bc1806c-b4ce-53d3-89cb-7e227eedbf2d",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Contrast-Cuff Abaya — Charcoal",
+    "name_ar": "ASO — عباية بأساور متباينة — فحمي",
+    "description": "ASO Contrast-Cuff Abaya — Charcoal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية بأساور متباينة — فحمي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 352,
+    "selling_price": 640,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Charcoal"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/abayas.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "2eab19ec-f9a7-5f8b-901f-7cf1bc8f9b05",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Satin Abaya — Chocolate",
+    "name_ar": "ASO — عباية ساتان — بني شوكولاتة",
+    "description": "ASO Satin Abaya — Chocolate. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية ساتان — بني شوكولاتة. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 297,
+    "selling_price": 540,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Chocolate"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/abayas.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "9401e293-5dc7-54e9-acf4-48acce29ee35",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Open-Front Abaya — Sand",
+    "name_ar": "ASO — عباية مفتوحة — رملي",
+    "description": "ASO Open-Front Abaya — Sand. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية مفتوحة — رملي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 407,
+    "selling_price": 740,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Sand"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/abayas.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "fbebe9ad-6f84-551c-9ff0-510691b3d87b",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Embroidered Abaya — Black",
+    "name_ar": "ASO — عباية مطرزة — أسود",
+    "description": "ASO Embroidered Abaya — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عباية مطرزة — أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "abayas",
+    "cost_price": 341,
+    "selling_price": 620,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/abayas.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T23:00:00Z"
+  },
+  {
+    "id": "d2b1540a-caf8-5173-8cdd-afb0c2ce68dd",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Classic Nida Isdal — Black",
+    "name_ar": "ASO — إسدال نيدا كلاسيك أسود",
+    "description": "ASO Classic Nida Isdal — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال نيدا كلاسيك أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 138,
+    "selling_price": 250,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/isdals.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "d27ce083-22f1-5a82-8f46-7c5008fc78ca",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Chiffon Isdal — Charcoal",
+    "name_ar": "ASO — إسدال شيفون جاري",
+    "description": "ASO Chiffon Isdal — Charcoal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال شيفون جاري. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 193,
+    "selling_price": 350,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Charcoal"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/isdals.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "3c6574cc-2232-5998-8019-07397d0dbb60",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Floral Print Isdal — Navy",
+    "name_ar": "ASO — إسدال مطبوع ورود نيفي",
+    "description": "ASO Floral Print Isdal — Navy. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال مطبوع ورود نيفي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 209,
+    "selling_price": 380,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Navy"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/isdals.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "d417053e-c0b2-5be1-9348-a5fefba21644",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Shimmer Gold-Woven Isdal",
+    "name_ar": "ASO — إسدال بخيوط ذهبية شيمر",
+    "description": "ASO Shimmer Gold-Woven Isdal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال بخيوط ذهبية شيمر. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 308,
+    "selling_price": 560,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Gold"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/isdals.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "3880e39b-bfcd-52d6-a35f-b72c4c8bac4a",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Lace-Hem Ivory Isdal",
+    "name_ar": "ASO — إسدال آيفوري بهيم دانتيل",
+    "description": "ASO Lace-Hem Ivory Isdal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال آيفوري بهيم دانتيل. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 248,
+    "selling_price": 450,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/isdals.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "6799cbc2-8ec1-59ab-b3cf-b09d36584f91",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Velvet Isdal — Burgundy",
+    "name_ar": "ASO — إسدال مخمل بورجوندي",
+    "description": "ASO Velvet Isdal — Burgundy. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال مخمل بورجوندي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 292,
+    "selling_price": 530,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Burgundy"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/isdals.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "ff305a77-c02b-58f4-ae8a-e5749168c4a3",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Micro-Pleated Isdal — Blush",
+    "name_ar": "ASO — إسدال مايكرو بليتد بلاش",
+    "description": "ASO Micro-Pleated Isdal — Blush. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال مايكرو بليتد بلاش. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 231,
+    "selling_price": 420,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Blush"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/isdals.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "2c74462c-3e75-5753-a308-59eeaaaf650e",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Embroidered Border Isdal — White",
+    "name_ar": "ASO — إسدال حدود مطرزة أبيض",
+    "description": "ASO Embroidered Border Isdal — White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال حدود مطرزة أبيض. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 292,
+    "selling_price": 530,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/isdals.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "ff4fd821-cf2a-54a1-ab4f-14fe84b14491",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Two-Tone Isdal — Black & Navy",
+    "name_ar": "ASO — إسدال ثنائي اللون أسود ونيفي",
+    "description": "ASO Two-Tone Isdal — Black & Navy. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال ثنائي اللون أسود ونيفي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 209,
+    "selling_price": 380,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black & Navy"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/isdals.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "6ba9e7fc-e204-5e50-91dc-a4ff31bd74cb",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Stretch Jersey Isdal — Black",
+    "name_ar": "ASO — إسدال جيرسي ستريتش أسود",
+    "description": "ASO Stretch Jersey Isdal — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — إسدال جيرسي ستريتش أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "isdals",
+    "cost_price": 127,
+    "selling_price": 230,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/isdals.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T22:00:00Z"
+  },
+  {
+    "id": "fe3be7df-4b5b-594c-880b-7200a319f2f6",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Linen Maxi Dress — Warm Sand",
+    "name_ar": "ASO — فستان ماكسي لينن رملي",
+    "description": "ASO Linen Maxi Dress — Warm Sand. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ماكسي لينن رملي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 374,
+    "selling_price": 680,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Sand"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/dresses.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "25b2abab-d0ec-54ca-8c52-91cfd53adadb",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Bias-Cut Satin Slip — Black",
+    "name_ar": "ASO — فستان ساتان بياس كت أسود",
+    "description": "ASO Bias-Cut Satin Slip — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ساتان بياس كت أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 330,
+    "selling_price": 600,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/dresses.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "34b64673-86a4-5b54-9515-7b5ef3bd6ec4",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Smocked Broderie Midi",
+    "name_ar": "ASO — فستان بروديري ميدي سموكد",
+    "description": "ASO Smocked Broderie Midi. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان بروديري ميدي سموكد. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 424,
+    "selling_price": 770,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/dresses.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "191d4253-07db-5f6a-8d64-24f7b3ebaab6",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Oversized Shirt Dress — Khaki",
+    "name_ar": "ASO — فستان شيرت أوفرسايزد كاكي",
+    "description": "ASO Oversized Shirt Dress — Khaki. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان شيرت أوفرسايزد كاكي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 346,
+    "selling_price": 630,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Khaki"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/dresses.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "af11ea62-8589-5097-9db5-6bf276c01613",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Ribbed Knit Midi — Ivory",
+    "name_ar": "ASO — فستان نيت ريبد ميدي آيفوري",
+    "description": "ASO Ribbed Knit Midi — Ivory. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان نيت ريبد ميدي آيفوري. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 396,
+    "selling_price": 720,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/dresses.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "75a29fa8-afca-5c3d-a5a1-bb1447627162",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Tiered Maxi — Terracotta",
+    "name_ar": "ASO — فستان ماكسي تيرد تراكوتا",
+    "description": "ASO Tiered Maxi — Terracotta. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ماكسي تيرد تراكوتا. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 440,
+    "selling_price": 800,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Terracotta"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/dresses.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "96b50aa7-221c-5577-bec0-544aca1c6d2d",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Knife-Pleat Midi — Dusty Blush",
+    "name_ar": "ASO — فستان ميدي بليتد داستي بلاش",
+    "description": "ASO Knife-Pleat Midi — Dusty Blush. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ميدي بليتد داستي بلاش. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 413,
+    "selling_price": 750,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Blush"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/dresses.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "1eb0db82-a2a5-56af-987b-bbfedc2c0a70",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Denim Raw-Hem Mini",
+    "name_ar": "ASO — فستان ميني جينز خام الهيم",
+    "description": "ASO Denim Raw-Hem Mini. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ميني جينز خام الهيم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 330,
+    "selling_price": 600,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Blue"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/dresses.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "6cb6ef66-e24b-58b5-9378-39c06bfc0fc1",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Corset-Bodice Maxi — Cream",
+    "name_ar": "ASO — فستان ماكسي كورست كريم",
+    "description": "ASO Corset-Bodice Maxi — Cream. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ماكسي كورست كريم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 528,
+    "selling_price": 960,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Cream"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/dresses.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "fae2793c-8e8b-518b-95de-02b7888959be",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Gingham Smock Mini",
+    "name_ar": "ASO — فستان ميني سموك جينجام",
+    "description": "ASO Gingham Smock Mini. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فستان ميني سموك جينجام. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "dresses",
+    "cost_price": 275,
+    "selling_price": 500,
+    "sizes": [
+      "XS",
+      "S",
+      "M"
+    ],
+    "colors": [
+      "Beige"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/dresses.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T21:00:00Z"
+  },
+  {
+    "id": "eec492fd-107f-5d49-9295-61aff1f6f7b0",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Boxy Tee — Jet Black",
+    "name_ar": "ASO — تيشيرت بوكسي هيفي وايت أسود",
+    "description": "ASO Heavyweight Boxy Tee — Jet Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت بوكسي هيفي وايت أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 143,
+    "selling_price": 260,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/tshirts.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "918962f2-3cdf-5b99-98d1-9546dfd32e62",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Essential White Tee",
+    "name_ar": "ASO — تيشيرت أبيض أساسي 200 جي إس إم",
+    "description": "ASO Essential White Tee — 200GSM. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت أبيض أساسي 200 جي إس إم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 116,
+    "selling_price": 210,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/tshirts.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "59d00f86-f3df-5e37-9d55-d9acee28a97e",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Oversized Logo Tee — Ecru",
+    "name_ar": "ASO — تيشيرت لوجو أوفرسايزد إيكرو",
+    "description": "ASO Oversized Logo Tee — Ecru. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت لوجو أوفرسايزد إيكرو. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 170,
+    "selling_price": 310,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Ecru"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/tshirts.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "93b37bd6-958c-5487-ab4f-b766bdf11d14",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Washed Black Vintage Tee",
+    "name_ar": "ASO — تيشيرت فينتاج أسود ووشد",
+    "description": "ASO Washed Black Vintage Tee. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت فينتاج أسود ووشد. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 132,
+    "selling_price": 240,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Washed Black"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/tshirts.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "5c91e680-b3a7-5fa2-b5e9-747f58b13540",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Drop-Shoulder Striped Tee",
+    "name_ar": "ASO — تيشيرت مخطط درب شولدر",
+    "description": "ASO Drop-Shoulder Striped Tee. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت مخطط درب شولدر. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 160,
+    "selling_price": 290,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Black & White"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/tshirts.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "831d29fc-6fc4-5d9c-a3c3-a763d72ccb7b",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Mock-Neck Premium Tee — Black",
+    "name_ar": "ASO — تيشيرت موك نيك بريميم أسود",
+    "description": "ASO Mock-Neck Premium Tee — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت موك نيك بريميم أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 165,
+    "selling_price": 300,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/tshirts.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "ceb882a2-e560-5cc7-93a3-a17929c5f035",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Embroidered Script Tee — White",
+    "name_ar": "ASO — تيشيرت سكريبت مطرز أبيض",
+    "description": "ASO Embroidered Script Tee — White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت سكريبت مطرز أبيض. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 198,
+    "selling_price": 360,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/tshirts.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "02eab751-aedf-53fb-acbf-bda11b13955b",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Vintage Wash Tee — Sage",
+    "name_ar": "ASO — تيشيرت فينتاج واش سيج",
+    "description": "ASO Vintage Wash Tee — Sage. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت فينتاج واش سيج. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 154,
+    "selling_price": 280,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Sage"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/tshirts.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "f8d42d70-02bb-5aaa-84f7-e742cc7fdcdd",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Cropped Boxy Tee — Cream",
+    "name_ar": "ASO — تيشيرت بوكسي كروبد كريم",
+    "description": "ASO Cropped Boxy Tee — Cream. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت بوكسي كروبد كريم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 143,
+    "selling_price": 260,
+    "sizes": [
+      "XS",
+      "S",
+      "M"
+    ],
+    "colors": [
+      "Cream"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/tshirts.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "5051169e-68ec-51fe-9059-3bd4938f70f5",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Rib Knit Tee — Olive",
+    "name_ar": "ASO — تيشيرت ريب نيت أوليف",
+    "description": "ASO Rib Knit Tee — Olive. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تيشيرت ريب نيت أوليف. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "tshirts",
+    "cost_price": 148,
+    "selling_price": 270,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Olive"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/tshirts.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T20:00:00Z"
+  },
+  {
+    "id": "770844ea-995b-5190-89fc-f6ca03269e17",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Wide-Leg Linen Trousers — Camel",
+    "name_ar": "ASO — بنطلون وايد ليج لينن كاميل",
+    "description": "ASO Wide-Leg Linen Trousers — Camel. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بنطلون وايد ليج لينن كاميل. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 330,
+    "selling_price": 600,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Camel"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/pants.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "4525ba18-b54b-5375-b5ab-e32d4bf410cc",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Cargo Pants — Washed Olive",
+    "name_ar": "ASO — بنطلون كارجو أوليف ووشد",
+    "description": "ASO Cargo Pants — Washed Olive. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بنطلون كارجو أوليف ووشد. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 363,
+    "selling_price": 660,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Olive"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/pants.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "0576fd04-75a1-5762-b7a3-a84d3ff1568f",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Raw-Hem Straight Jeans",
+    "name_ar": "ASO — جينز ستريت لاين خام الهيم",
+    "description": "ASO Raw-Hem Straight Jeans. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — جينز ستريت لاين خام الهيم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 429,
+    "selling_price": 780,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Blue"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/pants.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "bcc725f5-4150-509a-a53a-75e0576a1242",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Track Pants — Black",
+    "name_ar": "ASO — تراك بانتس أسود",
+    "description": "ASO Track Pants — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — تراك بانتس أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 258,
+    "selling_price": 470,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/pants.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "7387be9e-5931-52fd-8278-a9b7b996b78b",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Crisp White Linen Trousers",
+    "name_ar": "ASO — بنطلون لينن أبيض ناصع",
+    "description": "ASO Crisp White Linen Trousers. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بنطلون لينن أبيض ناصع. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 292,
+    "selling_price": 530,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/pants.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "e039e452-afab-5f3a-8cb8-ee69cfeb68f6",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Premium Marl Joggers",
+    "name_ar": "ASO — جوجر بانتس مارل بريميم",
+    "description": "ASO Premium Marl Joggers. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — جوجر بانتس مارل بريميم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 248,
+    "selling_price": 450,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "colors": [
+      "Grey"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/pants.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "82442dac-290b-52de-be16-dde6396b40e7",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Slim-Fit Tailored Trousers — Navy",
+    "name_ar": "ASO — بنطلون تيلورد سليم فيت نيفي",
+    "description": "ASO Slim-Fit Tailored Trousers — Navy. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بنطلون تيلورد سليم فيت نيفي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 385,
+    "selling_price": 700,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Navy"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/pants.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "a9f0bd2a-8ee1-5dd2-a140-00d1269ac4e8",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Nylon Parachute Pants",
+    "name_ar": "ASO — بنطلون باراشوت نايلون",
+    "description": "ASO Nylon Parachute Pants. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بنطلون باراشوت نايلون. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 330,
+    "selling_price": 600,
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/pants.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "a5180776-aaca-573a-a31f-5ba8abbacb8a",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Bleached Denim Shorts",
+    "name_ar": "ASO — شورت جينز بليشد",
+    "description": "ASO Bleached Denim Shorts. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شورت جينز بليشد. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 220,
+    "selling_price": 400,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Light Blue"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/pants.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "776f7748-f2ca-51da-bda0-7fc0ddf58a74",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Cream High-Waist Pleated Shorts",
+    "name_ar": "ASO — شورت بليتد هاي وايست كريم",
+    "description": "ASO Cream High-Waist Pleated Shorts. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شورت بليتد هاي وايست كريم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "pants",
+    "cost_price": 248,
+    "selling_price": 450,
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Cream"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/pants.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T19:00:00Z"
+  },
+  {
+    "id": "fcd922d4-9cc8-5192-b107-88b847027416",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Minimalist Leather Low-Top",
+    "name_ar": "ASO — سنيكر جلد مينيمال لو توب",
+    "description": "ASO Minimalist Leather Low-Top. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر جلد مينيمال لو توب. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 627,
+    "selling_price": 1140,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/sneakers.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "2358dc33-1695-5898-bfa6-093c85011bcf",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Classic White Canvas Hi-Top",
+    "name_ar": "ASO — سنيكر كانفاس كلاسيك هاي توب أبيض",
+    "description": "ASO Classic White Canvas Hi-Top. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر كانفاس كلاسيك هاي توب أبيض. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 330,
+    "selling_price": 600,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/sneakers.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "c594e18d-71a1-5e6a-8100-c8b2ce55ff59",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Chunky Platform Sneaker — Black",
+    "name_ar": "ASO — سنيكر بلاتفورم شانكي أسود",
+    "description": "ASO Chunky Platform Sneaker — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر بلاتفورم شانكي أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 501,
+    "selling_price": 910,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/sneakers.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "45412ba9-a6d3-5deb-b174-15872ab3afa3",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO 90s Retro Runner — Cream",
+    "name_ar": "ASO — سنيكر ريترو 90s كريم",
+    "description": "ASO 90s Retro Runner — Cream. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر ريترو 90s كريم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 539,
+    "selling_price": 980,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Cream"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/sneakers.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "97440528-3102-5b31-bbe5-6e62f7a13d25",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Slip-On Canvas — Off White",
+    "name_ar": "ASO — سنيكر كانفاس سليب أون أوف وايت",
+    "description": "ASO Slip-On Canvas — Off White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر كانفاس سليب أون أوف وايت. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 264,
+    "selling_price": 480,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Off White"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/sneakers.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "ac0e2494-1de5-5cbb-9883-040662f0b6b1",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO High-Top Canvas — Crimson Red",
+    "name_ar": "ASO — سنيكر هاي توب كانفاس أحمر",
+    "description": "ASO High-Top Canvas — Crimson Red. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر هاي توب كانفاس أحمر. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 358,
+    "selling_price": 650,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Crimson Red"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/sneakers.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "4b1d2ecf-0bdc-56d8-ae36-8a89475db4d0",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Premium Suede Low-Top — Caramel",
+    "name_ar": "ASO — سنيكر سويد لو توب كراميل بريميم",
+    "description": "ASO Premium Suede Low-Top — Caramel. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر سويد لو توب كراميل بريميم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 495,
+    "selling_price": 900,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Caramel"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/sneakers.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "8be08d4c-6f59-5ba4-ad5e-72e4c4b24c9c",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Engineered Knit Runner — Charcoal",
+    "name_ar": "ASO — سنيكر ران نيت جاري",
+    "description": "ASO Engineered Knit Runner — Charcoal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر ران نيت جاري. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 550,
+    "selling_price": 1000,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Charcoal"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/sneakers.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "388d215b-9bcb-51f3-8f92-7a5fa6d2b284",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Court Sneaker — Clay White",
+    "name_ar": "ASO — سنيكر كورت كلاي وايت",
+    "description": "ASO Court Sneaker — Clay White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر كورت كلاي وايت. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 402,
+    "selling_price": 730,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Clay White"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/sneakers.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "f4af1739-1ddd-50fa-958e-300d0866b4e6",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Skate Low — Black/White",
+    "name_ar": "ASO — سنيكر سكيت لو أسود/أبيض",
+    "description": "ASO Skate Low — Black/White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سنيكر سكيت لو أسود/أبيض. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "sneakers",
+    "cost_price": 330,
+    "selling_price": 600,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Black & White"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/sneakers.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T18:00:00Z"
+  },
+  {
+    "id": "847e3ae2-888b-5f00-9dea-45be18f7b0f3",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Block-Heel Leather Mule — Camel",
+    "name_ar": "ASO — كعب بلوك جلد ميول كاميل",
+    "description": "ASO Block-Heel Leather Mule — Camel. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب بلوك جلد ميول كاميل. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 346,
+    "selling_price": 630,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Camel"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/heels.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "12c93a8b-87ec-5d53-b51e-bc3abcf6a7b3",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Stiletto Pump — Patent Black",
+    "name_ar": "ASO — كعب ستيليتو ببيتنت أسود",
+    "description": "ASO Stiletto Pump — Patent Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب ستيليتو ببيتنت أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 451,
+    "selling_price": 820,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/heels.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "b1981f6f-2928-591a-be34-3976d1618050",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Kitten-Heel Slingback — Nude",
+    "name_ar": "ASO — كعب كيتن سلينجباك نود",
+    "description": "ASO Kitten-Heel Slingback — Nude. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب كيتن سلينجباك نود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 374,
+    "selling_price": 680,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Nude"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/heels.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "a2db2100-818e-5ca3-aded-20e600fd6f67",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Platform Mary Jane — White",
+    "name_ar": "ASO — ماري جين بلاتفورم أبيض",
+    "description": "ASO Platform Mary Jane — White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — ماري جين بلاتفورم أبيض. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 418,
+    "selling_price": 760,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/heels.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "6f2f9a18-a8ed-5507-9f00-092e28e9f970",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Multi-Strap Sandal Heel — Tan",
+    "name_ar": "ASO — كعب صندل سترابي تان",
+    "description": "ASO Multi-Strap Sandal Heel — Tan. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب صندل سترابي تان. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 402,
+    "selling_price": 730,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Tan"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/heels.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "bb0e8ebf-b528-5fd5-9af4-7b77feb99648",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Pointed-Toe Pump — Beige",
+    "name_ar": "ASO — كعب ببامب مؤشر بيج",
+    "description": "ASO Pointed-Toe Pump — Beige. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب ببامب مؤشر بيج. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 429,
+    "selling_price": 780,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Beige"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/heels.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "ef563959-2d1e-5b06-a087-afe0bb82f987",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Sculptural Heel Mule — Black",
+    "name_ar": "ASO — كعب سكالبتشرال ميول أسود",
+    "description": "ASO Sculptural Heel Mule — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب سكالبتشرال ميول أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 539,
+    "selling_price": 980,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/heels.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "77ae8ed1-32da-5fd7-ace1-d6823f367d48",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Ankle-Strap Heeled Sandal — Gold",
+    "name_ar": "ASO — كعب صندل أنكل ستراب ذهبي",
+    "description": "ASO Ankle-Strap Heeled Sandal — Gold. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب صندل أنكل ستراب ذهبي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 385,
+    "selling_price": 700,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Gold"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/heels.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "2f63d93b-a25a-5a23-979e-c69293b73c2d",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Clear PVC Heeled Mule",
+    "name_ar": "ASO — كعب ميول PVC شفاف",
+    "description": "ASO Clear PVC Heeled Mule. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب ميول PVC شفاف. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 358,
+    "selling_price": 650,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Clear"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/heels.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "d1119d11-2cc9-5234-9fa0-6ee7f1dcc781",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Padded Sock Heel Boot — Black",
+    "name_ar": "ASO — كعب بوت سوك بادد أسود",
+    "description": "ASO Padded Sock Heel Boot — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كعب بوت سوك بادد أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "heels",
+    "cost_price": 539,
+    "selling_price": 980,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/heels.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T17:00:00Z"
+  },
+  {
+    "id": "3978e60e-1b07-5b66-8efd-eaec7bd5af0b",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Faux-Fur Crossover Slide — Blush",
+    "name_ar": "ASO — شبشب فرو متقاطع — وردي",
+    "description": "ASO Faux-Fur Crossover Slide — Blush. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب فرو متقاطع — وردي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 132,
+    "selling_price": 240,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Blush"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/slippers.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "c209f5d5-1e83-5b85-9775-1c79f1b92786",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Flat Leather Slide — Black",
+    "name_ar": "ASO — شبشب جلد مسطح — أسود",
+    "description": "ASO Flat Leather Slide — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب جلد مسطح — أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 170,
+    "selling_price": 310,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/slippers.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "b35ba6ed-6b6c-533e-aaf9-ca3f6daeeb20",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Croc-Embossed Flat Slide — Beige",
+    "name_ar": "ASO — شبشب مسطح بنقشة جلد — بيج",
+    "description": "ASO Croc-Embossed Flat Slide — Beige. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب مسطح بنقشة جلد — بيج. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 198,
+    "selling_price": 360,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Beige"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/slippers.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "3cf33d12-1361-5d58-84e0-9afb7b062961",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Velvet House Slipper — Emerald",
+    "name_ar": "ASO — شبشب منزلي مخمل — زمردي",
+    "description": "ASO Velvet House Slipper — Emerald. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب منزلي مخمل — زمردي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 226,
+    "selling_price": 410,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Emerald"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/slippers.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "db14423b-7ac5-535d-b97b-f31a62e8429d",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO EVA Clog — Ivory",
+    "name_ar": "ASO — شبشب كلوج — عاجي",
+    "description": "ASO EVA Clog — Ivory. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب كلوج — عاجي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 253,
+    "selling_price": 460,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/slippers.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "5770472b-e11b-5884-8ffd-4b54053aba53",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Fluffy Closed-Toe Slipper — Coffee",
+    "name_ar": "ASO — شبشب مغلق فرو — بني قهوة",
+    "description": "ASO Fluffy Closed-Toe Slipper — Coffee. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب مغلق فرو — بني قهوة. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 143,
+    "selling_price": 260,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Coffee"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/slippers.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "7677b6c4-8845-5fb8-a9de-84143b97118c",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Cork-Sole Two-Strap Slide — Tan",
+    "name_ar": "ASO — شبشب بحزامين ونعل فلين — بني فاتح",
+    "description": "ASO Cork-Sole Two-Strap Slide — Tan. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب بحزامين ونعل فلين — بني فاتح. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 182,
+    "selling_price": 330,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Tan"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/slippers.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "108d3b65-ccf5-502a-bf68-58ebefd333b5",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Quilted House Slipper — Ivory",
+    "name_ar": "ASO — شبشب منزلي مبطن — عاجي",
+    "description": "ASO Quilted House Slipper — Ivory. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب منزلي مبطن — عاجي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 264,
+    "selling_price": 480,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/slippers.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "9ff226c5-cb28-51c3-a318-fbb8af7c3fb9",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Waffle House Slipper — Charcoal",
+    "name_ar": "ASO — شبشب منزلي بملمس وافل — فحمي",
+    "description": "ASO Waffle House Slipper — Charcoal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب منزلي بملمس وافل — فحمي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 215,
+    "selling_price": 390,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "Charcoal"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/slippers.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "aa7f1b8d-460c-5970-b2aa-42f375b359d3",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Pom-Pom Fluffy Slide — White",
+    "name_ar": "ASO — شبشب فرو ببوم بوم — أبيض",
+    "description": "ASO Pom-Pom Fluffy Slide — White. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — شبشب فرو ببوم بوم — أبيض. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "slippers",
+    "cost_price": 143,
+    "selling_price": 260,
+    "sizes": [
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41"
+    ],
+    "colors": [
+      "White"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/slippers.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T16:00:00Z"
+  },
+  {
+    "id": "8705aba9-2a77-5618-90e0-91d3f8a39090",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Mini Chain Crossbody — Black",
+    "name_ar": "ASO — حقيبة كروس بودي ميني تشين أسود",
+    "description": "ASO Mini Chain Crossbody — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — حقيبة كروس بودي ميني تشين أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 292,
+    "selling_price": 530,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/girls_bags.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "d58904b1-2658-5759-be29-9f8c2511bffc",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Large Canvas Tote — Natural",
+    "name_ar": "ASO — توت باج كانفاس لارج ناتورال",
+    "description": "ASO Large Canvas Tote — Natural. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — توت باج كانفاس لارج ناتورال. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 242,
+    "selling_price": 440,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Natural"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/girls_bags.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "107f1437-a55e-5086-8269-9b441366e354",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Gold Metallic Clutch",
+    "name_ar": "ASO — كلتش ميتاليك ذهبي",
+    "description": "ASO Gold Metallic Clutch. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كلتش ميتاليك ذهبي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 319,
+    "selling_price": 580,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Gold"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/girls_bags.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "cc1c0527-5469-5ca2-ae48-c8b59dc9ce84",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Leather Bucket Bag — Tan",
+    "name_ar": "ASO — باكيت باج جلد تان",
+    "description": "ASO Leather Bucket Bag — Tan. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — باكيت باج جلد تان. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 429,
+    "selling_price": 780,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Tan"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/girls_bags.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "8a9c8112-2a49-5b4b-84a5-9860001d5c8e",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Saddle Bag — Cognac",
+    "name_ar": "ASO — سادل باج كونياك",
+    "description": "ASO Saddle Bag — Cognac. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سادل باج كونياك. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 468,
+    "selling_price": 850,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Cognac"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/girls_bags.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "7fbc3fdc-6660-5776-ad25-9a4217add220",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Clear PVC with Leather Trim",
+    "name_ar": "ASO — حقيبة PVC شفافة بتريم جلد",
+    "description": "ASO Clear PVC with Leather Trim. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — حقيبة PVC شفافة بتريم جلد. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 209,
+    "selling_price": 380,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Brown & Clear"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/girls_bags.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "08afee34-15ea-5d33-8ac8-fb1a55265a71",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Handwoven Straw Tote — Natural",
+    "name_ar": "ASO — توت باج ستراو منسوجة ناتورال",
+    "description": "ASO Handwoven Straw Tote — Natural. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — توت باج ستراو منسوجة ناتورال. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 264,
+    "selling_price": 480,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Natural"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/girls_bags.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "cd2fc79a-f902-5ad7-b125-5772fff8c393",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Quilted Caviar Mini — Beige",
+    "name_ar": "ASO — حقيبة كيلتد كافيار ميني بيج",
+    "description": "ASO Quilted Caviar Mini — Beige. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — حقيبة كيلتد كافيار ميني بيج. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 583,
+    "selling_price": 1060,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Beige"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/girls_bags.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "f2f089cc-4d74-566c-b6ea-5858575cba2c",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Slouchy Hobo — Camel",
+    "name_ar": "ASO — هوبو باج سلاوشي كاميل",
+    "description": "ASO Slouchy Hobo — Camel. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — هوبو باج سلاوشي كاميل. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 440,
+    "selling_price": 800,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Camel"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/girls_bags.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "cc9b9dbe-dc7a-5d85-aaf2-46f9471b236f",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Nylon Belt Bag — Olive",
+    "name_ar": "ASO — بيلت باج نايلون أوليف",
+    "description": "ASO Nylon Belt Bag — Olive. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بيلت باج نايلون أوليف. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "girls_bags",
+    "cost_price": 237,
+    "selling_price": 430,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Olive"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/girls_bags.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T15:00:00Z"
+  },
+  {
+    "id": "1583b0ff-ac6f-56e8-a21f-f1ccf984f1ee",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Satin Square Scarf — Black",
+    "name_ar": "ASO — سكارف حرير سكوير 100% أسود",
+    "description": "ASO 100% Silk Square Scarf — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سكارف حرير سكوير 100% أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 220,
+    "selling_price": 400,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/accessories.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "2be59f05-4494-568c-9292-d86442244adf",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Gold Beaded Layered Necklace",
+    "name_ar": "ASO — نيكليس خرز مطلي ذهبي متعدد الطبقات",
+    "description": "ASO Gold Beaded Layered Necklace. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — نيكليس خرز مطلي ذهبي متعدد الطبقات. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 116,
+    "selling_price": 210,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Gold"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/accessories.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "d0a18e09-2523-5020-9721-e0f66d41d2d0",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Large Silver Hoop Earrings",
+    "name_ar": "ASO — حلق هوب كبير فضي",
+    "description": "ASO Large Silver Hoop Earrings. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — حلق هوب كبير فضي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 99,
+    "selling_price": 180,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Silver"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/accessories.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "591bfcc0-efa5-5707-a5f1-bcde8567d07c",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Leather Belt — Black/Gold Buckle",
+    "name_ar": "ASO — حزام جلد أسود بإبزيم ذهبي",
+    "description": "ASO Leather Belt — Black/Gold Buckle. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — حزام جلد أسود بإبزيم ذهبي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 170,
+    "selling_price": 310,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black & Gold"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/accessories.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "3785cde3-ad49-584f-a438-51ab2e587169",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Ribbed Knit Beanie — Charcoal",
+    "name_ar": "ASO — بيني نيت ريبد جاري",
+    "description": "ASO Ribbed Knit Beanie — Charcoal. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بيني نيت ريبد جاري. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 143,
+    "selling_price": 260,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Charcoal"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/accessories.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "40cc0233-29a7-57ae-b5c2-543e0850e508",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Oversized Square Sunglasses",
+    "name_ar": "ASO — نظارة شمسية أوفرسايزد سكوير",
+    "description": "ASO Oversized Square Sunglasses. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — نظارة شمسية أوفرسايزد سكوير. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 253,
+    "selling_price": 460,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/accessories.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "068a0697-61ae-54dc-9002-64f1d5793360",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Resin Hair Claw Clip Set",
+    "name_ar": "ASO — سيت كلو كليب ريزن",
+    "description": "ASO Resin Hair Claw Clip Set. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سيت كلو كليب ريزن. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 99,
+    "selling_price": 180,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Mixed"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/accessories.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "10b0a928-d382-5f31-9eba-85c5930b6a2d",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Satin Scrunchie Set — Pastels",
+    "name_ar": "ASO — سيت سكرانشي ساتان باستيل",
+    "description": "ASO Satin Scrunchie Set — Pastels. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — سيت سكرانشي ساتان باستيل. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 66,
+    "selling_price": 120,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Pastels"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/accessories.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "6fdcd6bd-50c4-59c6-9d81-9b2ff9914b79",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Unstructured Canvas Cap — Black",
+    "name_ar": "ASO — كاب كانفاس أنستركتشرد أسود",
+    "description": "ASO Unstructured Canvas Cap — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كاب كانفاس أنستركتشرد أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 143,
+    "selling_price": 260,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/accessories.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "773e4688-2262-5bb0-86bf-a88aca75bb3b",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Reversible Bucket Hat — Camo",
+    "name_ar": "ASO — باكيت هات ريفيرسيبل كامو",
+    "description": "ASO Reversible Bucket Hat — Camo. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — باكيت هات ريفيرسيبل كامو. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "accessories",
+    "cost_price": 160,
+    "selling_price": 290,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Camo"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/accessories.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T14:00:00Z"
+  },
+  {
+    "id": "b69df8db-ef43-5614-95fb-da08ebfb5bb5",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO 12-Shade Nude Eyeshadow Palette",
+    "name_ar": "ASO — باليت ظلال عيون 12 درجة نودز",
+    "description": "ASO 12-Shade Nude Eyeshadow Palette. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — باليت ظلال عيون 12 درجة نودز. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 264,
+    "selling_price": 480,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Nude Palette"
+    ],
+    "stock_quantity": 3,
+    "image_url": "/demo/makeup.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "28a6556b-fe6d-5212-8931-cfcc9ff43213",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Long-Wear Matte Lip — Classic Red",
+    "name_ar": "ASO — أحمر شفاه مات لونج وير أحمر",
+    "description": "ASO Long-Wear Matte Lip — Classic Red. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — أحمر شفاه مات لونج وير أحمر. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 99,
+    "selling_price": 180,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Classic Red"
+    ],
+    "stock_quantity": 6,
+    "image_url": "/demo/makeup.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "96d1df43-5bde-5cb8-b723-e94b419d1edf",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Mega-Volume Mascara — Black",
+    "name_ar": "ASO — ماسكارا فوليوم ماكسيمام أسود",
+    "description": "ASO Mega-Volume Mascara — Black. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — ماسكارا فوليوم ماكسيمام أسود. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 116,
+    "selling_price": 210,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 9,
+    "image_url": "/demo/makeup.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "26df199d-b285-57b8-bb62-5d01992f1976",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Rose-Gold Pressed Highlighter",
+    "name_ar": "ASO — هايلايتر مضغوط روز جولد",
+    "description": "ASO Rose-Gold Pressed Highlighter. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — هايلايتر مضغوط روز جولد. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 160,
+    "selling_price": 290,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Rose Gold"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/makeup.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "62fb03ad-b2b7-505d-b202-3f7c7965ee49",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO 4-Pan Peachy Blush Palette",
+    "name_ar": "ASO — باليت بلاش 4 درجات بيتشي",
+    "description": "ASO 4-Pan Peachy Blush Palette. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — باليت بلاش 4 درجات بيتشي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 242,
+    "selling_price": 440,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Peach"
+    ],
+    "stock_quantity": 15,
+    "image_url": "/demo/makeup.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "f57c42ec-f80c-5543-9222-40558154e8a2",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Buildable Foundation Stick — Medium",
+    "name_ar": "ASO — فاونديشن ستيك بيلدبل ميديوم",
+    "description": "ASO Buildable Foundation Stick — Medium. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — فاونديشن ستيك بيلدبل ميديوم. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 215,
+    "selling_price": 390,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Medium Beige"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/makeup.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "af737ec2-ef13-5149-860b-4fe8f43b361d",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Translucent Setting Powder",
+    "name_ar": "ASO — بودرة تثبيت ترانسلوسنت",
+    "description": "ASO Translucent Setting Powder. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — بودرة تثبيت ترانسلوسنت. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 170,
+    "selling_price": 310,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Translucent"
+    ],
+    "stock_quantity": 21,
+    "image_url": "/demo/makeup.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "15629ba9-906f-5232-b102-9f650ab9fcc4",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Contour & Highlight Duo Kit",
+    "name_ar": "ASO — كيت كونتور وهايلايت ثنائي",
+    "description": "ASO Contour & Highlight Duo Kit. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — كيت كونتور وهايلايت ثنائي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 226,
+    "selling_price": 410,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Bronze"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/makeup.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "73eea572-e503-54e6-b5a2-2f3d98200ecb",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO High-Shine Clear Lip Gloss",
+    "name_ar": "ASO — جلوس شفاه شفاف هاي شاين",
+    "description": "ASO High-Shine Clear Lip Gloss. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — جلوس شفاه شفاف هاي شاين. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 66,
+    "selling_price": 120,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Clear"
+    ],
+    "stock_quantity": 27,
+    "image_url": "/demo/makeup.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "9a55caf7-085e-5136-9e1c-26539f084253",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Ultra-Fine Brow Pencil — Brunette",
+    "name_ar": "ASO — قلم حواجب أولترا فاين برونيت",
+    "description": "ASO Ultra-Fine Brow Pencil — Brunette. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — قلم حواجب أولترا فاين برونيت. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "makeup",
+    "cost_price": 82,
+    "selling_price": 150,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Brunette"
+    ],
+    "stock_quantity": 30,
+    "image_url": "/demo/makeup.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-10-01T13:00:00Z"
+  },
+  {
+    "id": "a06c48d3-320e-5a87-abc7-f0f7f41ca583",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Compact Coffee Maker",
+    "name_ar": "ASO — ماكينة قهوة صغيرة",
+    "description": "ASO Compact Coffee Maker. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — ماكينة قهوة صغيرة. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 1348,
+    "selling_price": 2450,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black & Steel"
+    ],
+    "stock_quantity": 8,
+    "image_url": "/demo/home_appliances.png#tile=0",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "a7fe4924-bc6c-5768-90fd-efb01f1acaad",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Electric Kettle",
+    "name_ar": "ASO — غلاية كهربائية",
+    "description": "ASO Electric Kettle. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — غلاية كهربائية. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 522,
+    "selling_price": 950,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Steel"
+    ],
+    "stock_quantity": 10,
+    "image_url": "/demo/home_appliances.png#tile=1",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "0952ba2b-cc57-5580-8fe0-c31c42feb18b",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Two-Slice Toaster",
+    "name_ar": "ASO — توستر شريحتين",
+    "description": "ASO Two-Slice Toaster. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — توستر شريحتين. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 743,
+    "selling_price": 1350,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 12,
+    "image_url": "/demo/home_appliances.png#tile=2",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "70080a7d-6aa1-50e9-afea-e5a222df764d",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Personal Blender",
+    "name_ar": "ASO — خلاط شخصي",
+    "description": "ASO Personal Blender. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — خلاط شخصي. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 908,
+    "selling_price": 1650,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Slate"
+    ],
+    "stock_quantity": 14,
+    "image_url": "/demo/home_appliances.png#tile=3",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "9a7dca31-d9f0-51e6-abd1-acd3f65e2516",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Digital Air Fryer",
+    "name_ar": "ASO — قلاية هوائية رقمية",
+    "description": "ASO Digital Air Fryer. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — قلاية هوائية رقمية. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 2172,
+    "selling_price": 3950,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 16,
+    "image_url": "/demo/home_appliances.png#tile=4",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "3cb33c20-32c3-51a8-8abf-7e1a99650a16",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Handheld Garment Steamer",
+    "name_ar": "ASO — جهاز بخار للملابس",
+    "description": "ASO Handheld Garment Steamer. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — جهاز بخار للملابس. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 1072,
+    "selling_price": 1950,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 18,
+    "image_url": "/demo/home_appliances.png#tile=5",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "917bfd15-7567-542d-88f3-3efd5c76e14a",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Compact Desk Fan",
+    "name_ar": "ASO — مروحة مكتب صغيرة",
+    "description": "ASO Compact Desk Fan. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — مروحة مكتب صغيرة. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 468,
+    "selling_price": 850,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Sage"
+    ],
+    "stock_quantity": 20,
+    "image_url": "/demo/home_appliances.png#tile=6",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "816f75ca-8201-5592-997f-bb30de0b9e32",
+    "partner_id": "2a304931-2230-4960-9e44-b19ed5e0178b",
+    "name_en": "ASO Mini Food Processor",
+    "name_ar": "ASO — محضر طعام صغير",
+    "description": "ASO Mini Food Processor. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — محضر طعام صغير. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 798,
+    "selling_price": 1450,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 22,
+    "image_url": "/demo/home_appliances.png#tile=7",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "f50b50c7-2233-5cd0-b3ba-0bdcd08a9a51",
+    "partner_id": "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
+    "name_en": "ASO Cordless Hand Vacuum",
+    "name_ar": "ASO — مكنسة يدوية لاسلكية",
+    "description": "ASO Cordless Hand Vacuum. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — مكنسة يدوية لاسلكية. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 1238,
+    "selling_price": 2250,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Black"
+    ],
+    "stock_quantity": 24,
+    "image_url": "/demo/home_appliances.png#tile=8",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  },
+  {
+    "id": "ecc9f692-b733-5c76-a2dd-24361de254da",
+    "partner_id": "596c4367-1491-481f-b0f2-1825c2540ebd",
+    "name_en": "ASO Electric Citrus Juicer",
+    "name_ar": "ASO — عصارة حمضيات كهربائية",
+    "description": "ASO Electric Citrus Juicer. ASO collection with a considered finish and a clean everyday design. The photograph shows the available color. Sample product for the store presentation.",
+    "description_ar": "ASO — عصارة حمضيات كهربائية. قطعة من مجموعة ASO بتشطيب أنيق وتصميم عملي. الصورة تعرض اللون المتاح. منتج تجريبي لعرض المتجر.",
+    "category": "home_appliances",
+    "cost_price": 632,
+    "selling_price": 1150,
+    "sizes": [
+      "One Size"
+    ],
+    "colors": [
+      "Ivory"
+    ],
+    "stock_quantity": 26,
+    "image_url": "/demo/home_appliances.png#tile=9",
+    "image_urls": [],
+    "is_available": true,
+    "in_stock": true,
+    "created_at": "2026-09-30T12:00:00Z"
+  }
+]

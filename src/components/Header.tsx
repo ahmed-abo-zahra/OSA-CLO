@@ -28,6 +28,7 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  useEffect(()=>{const close=(e:KeyboardEvent)=>{if(e.key==="Escape")setMobileOpen(false);};document.addEventListener("keydown",close);return()=>document.removeEventListener("keydown",close);},[]);
   // Close mobile menu on resize
   useEffect(() => {
     const handler = () => { if (window.innerWidth >= 768) setMobileOpen(false); };
@@ -55,7 +56,7 @@ export default function Header() {
         }
       `}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Logo */}
         <Link
           href="/"
@@ -67,7 +68,7 @@ export default function Header() {
             alt="ASO CLO"
             width={80}
             height={32}
-            className="h-8 w-auto object-contain dark:invert"
+            className="h-auto w-[82px] sm:w-[118px] object-contain dark:invert"
             priority
           />
         </Link>
@@ -97,7 +98,7 @@ export default function Header() {
 
         {/* Right side controls */}
         <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
-          <ThemeToggle />
+          <div className="hidden min-[400px]:block"><ThemeToggle /></div>
           <LangToggle />
           <WishlistBell />
 
@@ -128,7 +129,7 @@ export default function Header() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-label={isRTL?"فتح القائمة":"Toggle menu"}
             aria-expanded={mobileOpen}
             className="
               md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5
@@ -155,7 +156,9 @@ export default function Header() {
           ${mobileOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"}
         `}
         aria-hidden={!mobileOpen}
+        hidden={!mobileOpen}
       >
+        <div className="min-[400px]:hidden px-4 pt-3"><ThemeToggle /></div>
         <ul className="px-4 py-4 flex flex-col gap-4" dir={isRTL ? "rtl" : "ltr"}>
           {navLinks.map((link) => (
             <li key={link.href}>

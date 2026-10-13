@@ -1,3 +1,5 @@
+import { DEMO_MODE } from "@/lib/demo-mode";
+import { saveDemoImage } from "@/lib/demo-upload";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +19,7 @@ async function uploadToStorage(
   file: File,
   partnerId: string
 ): Promise<string | null> {
+  if (DEMO_MODE) return saveDemoImage(file);
   try {
     const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
     const fileName = `${partnerId}/${Date.now()}.${ext}`;
@@ -82,7 +85,7 @@ export async function PUT(
     const costNum    = parseFloat(cost_price);
     const sellingNum = parseFloat(selling_price);
 
-    if (isNaN(costNum) || isNaN(sellingNum)) {
+    if (!Number.isFinite(costNum) || !Number.isFinite(sellingNum) || costNum < 0 || sellingNum <= 0 || !Number.isInteger(Number(stock_qty)) || Number(stock_qty)<0) {
       return NextResponse.json({ error: "أسعار غير صالحة" }, { status: 400 });
     }
 
@@ -122,7 +125,9 @@ export async function PUT(
         cost_price:    costNum,
         selling_price: sellingNum,
         sizes:         normalizedSizes,
-        stock_quantity: parseInt(stock_qty) || 0,
+        ...(formData.has("colors") ? {colors:String(formData.get("colors")??"").split(",").map(c=>c.trim()).filter(Boolean)} : {}),
+        stock_quantity: Number(stock_qty),
+        in_stock: Number(stock_qty)>0,
         image_url,
       })
       .eq("id", params.id)
@@ -137,6 +142,7 @@ export async function PUT(
 
     LOG("PUT", "✅ Product updated:", data.id);
     revalidatePath("/");
+    revalidatePath(`/product/${params.id}`);
     revalidatePath(`/product/${params.id}`);
     return NextResponse.json({ success: true, product: data });
 
@@ -161,6 +167,9 @@ export async function DELETE(
 
   try {
     const dbPartnerId = getPartnerDbId(session.partnerId);
+    const { data: owned } = await supabaseAdmin.from("products").select("id,partner_id").eq("id", params.id).single();
+    if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (owned.partner_id !== dbPartnerId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { error } = await supabaseAdmin
       .from("products")
@@ -175,6 +184,7 @@ export async function DELETE(
 
     LOG("DELETE", "✅ Product deleted");
     revalidatePath("/");
+    revalidatePath(`/product/${params.id}`);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[DELETE /api/admin/products/[id]] ❌ Unexpected error:", err);
@@ -196,11 +206,14 @@ export async function PATCH(
 
     LOG("PATCH", `Field: ${field} = ${value}`);
 
-    if (!["in_stock", "is_available"].includes(field)) {
+    if (!["in_stock", "is_available"].includes(field) || typeof value !== "boolean") {
       return NextResponse.json({ error: "Invalid field" }, { status: 400 });
     }
 
     const dbPartnerId = getPartnerDbId(session.partnerId);
+    const { data: owned } = await supabaseAdmin.from("products").select("id,partner_id").eq("id", params.id).single();
+    if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (owned.partner_id !== dbPartnerId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const { data, error: dbError } = await supabaseAdmin
       .from("products")
@@ -217,6 +230,7 @@ export async function PATCH(
 
     LOG("PATCH", "✅ Updated:", { [field]: value });
     revalidatePath("/");
+    revalidatePath(`/product/${params.id}`);
     return NextResponse.json({ success: true, product: data });
 
   } catch (err) {

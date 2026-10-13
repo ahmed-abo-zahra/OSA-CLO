@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { decodeSessionValue, COOKIE_NAME } from "@/lib/session";
+import { getPartnerDbId } from "@/lib/partners";
 import { cookies } from "next/headers";
 
 function getSession() {
@@ -17,7 +18,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from("discount_codes")
     .select("*")
-    .eq("partner_id", session.partnerId)
+    .eq("partner_id", getPartnerDbId(session.partnerId))
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
       min_order:  Number(min_order) || 0,
       max_uses:   max_uses ? Number(max_uses) : null,
       expires_at: expires_at || null,
-      partner_id: session.partnerId,
+      partner_id: getPartnerDbId(session.partnerId),
       is_active:  true,
     })
     .select()
@@ -79,7 +80,7 @@ export async function DELETE(req: NextRequest) {
     .from("discount_codes")
     .delete()
     .eq("id", id)
-    .eq("partner_id", session.partnerId); // security: only own codes
+    .eq("partner_id", getPartnerDbId(session.partnerId)); // security: only own codes
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

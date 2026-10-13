@@ -8,6 +8,7 @@ import {
   useCallback,
   useRef,
 } from "react";
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { supabase } from "@/lib/supabase";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -79,7 +80,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   // ── Background checker ───────────────────────────────────────────────────
   const checkWishlist = useCallback(async (currentItems: WishlistItem[]) => {
-    if (currentItems.length === 0) return;
+    if (DEMO_MODE || currentItems.length === 0) return;
 
     const ids = currentItems.map((i) => i.productId);
     const { data, error } = await supabase

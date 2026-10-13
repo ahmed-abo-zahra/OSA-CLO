@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// We need the service_role key to update bucket settings, 
+// We need the service_role key to update bucket settings,
 // but since the user only provided the anon key before, let's see if we can read the service key from .env.local
 import fs from "fs";
 import path from "path";
@@ -20,14 +20,14 @@ if (fs.existsSync(envPath)) {
 if (!serviceKey || !url) {
   console.log("Could not find service key or url in .env.local. Trying anon key...");
   url = "https://espqrrunhekvjsoxdfbx.supabase.co";
-  serviceKey = "sb_publishable_gBLthp-l-wVyAp_coMIhKA_xUwBb6WQ"; // actually anon key, this might fail to update bucket.
+  serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // actually anon key, this might fail to update bucket.
 }
 
 const supabase = createClient(url, serviceKey);
 
 async function makeBucketPublic() {
   console.log("Checking if bucket 'product-images' is public...");
-  
+
   // Try to update the bucket to be public
   const { data, error } = await supabase.storage.updateBucket('product-images', {
     public: true,

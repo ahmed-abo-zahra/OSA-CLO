@@ -1,8 +1,10 @@
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { createSupabaseRouteClient } from '@/lib/supabase-route';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
+  if(DEMO_MODE)return NextResponse.json({error:"External authentication disabled in demo"},{status:503});
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const origin = requestUrl.origin;

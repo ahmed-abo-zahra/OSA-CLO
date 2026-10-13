@@ -1,13 +1,15 @@
 "use client";
+import { colorLabel } from "@/lib/colors";
 
+import ProductImage from "@/components/ProductImage";
+import { getSubcategoryLabel } from "@/lib/categories";
+import { DEMO_MODE } from "@/lib/demo-mode";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
 import SmartSizeGuide from "@/components/SmartSizeGuide";
 import WishlistButton from "@/components/WishlistButton";
-import { useParallax } from "@/hooks/useParallax";
-import AnimatedNumber from "@/components/AnimatedNumber";
 
 const WA_NUMBER = "201038856486";
 
@@ -21,6 +23,8 @@ export interface PDPProduct {
   selling_price: number;
   sizes?: string[] | null;
   stock_quantity: number;
+  colors?: string[];
+  description_ar?: string;
   image_url?: string | null;
   image_urls?: string[] | null;
 }
@@ -150,8 +154,8 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
   const { t, lang, isRTL } = useLanguage();
   const { addItem } = useCart();
 
+  const [selectedColor,setSelectedColor]=useState(product.colors?.[0]??"");
   const [selectedSize, setSelectedSize] = useState("");
-  const parallaxRef = useParallax(0.25);
   const [sizeError,    setSizeError]    = useState(false);
   const [added,        setAdded]        = useState(false);
   const [shared,       setShared]       = useState(false);
@@ -168,6 +172,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
   const isLowStock  = product.stock_quantity > 0 && product.stock_quantity < 5;
 
   function handleAddToCart() {
+    if (product.stock_quantity<=0)return;
     if (hasSizes && !selectedSize) { setSizeError(true); return; }
     setSizeError(false);
     addItem({
@@ -179,6 +184,8 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
       imageUrl:  allImages[0] ?? undefined,
       size:      selectedSize,
       quantity:  1,
+      color: selectedColor,
+      maxStock: product.stock_quantity,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -222,12 +229,8 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
             <div className="group relative aspect-[3/4] bg-gray-100 dark:bg-brand-black overflow-hidden cursor-zoom-in" style={{overflow:"hidden"}}>
               {allImages.length > 0 ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <div ref={parallaxRef} className="absolute inset-0 scale-[1.15]">
-                <img
-                  src={allImages[activeImg]}
-                  alt={`${displayName} ${activeImg + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                <div className="absolute inset-0">
+                <ProductImage src={allImages[activeImg]} alt={displayName} sizes="1000px" priority />
                 </div>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -279,7 +282,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
                       i === activeImg ? "border-[#1A1A1A]" : "border-transparent opacity-60 hover:opacity-100"
                     }`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt={`thumb-${i}`} className="w-full h-full object-cover" />
+                    <ProductImage src={img} alt={`${displayName} ${i+1}`} sizes="320px" />
                   </button>
                 ))}
               </div>
@@ -292,7 +295,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
             <div className="flex items-center gap-2 flex-wrap">
               {product.category && (
                 <span className="text-[10px] font-bold tracking-[0.1em] uppercase text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-brand-border/30 px-2 py-0.5">
-                  {product.category}
+                  {getSubcategoryLabel(product.category,lang)}
                 </span>
               )}
               {isLowStock && (
@@ -305,9 +308,9 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
             {/* Name */}
             <div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-[-0.03em] text-brand-black dark:text-offwhite leading-tight">
-                {product.name_en}
+                {displayName}
               </h1>
-              {product.name_ar && (
+              {lang === "en" && product.name_ar && (
                 <p className="text-lg font-semibold text-gray-500 dark:text-gray-400 mt-1" dir="rtl">{product.name_ar}</p>
               )}
             </div>
@@ -323,7 +326,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
                 <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-gray-500 dark:text-gray-400 mb-1.5">
                   {t("storefront.product.description")}
                 </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{product.description}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{lang === "ar" ? (product.description_ar??product.description) : product.description}</p>
               </div>
             )}
 
@@ -362,10 +365,14 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
               </div>
             )}
 
+            <div className="space-y-3">
+              <p className="text-xs text-brand-muted">{lang==="ar"?`المخزون: ${product.stock_quantity} قطعة`:`In stock: ${product.stock_quantity} pieces`}</p>
+              {product.colors?.length ? <fieldset><legend className="text-xs font-bold mb-2">{lang==="ar"?"اللون":"Color"}</legend><div className="flex flex-wrap gap-2">{product.colors.map(color=><button key={color} type="button" aria-pressed={selectedColor===color} onClick={()=>setSelectedColor(color)} className={`px-4 py-2 border text-xs ${selectedColor===color?'bg-brand-black text-white dark:bg-offwhite dark:text-brand-black':'border-brand-border'}`}>{colorLabel(color,lang)}</button>)}</div></fieldset> : null}
+            </div>
             {/* CTAs */}
             <div className="flex flex-col gap-3 pt-2">
               <button
-                onClick={handleAddToCart}
+                disabled={product.stock_quantity<=0} onClick={handleAddToCart}
                 className={`w-full py-4 text-xs font-black tracking-[0.15em] uppercase transition-all
                   ${added
                     ? "bg-green-600 text-white"
@@ -376,14 +383,14 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
               </button>
 
               <button
-                onClick={handleWABuy}
+                disabled={DEMO_MODE} onClick={handleWABuy}
                 className="w-full py-4 text-xs font-black tracking-[0.15em] uppercase bg-[#25D366] text-white hover:bg-[#1EBE57] transition-colors flex items-center justify-center gap-2"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 1.991.52 3.863 1.432 5.482L2 22l4.664-1.408A9.956 9.956 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
                 </svg>
-                {t("storefront.products.buyWhatsApp")}
+                {DEMO_MODE ? (lang==="ar"?"الطلب عبر واتساب غير مفعّل في العرض":"WhatsApp ordering disabled in demo") : t("storefront.products.buyWhatsApp")}
               </button>
 
               {/* Wishlist button */}
@@ -392,17 +399,12 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
               </div>
             </div>
 
-            {/* Stock info */}
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
-              {t("storefront.product.stock")}:
-              <AnimatedNumber value={product.stock_quantity} duration={800} suffix=" units" />
-            </p>
           </div>
         </div>
       </div>
 
       {/* ── Reviews Section (outside the main grid) ── */}
-      <ReviewsSection productId={product.id} />
+      {!DEMO_MODE && <ReviewsSection productId={product.id} />}
     </div>
   );
 }
