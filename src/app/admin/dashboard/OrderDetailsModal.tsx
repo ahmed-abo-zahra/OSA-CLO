@@ -3,6 +3,7 @@ import ProductImage from "@/components/ProductImage";
 
 import { useState, useCallback, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useToast } from "@/context/ToastContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ActivityEntry { status: string; by: string; at: string; }
@@ -28,7 +29,7 @@ export interface FullOrder {
   notes?: string;
   total_amount: number;
   paid_amount?: number;
-  activity_log?: string;
+  activity_log?: string | ActivityEntry[];
   created_at: string;
   updated_at?: string;
   order_items?: OrderItem[];
@@ -63,6 +64,7 @@ export default function OrderDetailsModal({
   orderId, partnerName, onClose, onStatusChange, onPaidAmountChange,
 }: Props) {
   const { t, lang, isRTL } = useLanguage();
+  const { error: showToastError } = useToast();
 
   // ── All hooks at top level — NO conditional hook calls ───────────────────
   const [order, setOrder]               = useState<FullOrder | null>(null);
@@ -95,38 +97,56 @@ export default function OrderDetailsModal({
   async function handleStatusChange(newStatus: string) {
     if (!order || updatingStatus) return;
     setUpdatingStatus(true);
-    const res  = await fetch(`/api/admin/orders/${orderId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setOrder(data.order);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToastError(data.error ?? "Could not update the order status.");
+        return;
+      }
+      setOrder((current) => current ? { ...current, ...data.order } : current);
       onStatusChange(orderId, newStatus);
+    } catch {
+      showToastError("Network error while updating the order.");
+    } finally {
+      setUpdatingStatus(false);
     }
-    setUpdatingStatus(false);
   }
 
   async function handlePaidSave() {
     if (!order) return;
     const amount = parseFloat(paidInput) || 0;
-    const res  = await fetch(`/api/admin/orders/${orderId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paid_amount: amount }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setOrder(data.order);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paid_amount: amount }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToastError(data.error ?? "Could not update the paid amount.");
+        return;
+      }
+      setOrder((current) => current ? { ...current, ...data.order } : current);
+      setPaidInput(String(data.order?.paid_amount ?? amount));
       onPaidAmountChange(orderId, amount);
+      setEditingPaid(false);
+    } catch {
+      showToastError("Network error while updating the paid amount.");
     }
-    setEditingPaid(false);
   }
 
   // ── Derived values ────────────────────────────────────────────────────────
   let activityLog: ActivityEntry[] = [];
-  try { activityLog = JSON.parse(order?.activity_log ?? "[]"); } catch { activityLog = []; }
+  try {
+    const value = order?.activity_log;
+    const parsed = Array.isArray(value) ? value : typeof value === "string" ? JSON.parse(value) : [];
+    if (Array.isArray(parsed)) activityLog = parsed;
+  } catch { activityLog = []; }
 
   const total     = order?.total_amount ?? 0;
   const paid      = order?.paid_amount  ?? 0;

@@ -183,7 +183,7 @@
       "subtitle": "ASO CLO — Management Dashboard",
       "partnerLabel": "Partner Name",
       "passwordLabel": "Password",
-      "partnerPlaceholder": "e.g. Safia",
+      "partnerPlaceholder": "e.g. Partner A",
       "passwordPlaceholder": "••••••••",
       "submitBtn": "Enter Dashboard",
       "loading": "Signing in...",

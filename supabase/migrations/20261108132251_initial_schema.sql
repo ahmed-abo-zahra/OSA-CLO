@@ -24,9 +24,9 @@ create table public.partners (
 
 insert into public.partners (id, slug, name, initials, color)
 values
-  ('596c4367-1491-481f-b0f2-1825c2540ebd', 'safia', 'Safia', 'SF', '#7C3AED'),
-  ('2a304931-2230-4960-9e44-b19ed5e0178b', 'omaima', 'Omaima', 'OM', '#DB2777'),
-  ('652f4263-d4e3-4bf6-a5c4-778e8a08c710', 'aisha', 'Aisha', 'AI', '#D97706')
+  ('596c4367-1491-481f-b0f2-1825c2540ebd', 'partner-a', 'Partner A', 'PA', '#7C3AED'),
+  ('2a304931-2230-4960-9e44-b19ed5e0178b', 'partner-b', 'Partner B', 'PB', '#DB2777'),
+  ('652f4263-d4e3-4bf6-a5c4-778e8a08c710', 'partner-c', 'Partner C', 'PC', '#D97706')
 on conflict (id) do update set
   slug = excluded.slug,
   name = excluded.name,
@@ -169,7 +169,12 @@ alter table public.admin_login_attempts enable row level security;
 
 revoke all on public.partners, public.products, public.discount_codes, public.orders,
   public.order_items, public.reviews, public.store_settings, public.admin_login_attempts from public, anon, authenticated;
-grant select on public.products, public.reviews, public.store_settings to anon, authenticated;
+grant select (
+  id, name_en, name_ar, description, description_ar, category, selling_price,
+  sizes, colors, stock_quantity, in_stock, is_available, image_url, image_urls,
+  created_at, updated_at
+) on public.products to anon, authenticated;
+grant select on public.reviews, public.store_settings to anon, authenticated;
 grant all on public.partners, public.products, public.discount_codes, public.orders,
   public.order_items, public.reviews, public.store_settings, public.admin_login_attempts to service_role;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ProductImage from "@/components/ProductImage";
 import { DEMO_MODE } from "@/lib/demo-mode";
@@ -8,7 +8,7 @@ import { CATEGORY_GROUPS, getSubcategoryLabel } from "@/lib/categories";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
-import { supabase } from "@/lib/supabase";
+import { WHATSAPP_NUMBER } from "@/lib/contact";
 import CategoryFilter from "@/components/CategoryFilter";
 import Fuse from "fuse.js";
 import WishlistButton from "@/components/WishlistButton";
@@ -36,8 +36,6 @@ interface Props {
   loadError?: boolean;
 }
 
-const WA_NUMBER = "201038856486";
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 /** Return image URL as-is — each upload already gets a unique timestamped filename.
  *  We only need to bust cache when an image is replaced (URL changes automatically). */
@@ -58,64 +56,49 @@ export default function StorefrontClient({ products: initialProducts, loadError 
   const [sort, setSort] = useState("featured");
   const [maxPrice, setMaxPrice] = useState("");
   const [mounted,   setMounted]   = useState(false);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [loadFailed, setLoadFailed] = useState(loadError ?? false);
 
   useEffect(() => { setMounted(true); }, []);
 
-  // ── Supabase Realtime Subscription ─────────────────────────────────────────
+  // Refresh through a server allowlist; do not expose whole-row Realtime payloads.
   useEffect(() => {
     if (DEMO_MODE) return;
-    // Subscribe to all changes on the products table
-    const channel = supabase
-      .channel("storefront-products-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "products" },
-        (payload) => {
-          const { eventType, new: newRecord, old: oldRecord } = payload;
-
-          setProducts((prev) => {
-            switch (eventType) {
-              case "INSERT": {
-                const inserted = newRecord as StorefrontProduct;
-                // Only show if available and in stock
-                if (!inserted.is_available || !inserted.in_stock) return prev;
-                // Avoid duplicates
-                if (prev.some((p) => p.id === inserted.id)) return prev;
-                return [inserted, ...prev];
-              }
-
-              case "UPDATE": {
-                const updated = newRecord as StorefrontProduct;
-                // If product is no longer available/in-stock, remove from list
-                if (!updated.is_available || !updated.in_stock) {
-                  return prev.filter((p) => p.id !== updated.id);
-                }
-                // Otherwise update in place
-                return prev.some(p=>p.id===updated.id) ? prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p)) : [updated,...prev];
-              }
-
-              case "DELETE": {
-                const deleted = oldRecord as { id: string };
-                return prev.filter((p) => p.id !== deleted.id);
-              }
-
-              default:
-                return prev;
-            }
-          });
+    const controller = new AbortController();
+    const refreshCatalog = async () => {
+      try {
+        const catalog: StorefrontProduct[] = [];
+        let offset = 0;
+        while (true) {
+          const path = offset === 0 ? "/api/products" : `/api/products?offset=${offset}`;
+          const response = await fetch(path, { cache: "no-store", signal: controller.signal });
+          if (!response.ok) throw new Error("Catalog refresh failed");
+          const payload: unknown = await response.json();
+          if (!payload || typeof payload !== "object" || !Array.isArray((payload as { products?: unknown }).products)) {
+            throw new Error("Invalid catalog response");
+          }
+          const page = payload as { products: StorefrontProduct[]; hasMore?: unknown; nextOffset?: unknown };
+          catalog.push(...page.products);
+          if (page.hasMore !== true) break;
+          if (typeof page.nextOffset !== "number" || !Number.isInteger(page.nextOffset) || page.nextOffset <= offset) {
+            throw new Error("Invalid catalog pagination response");
+          }
+          offset = page.nextOffset;
         }
-      )
-      .subscribe();
-
-    channelRef.current = channel;
-
-    return () => {
-      supabase.removeChannel(channel);
+        setProducts(catalog);
+        setLoadFailed(false);
+      } catch {
+        if (!controller.signal.aborted) setLoadFailed(true);
+      }
     };
-  }, []);
-
-
+    if (loadError) void refreshCatalog();
+    const interval = window.setInterval(() => void refreshCatalog(), 60_000);
+    window.addEventListener("focus", refreshCatalog);
+    return () => {
+      controller.abort();
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refreshCatalog);
+    };
+  }, [loadError]);
 
   const filtered = useMemo(() => {
     let result = products.filter(p => p.is_available && p.in_stock);
@@ -185,8 +168,25 @@ export default function StorefrontClient({ products: initialProducts, loadError 
             <p className="text-sm text-brand-muted max-w-md leading-relaxed">{lang==="ar"?"ملابس وقطع مختارة بتفاصيل مدروسة. اكتشف مجموعات ASO واختر ما يشبهك.":"Considered clothing. Everyday essentials. Discover the ASO collections and make them your own."}</p>
             <a href="#collections" className="inline-flex items-center gap-4 mt-5 px-6 py-3 bg-brand-black text-white dark:bg-offwhite dark:text-brand-black text-xs font-bold">{lang==="ar"?"اكتشف المجموعة":"EXPLORE THE COLLECTION"}<span aria-hidden="true">↗</span></a>
           </div>
-          <div className="hidden md:grid grid-cols-3 gap-2 h-64 lg:h-72" aria-label={lang==="ar"?"مختارات ASO":"ASO collection preview"}>
-            {['tshirts','dresses','abayas'].map((c,i)=><div key={c} className="h-full overflow-hidden bg-[#eae3d9]"><ProductImage src={`/demo/${c}.png#tile=${i}`} alt={`ASO ${c}`} priority /></div>)}
+          <div className="hidden md:grid grid-cols-3 gap-2 h-64 lg:h-72" aria-label={lang==="ar"?"معاينة منتجات ASO":"ASO product preview"}>
+            {products.length > 0 ? products.slice(0, 3).map((product, index) => (
+              <div key={product.id} className="h-full overflow-hidden bg-[#eae3d9]">
+                <ProductImage
+                  src={product.image_url ?? "/aso-logo.png"}
+                  alt={lang === "ar" && product.name_ar ? product.name_ar : product.name_en}
+                  priority={index === 0}
+                />
+              </div>
+            )) : (
+              <div className="col-span-3 relative flex h-full items-center justify-center overflow-hidden bg-[#eae3d9] text-center">
+                <div aria-hidden="true" className="absolute -left-12 -top-16 h-56 w-56 rounded-full border border-brand-black/10" />
+                <div aria-hidden="true" className="absolute -bottom-24 -right-8 h-64 w-64 rounded-full border border-brand-black/10" />
+                <div className="relative">
+                  <p className="text-4xl font-black tracking-[0.2em] text-brand-black">ASO</p>
+                  <p className="mt-2 text-[10px] font-bold tracking-[0.3em] text-brand-muted">CLOTHING · EVERYDAY</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -218,7 +218,7 @@ export default function StorefrontClient({ products: initialProducts, loadError 
           <label className="text-xs flex flex-col gap-2">{lang==="ar"?"أقصى سعر (ج.م)":"Maximum price (EGP)"}<input type="number" min="0" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} className="input-style w-40" /></label>
           {(search||category!=="all"||maxPrice)&&<button className="text-xs underline p-3" onClick={()=>{setSearch("");setCategory("all");setMaxPrice("");}}>{lang==="ar"?"مسح الفلاتر":"Clear filters"}</button>}
         </div>
-        {loadError && <div role="alert" className="p-4 border border-red-200 text-sm mb-4">{lang==="ar"?"تعذر تحميل المنتجات. حاول مرة أخرى.":"Products could not be loaded. Please try again."}<button className="underline ms-3" onClick={()=>window.location.reload()}>{lang==="ar"?"إعادة المحاولة":"Retry"}</button></div>}
+        {loadFailed && <div role="alert" className="p-4 border border-red-200 text-sm mb-4">{lang==="ar"?"تعذر تحميل المنتجات. حاول مرة أخرى.":"Products could not be loaded. Please try again."}<button className="underline ms-3" onClick={()=>window.location.reload()}>{lang==="ar"?"إعادة المحاولة":"Retry"}</button></div>}
         {/* Results count */}
         <p className="text-xs text-brand-muted mb-2 tracking-wider">
           {filtered.length} {lang === "ar" ? "منتج" : "products"}
@@ -230,9 +230,9 @@ export default function StorefrontClient({ products: initialProducts, loadError 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-8">
         {filtered.length === 0 ? (
           <div className="py-24 text-center">
-            <p className="text-2xl mb-3">🔍</p>
-            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{t("storefront.search.noResults")}</p>
-            {search && (
+            <svg aria-hidden="true" className="mx-auto mb-4 h-8 w-8 text-brand-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{products.length === 0 ? t("storefront.products.noProducts") : t("storefront.search.noResults")}</p>
+            {(search || category !== "all" || maxPrice) && (
               <button onClick={() => setSearch("")}
                 className="mt-4 text-xs text-gray-400 underline hover:text-brand-black dark:text-offwhite dark:hover:text-offwhite">
                 {t("storefront.search.clear")}
@@ -265,10 +265,8 @@ export default function StorefrontClient({ products: initialProducts, loadError 
             <Link href="/track" className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 hover:text-brand-black dark:text-offwhite dark:hover:text-offwhite dark:hover:text-offwhite transition-colors">
               {t("storefront.footer.track")}
             </Link>
-            <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noreferrer"
-              className="text-xs text-gray-500 dark:text-gray-400 hover:text-green-600 transition-colors">
-              WhatsApp
-            </a>
+            {WHATSAPP_NUMBER && <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer"
+              className="text-xs text-gray-500 dark:text-gray-400 hover:text-green-600 transition-colors">WhatsApp</a>}
           </div>
           <p className="text-[10px] text-gray-500 dark:text-gray-600">{t("storefront.footer.copyright")}</p>
         </div>

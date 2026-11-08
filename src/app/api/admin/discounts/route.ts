@@ -1,4 +1,5 @@
 import { getPartnerDbId } from '@/lib/partners';
+import { hasSameOrigin } from '@/lib/request-security';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -29,6 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
 
   try {
     const rawBody: unknown = await request.json();
@@ -97,6 +99,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
 
   const id = request.nextUrl.searchParams.get('id');
   if (!id || !UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid discount code ID.' }, { status: 400 });

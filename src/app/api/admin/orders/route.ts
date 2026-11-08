@@ -2,6 +2,7 @@ import { DEMO_MODE } from '@/lib/demo-mode';
 import { placeDemoManualOrder } from '@/lib/demo-fetch';
 import { decodeSessionValue, COOKIE_NAME } from '@/lib/session';
 import { getPartnerDbId } from '@/lib/partners';
+import { hasSameOrigin } from '@/lib/request-security';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -16,16 +17,6 @@ type OrderItemInput = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function hasSameOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
-  if (!origin) return true;
-  try {
-    return new URL(origin).origin === request.nextUrl.origin;
-  } catch {
-    return false;
-  }
 }
 
 export async function POST(request: NextRequest) {

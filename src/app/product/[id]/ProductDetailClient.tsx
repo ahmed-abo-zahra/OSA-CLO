@@ -2,6 +2,7 @@
 import { colorLabel } from "@/lib/colors";
 
 import ProductImage from "@/components/ProductImage";
+import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { getSubcategoryLabel } from "@/lib/categories";
 import { DEMO_MODE } from "@/lib/demo-mode";
 import { useState } from "react";
@@ -10,8 +11,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
 import SmartSizeGuide from "@/components/SmartSizeGuide";
 import WishlistButton from "@/components/WishlistButton";
-
-const WA_NUMBER = "201038856486";
 
 export interface PDPProduct {
   id: string;
@@ -195,7 +194,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
     const msg = encodeURIComponent(
       `مرحباً، أريد طلب:\n${product.name_en}${selectedSize ? ` - Size: ${selectedSize}` : ""}\nالسعر: EGP ${product.selling_price}`
     );
-    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, "_blank");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank", "noopener,noreferrer");
   }
 
   async function handleShare() {
@@ -380,7 +379,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
                 {added ? `✓ ${t("storefront.products.inCart")}` : t("storefront.products.addToCart")}
               </button>
 
-              <button
+              {WHATSAPP_NUMBER && <button
                 disabled={DEMO_MODE} onClick={handleWABuy}
                 className="w-full py-4 text-xs font-black tracking-[0.15em] uppercase bg-[#25D366] text-white hover:bg-[#1EBE57] transition-colors flex items-center justify-center gap-2"
               >
@@ -389,7 +388,7 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
                   <path d="M12 2C6.477 2 2 6.477 2 12c0 1.991.52 3.863 1.432 5.482L2 22l4.664-1.408A9.956 9.956 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
                 </svg>
                 {DEMO_MODE ? (lang==="ar"?"الطلب عبر واتساب غير مفعّل في العرض":"WhatsApp ordering disabled in demo") : t("storefront.products.buyWhatsApp")}
-              </button>
+              </button>}
 
               {/* Wishlist button */}
               <div className="flex justify-center pt-1">

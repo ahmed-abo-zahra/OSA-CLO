@@ -2,14 +2,16 @@
 
 import { useState, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { ALL_SUBCATEGORY_KEYS } from "@/lib/categories";
 
 interface Props {
   onSuccess: () => void;
 }
 
-const TEMPLATE_CSV = `name_en,name_ar,category,cost_price,selling_price,stock_quantity,description
-White Oversized Tee,تيشيرت أبيض,T-Shirts,120,250,20,Premium cotton oversized tee
-Black Hoodie,هودي أسود,Hoodies,200,450,15,Heavy fleece hoodie`;
+const TEMPLATE_CSV = "name_en,name_ar,category,cost_price,selling_price,stock_quantity,description\n";
+const MAX_CSV_BYTES = 2_000_000;
+const MAX_IMPORT_ROWS = 100;
+const IMPORT_CONCURRENCY = 5;
 
 function downloadTemplate() {
   const blob = new Blob([TEMPLATE_CSV], { type: "text/csv;charset=utf-8" });
@@ -18,7 +20,7 @@ function downloadTemplate() {
   a.href     = url;
   a.download = "aso-products-template.csv";
   a.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 interface ParsedProduct {
@@ -32,40 +34,96 @@ interface ParsedProduct {
 }
 
 function parseCSV(text: string): ParsedProduct[] {
-  const lines   = text.trim().split("\n").filter(Boolean);
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
-  return lines.slice(1).map((line) => {
-    const vals: Record<string, string> = {};
-    line.split(",").forEach((v, i) => { vals[headers[i]] = v.trim().replace(/^"|"$/g, ""); });
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let quoted = false;
+  const source = text.replace(/^\uFEFF/, "");
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (char === '"') {
+      if (quoted && source[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (char === "," && !quoted) {
+      row.push(field.trim());
+      field = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && source[index + 1] === "\n") index += 1;
+      row.push(field.trim());
+      if (row.some((value) => value.length > 0)) rows.push(row);
+      row = [];
+      field = "";
+    } else {
+      field += char;
+    }
+  }
+
+  if (quoted) throw new Error("CSV contains an unclosed quoted field.");
+  if (field.length > 0 || row.length > 0) {
+    row.push(field.trim());
+    if (row.some((value) => value.length > 0)) rows.push(row);
+  }
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map((header) => header.trim().toLowerCase());
+  const categoryAliases = new Map(ALL_SUBCATEGORY_KEYS.map((key) => [key.replace(/[^a-z0-9]/gi, "").toLowerCase(), key]));
+  return rows.slice(1).map((values) => {
+    const record = Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])) as Record<string, string>;
+    const rawCategory = record.category ?? "";
+    const normalizedCategory = categoryAliases.get(rawCategory.replace(/[^a-z0-9]/gi, "").toLowerCase()) ?? "";
     return {
-      name_en:       vals["name_en"]        ?? "",
-      name_ar:       vals["name_ar"]        ?? "",
-      category:      vals["category"]       ?? "",
-      cost_price:    Number(vals["cost_price"])    || 0,
-      selling_price: Number(vals["selling_price"]) || 0,
-      stock_quantity: Number(vals["stock_quantity"]) || 0,
-      description:   vals["description"]    ?? "",
+      name_en: record.name_en ?? "",
+      name_ar: record.name_ar ?? "",
+      category: normalizedCategory,
+      cost_price: Number(record.cost_price),
+      selling_price: Number(record.selling_price),
+      stock_quantity: Number(record.stock_quantity),
+      description: record.description ?? "",
     };
-  }).filter((p) => p.name_en && p.selling_price > 0);
+  });
 }
 
 export default function BulkImport({ onSuccess }: Props) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [preview, setPreview]   = useState<ParsedProduct[]>([]);
   const [uploading, setUploading] = useState(false);
   const [result, setResult]     = useState<{ success: number; errors: string[] } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+    setPreview([]);
+    setResult(null);
+    if (file.size > MAX_CSV_BYTES) {
+      setResult({ success: 0, errors: ["CSV file must be 2 MB or smaller."] });
+      input.value = "";
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      setPreview(parseCSV(text));
-      setResult(null);
+      try {
+        const text = typeof ev.target?.result === "string" ? ev.target.result : "";
+        const products = parseCSV(text);
+        if (products.length > MAX_IMPORT_ROWS) {
+          setResult({ success: 0, errors: [`A single import can contain at most ${MAX_IMPORT_ROWS} products.`] });
+        } else if (products.length === 0) {
+          setResult({ success: 0, errors: ["No product rows found. Check the CSV header and add at least one row."] });
+        } else {
+          setPreview(products);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Could not read this CSV file.";
+        setResult({ success: 0, errors: [message] });
+      }
     };
+    reader.onerror = () => setResult({ success: 0, errors: ["Could not read this CSV file."] });
     reader.readAsText(file, "utf-8");
   }
 
@@ -74,36 +132,48 @@ export default function BulkImport({ onSuccess }: Props) {
     setUploading(true);
     const errors: string[] = [];
     let success = 0;
+    try {
+      for (let offset = 0; offset < preview.length; offset += IMPORT_CONCURRENCY) {
+        const batch = preview.slice(offset, offset + IMPORT_CONCURRENCY);
+        const results = await Promise.all(batch.map(async (product) => {
+          const formData = new FormData();
+          formData.append("name_en", product.name_en);
+          formData.append("name_ar", product.name_ar ?? "");
+          formData.append("category", product.category ?? "");
+          formData.append("cost_price", String(product.cost_price));
+          formData.append("selling_price", String(product.selling_price));
+          formData.append("stock_quantity", String(product.stock_quantity));
+          formData.append("description", product.description ?? "");
+          formData.append("sizes", "");
+          formData.append("colors", "");
 
-    for (const product of preview) {
-      const res = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name_en:       product.name_en,
-          name_ar:       product.name_ar || null,
-          category:      product.category || null,
-          cost_price:    product.cost_price,
-          selling_price: product.selling_price,
-          stock_quantity: product.stock_quantity,
-          description:   product.description || null,
-          in_stock:      product.stock_quantity > 0,
-          is_available:  true,
-          sizes:         [],
-        }),
-      });
-      if (res.ok) { success++; }
-      else {
-        const d = await res.json();
-        errors.push(`"${product.name_en}": ${d.error ?? "Unknown error"}`);
+          try {
+            const response = await fetch("/api/admin/products", { method: "POST", body: formData });
+            const data = await response.json().catch(() => ({})) as { error?: string };
+            return response.ok ? { ok: true as const, name: product.name_en } : {
+              ok: false as const,
+              name: product.name_en,
+              error: data.error ?? `Request failed (${response.status}).`,
+            };
+          } catch {
+            return { ok: false as const, name: product.name_en, error: "Network request failed." };
+          }
+        }));
+
+        for (const result of results) {
+          if (result.ok) success += 1;
+          else errors.push(`"${result.name || "(unnamed product)"}": ${result.error}`);
+        }
       }
+    } catch {
+      errors.push("Import was interrupted. Some earlier rows may already have been created.");
+    } finally {
+      setResult({ success, errors });
+      setPreview([]);
+      if (fileRef.current) fileRef.current.value = "";
+      if (success > 0) onSuccess();
+      setUploading(false);
     }
-
-    setResult({ success, errors });
-    setPreview([]);
-    if (fileRef.current) fileRef.current.value = "";
-    if (success > 0) onSuccess();
-    setUploading(false);
   }
 
   return (
@@ -122,6 +192,10 @@ export default function BulkImport({ onSuccess }: Props) {
           {t("admin.bulk.downloadBtn")}
         </button>
         <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-2">{t("admin.bulk.step1desc")}</p>
+        <p className="mt-2 break-words text-[10px] text-gray-600 dark:text-gray-400">
+          {lang === "ar" ? "الحقول: name_en, name_ar, category, cost_price, selling_price, stock_quantity, description. الحد الأقصى 100 منتج. الفئات: " : "Columns: name_en, name_ar, category, cost_price, selling_price, stock_quantity, description. Maximum 100 products. Categories: "}
+          {ALL_SUBCATEGORY_KEYS.join(", ")}
+        </p>
       </div>
 
       {/* Step 2: Upload */}

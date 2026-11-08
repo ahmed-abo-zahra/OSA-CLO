@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { getPartnerById } from "@/lib/partners";
 import { useLanguage } from "@/context/LanguageContext";
+import { useToast } from "@/context/ToastContext";
 import AddProductModal, { type ProductForModal } from "./AddProductModal";
 import ManualOrderModal from "./ManualOrderModal";
 import OrderDetailsModal from "./OrderDetailsModal";
@@ -36,7 +37,7 @@ export interface Order {
   customer_phone?: string; customer_address?: string;
   source?: string; status: string; notes?: string;
   total_amount: number; paid_amount?: number;
-  activity_log?: string; created_at: string; updated_at?: string;
+  activity_log?: string | { status: string; by: string; at: string }[]; created_at: string; updated_at?: string;
   order_items?: OrderItem[];
 }
 
@@ -145,6 +146,7 @@ const NAV_ICONS: Record<Tab, React.ReactNode> = {
 export default function DashboardShell({ session, products: initProducts, orders: initOrders }: Props) {
   const router = useRouter();
   const { t, lang, setLang, isRTL } = useLanguage();
+  const { error: showToastError } = useToast();
   const partner = getPartnerById(session.partnerId);
 
   const [products, setProducts] = useState<Product[]>(initProducts);
@@ -205,12 +207,21 @@ export default function DashboardShell({ session, products: initProducts, orders
   }
 
   async function handleInlineStatusChange(orderId: string, newStatus: string) {
-    await fetch(`/api/admin/orders/${orderId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-    handleOrderStatusChange(orderId, newStatus);
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        showToastError(data.error ?? "Could not update the order status.");
+        return;
+      }
+      handleOrderStatusChange(orderId, newStatus);
+    } catch {
+      showToastError("Network error while updating the order status.");
+    }
   }
 
   async function handleDelete(productId: string) {
