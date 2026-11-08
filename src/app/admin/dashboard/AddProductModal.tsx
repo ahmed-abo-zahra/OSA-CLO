@@ -1,8 +1,9 @@
 "use client";
 
 import ProductImage from "@/components/ProductImage";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { ALL_SUBCATEGORY_KEYS, getSubcategoryLabel } from "@/lib/categories";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface ProductForModal {
@@ -28,32 +29,13 @@ interface Props {
   onClose: () => void;
 }
 
-// const CATEGORIES = [
-//   "T-Shirts", "Hoodies", "Pants", "Shorts",
-//   "Outerwear", "Accessories", "Shoes", "Other",
-// ];
 const SIZE_PRESETS = ["XS", "S", "M", "L", "XL", "XXL", "Oversized", "One Size"];
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function ProductModal({ product, partnerName, onSuccess, onClose }: Props) {
+export default function ProductModal({ product, onSuccess, onClose }: Props) {
   const { t, isRTL, lang } = useLanguage();
   const isEdit = !!product;
-
-  let allowedCategories = [
-    "T-Shirts", "Hoodies", "Pants", "Shorts", "Outerwear",
-    "Accessories", "Shoes", "Abayas", "Dresses", "Shirts",
-    "Skirts", "Suits", "Loungewear", "Lingerie", "Bags",
-    "Makeup", "Home Appliances", "Other"
-  ];
-
-  if (partnerName === "Safia" || partnerName === "صافيه") {
-    allowedCategories = ["Abayas", "Dresses", "T-Shirts", "Pants", "Shirts", "Skirts", "Suits"];
-  } else if (partnerName === "Omaima" || partnerName === "Omayma" || partnerName === "اميمه") {
-    allowedCategories = ["Shoes", "Loungewear", "Lingerie"];
-  } else if (partnerName === "Aisha" || partnerName === "عائشه") {
-    allowedCategories = ["Bags", "Accessories"];
-  }
-
+  const allowedCategories = ALL_SUBCATEGORY_KEYS;
 
   const fileRef      = useRef<HTMLInputElement>(null);
   const extraFileRef  = useRef<HTMLInputElement>(null);
@@ -62,42 +44,23 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
   const [extraPreviews, setExtraPreviews] = useState<{ url: string; file: File }[]>([]);
   const [loading, setLoading]             = useState(false);
   const [error, setError]                 = useState("");
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(product?.sizes ?? []);
 
   // ── Financial formula state ─────────────────────────────────────────────────
-  const [form, setForm] = useState({
-    name_en:        "",
-    name_ar:        "",
-    description:    "",
-    category:       "",
-    cost_price:     "",
-    target_profit:  "",
-    custom_sizes:   "",
-    stock_quantity: "",
+  const [form, setForm] = useState(() => {
+    const cost = product?.cost_price ?? 0;
+    const selling = product?.selling_price ?? 0;
+    return {
+      name_en: product?.name_en ?? "",
+      name_ar: product?.name_ar ?? "",
+      description: product?.description ?? "",
+      category: product?.category ?? "",
+      cost_price: product ? String(cost) : "",
+      target_profit: product ? String(Math.max(0, selling - cost)) : "",
+      custom_sizes: "",
+      stock_quantity: product ? String(product.stock_quantity ?? 0) : "",
+    };
   });
-
-  // Pre-fill when editing
-  useEffect(() => {
-    if (product) {
-      setColors(product.colors?.join(", ") ?? "");
-      const cost          = product.cost_price ?? 0;
-      const selling       = product.selling_price ?? 0;
-      const derivedProfit = Math.max(0, selling - cost);
-
-      setForm({
-        name_en:        product.name_en ?? "",
-        name_ar:        product.name_ar ?? "",
-        description:    product.description ?? "",
-        category:       product.category ?? "",
-        cost_price:     String(cost),
-        target_profit:  String(derivedProfit),
-        custom_sizes:   "",
-        stock_quantity: String(product.stock_quantity ?? 0),
-      });
-
-      if (product.sizes?.length) setSelectedSizes(product.sizes);
-    }
-  }, [product]);
 
   function set(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -117,6 +80,11 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
 
   function handleExtraFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
+    if (extraPreviews.length + files.length > 5) {
+      setError("You can upload up to five extra images.");
+      return;
+    }
+    setError("");
     const newPreviews = files.map((f) => ({ url: URL.createObjectURL(f), file: f }));
     setExtraPreviews((prev) => [...prev, ...newPreviews]);
     // reset input so same file can be re-added
@@ -256,7 +224,6 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
                          flex items-center justify-center h-36 overflow-hidden group"
             >
               {preview ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <ProductImage src={preview} alt="Preview" />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-gray-400 group-hover:text-gray-600">
@@ -264,11 +231,11 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
                     <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                   </svg>
                   <span className="text-xs font-medium">{t("admin.addProduct.imageHint")}</span>
-                  <span className="text-[10px] text-gray-300">PNG, JPG, WEBP — max 5MB</span>
+                  <span className="text-[10px] text-gray-300">PNG, JPG, WEBP — 3.5MB each, 4MB total</span>
                 </div>
               )}
             </div>
-            <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={handleFileChange} />
+            <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleFileChange} />
           </div>
 
           <label className="label-style">{lang==="ar"?"الألوان (افصل بفاصلة)":"Colors (comma separated)"}<input className="input-style mt-2" value={colors} onChange={e=>setColors(e.target.value)} /></label>
@@ -336,7 +303,9 @@ export default function ProductModal({ product, partnerName, onSuccess, onClose 
               className="input-style"
             >
               <option value="">{t("admin.addProduct.categoryPlaceholder")}</option>
-              {allowedCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+              {allowedCategories.map((categoryKey) => (
+                <option key={categoryKey} value={categoryKey}>{getSubcategoryLabel(categoryKey, lang)}</option>
+              ))}
             </select>
           </div>
 

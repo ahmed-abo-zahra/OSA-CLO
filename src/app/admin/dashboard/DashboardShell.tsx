@@ -860,7 +860,6 @@ function ProductsView({ products, onAdd, t }: { products: Product[]; onAdd: () =
               <div key={p.id} className="bg-white dark:bg-brand-gray border border-gray-200 dark:border-brand-border/20 overflow-hidden hover:shadow-sm transition-shadow">
                 <div className="aspect-square bg-gray-100 dark:bg-brand-black overflow-hidden">
                   {p.image_url
-                    // eslint-disable-next-line @next/next/no-img-element
                     ? <ProductImage src={p.image_url} alt={p.name_en} sizes="320px" />
                     : <div className="w-full h-full flex items-center justify-center text-gray-300 text-2xl font-black">{p.name_en.slice(0, 2).toUpperCase()}</div>}
                 </div>
@@ -924,7 +923,6 @@ function ManageTab({ products, deletingId, togglingId, onAdd, onEdit, onDelete, 
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             {p.image_url
-                              // eslint-disable-next-line @next/next/no-img-element
                               ? <div className="w-10 h-10 shrink-0"><ProductImage src={p.image_url} alt={p.name_en} sizes="320px" /></div>
                               : <div className="w-10 h-10 bg-gray-100 dark:bg-brand-black flex items-center justify-center text-[9px] text-gray-400 font-bold shrink-0">{p.name_en.slice(0, 2).toUpperCase()}</div>}
                             <div className="min-w-0">
@@ -980,7 +978,6 @@ function ManageTab({ products, deletingId, togglingId, onAdd, onEdit, onDelete, 
                     {/* Product info */}
                     <div className="flex items-center gap-3 mb-3">
                       {p.image_url
-                        // eslint-disable-next-line @next/next/no-img-element
                         ? <div className="w-12 h-12 shrink-0"><ProductImage src={p.image_url} alt={p.name_en} sizes="320px" /></div>
                         : <div className="w-12 h-12 bg-gray-100 dark:bg-brand-black flex items-center justify-center text-[10px] text-gray-400 font-bold shrink-0">{p.name_en.slice(0, 2).toUpperCase()}</div>}
                       <div className="flex-1 min-w-0">

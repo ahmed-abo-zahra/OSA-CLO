@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 
 // Public order tracking — no auth required, minimal data returned
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { orderId: string } }
-) {
+export async function GET(_request: NextRequest, props: { params: Promise<{ orderId: string }> }) {
+  const params = await props.params;
   const { orderId } = params;
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) {

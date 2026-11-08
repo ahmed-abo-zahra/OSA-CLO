@@ -1,116 +1,149 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
-import { decodeSessionValue, COOKIE_NAME } from "@/lib/session";
-import { getPartnerById, getPartnerDbId } from "@/lib/partners";
+import { DEMO_MODE } from '@/lib/demo-mode';
+import { placeDemoManualOrder } from '@/lib/demo-fetch';
+import { decodeSessionValue, COOKIE_NAME } from '@/lib/session';
+import { getPartnerDbId } from '@/lib/partners';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { NextResponse, type NextRequest } from 'next/server';
 
-interface OrderItemInput {
-  product_id: string;
-  size?: string;
-  quantity: number;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SOURCES = new Set(['manual', 'facebook', 'whatsapp', 'instagram', 'walk_in']);
+
+type OrderItemInput = {
+  product_id?: unknown;
+  size?: unknown;
+  quantity?: unknown;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function getSession(req: NextRequest) {
-  return decodeSessionValue(req.cookies.get(COOKIE_NAME)?.value);
+function hasSameOrigin(request: NextRequest): boolean {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
+  try {
+    return new URL(origin).origin === request.nextUrl.origin;
+  } catch {
+    return false;
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const session = getSession(request);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const dbPartnerId = getPartnerDbId(session.partnerId);
+  const session = decodeSessionValue(request.cookies.get(COOKIE_NAME)?.value);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
 
   try {
-    const body = await request.json();
-    const {
-      customer_name,
-      customer_phone,
-      customer_address,
-      source,
-      notes,
-      paid_amount,
-      items,
-    } = body as {
-      customer_name: string;
-      customer_phone?: string;
-      customer_address?: string;
-      source?: string;
-      notes?: string;
-      paid_amount?: number;
-      items: OrderItemInput[];
-    };
+    const rawBody: unknown = await request.json();
+    if (!isRecord(rawBody)) return NextResponse.json({ error: 'Invalid order details.' }, { status: 400 });
 
-    if (!customer_name?.trim() || !items?.length) {
-      return NextResponse.json({ error: "اسم العميل والمنتجات مطلوبة" }, { status: 400 });
+    const customerName = typeof rawBody.customer_name === 'string' ? rawBody.customer_name.trim() : '';
+    const customerPhone = typeof rawBody.customer_phone === 'string' ? rawBody.customer_phone.trim() : '';
+    const customerAddress = typeof rawBody.customer_address === 'string' ? rawBody.customer_address.trim() : '';
+    const source = typeof rawBody.source === 'string' ? rawBody.source : 'manual';
+    const notes = typeof rawBody.notes === 'string' ? rawBody.notes.trim() : '';
+    const paidAmount = rawBody.paid_amount === undefined || rawBody.paid_amount === '' ? 0 : Number(rawBody.paid_amount);
+
+    if (customerName.length < 2 || customerName.length > 120) {
+      return NextResponse.json({ error: 'Enter a valid customer name.' }, { status: 400 });
+    }
+    if (customerPhone && !/^\d{10,15}$/.test(customerPhone.replace(/[^0-9]/g, ''))) {
+      return NextResponse.json({ error: 'Enter a valid phone number or leave it blank.' }, { status: 400 });
+    }
+    if (customerAddress && (customerAddress.length < 5 || customerAddress.length > 500)) {
+      return NextResponse.json({ error: 'Enter a valid address or leave it blank.' }, { status: 400 });
+    }
+    if (notes.length > 500 || !SOURCES.has(source)) {
+      return NextResponse.json({ error: 'Invalid order details.' }, { status: 400 });
+    }
+    if (!Number.isFinite(paidAmount) || paidAmount < 0) {
+      return NextResponse.json({ error: 'Enter a valid paid amount.' }, { status: 400 });
+    }
+    if (!Array.isArray(rawBody.items) || rawBody.items.length < 1 || rawBody.items.length > 100) {
+      return NextResponse.json({ error: 'Add between 1 and 100 order items.' }, { status: 400 });
     }
 
-    // Fetch product prices (partner-scoped)
-    const productIds = items.map((i) => i.product_id);
-    const { data: products, error: fetchError } = await supabase
-      .from("products")
-      .select("id, selling_price, cost_price, name_en, stock_quantity")
-      .in("id", productIds)
-      .eq("partner_id", dbPartnerId);
+    const items = rawBody.items as unknown[];
+    const normalizedItems = items.map((entry) => {
+      if (!isRecord(entry)) return null;
+      const item = entry as OrderItemInput;
+      const size = item.size ?? null;
+      if (
+        typeof item.product_id !== 'string' || !UUID_PATTERN.test(item.product_id) ||
+        typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 50 ||
+        (size !== null && (typeof size !== 'string' || size.length > 40))
+      ) {
+        return null;
+      }
+      return {
+        product_id: item.product_id,
+        size: typeof size === 'string' ? size.trim() || null : null,
+        quantity: item.quantity,
+      };
+    });
 
-    if (fetchError || !products?.length || products.length !== new Set(productIds).size || items.some(i=>!Number.isInteger(i.quantity)||i.quantity<1)) {
-      return NextResponse.json({ error: "بعض المنتجات غير موجودة أو لا تنتمي لحسابك" }, { status: 404 });
+    if (normalizedItems.some((item) => item === null)) {
+      return NextResponse.json({ error: 'One or more order items are invalid.' }, { status: 400 });
+    }
+    const validItems = normalizedItems.filter((item): item is NonNullable<typeof item> => item !== null);
+    const partnerId = getPartnerDbId(session.partnerId);
+    const normalizedPhone = customerPhone ? customerPhone.replace(/[^0-9]/g, '') : null;
+
+    if (DEMO_MODE) {
+      try {
+        const order = placeDemoManualOrder({
+          partner_id: partnerId,
+          customer_name: customerName,
+          customer_phone: normalizedPhone,
+          customer_address: customerAddress || null,
+          source,
+          notes: notes || null,
+          paid_amount: paidAmount,
+          items: validItems,
+        });
+        return NextResponse.json({ success: true, order, demo: true }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '';
+        if (message.includes('PRODUCT_OPTION_INVALID')) {
+          return NextResponse.json({ error: 'Choose a valid size for each product.' }, { status: 400 });
+        }
+        if (message.includes('PRODUCT_UNAVAILABLE')) {
+          return NextResponse.json({ error: 'One or more selected products are unavailable in that quantity.' }, { status: 409 });
+        }
+        return NextResponse.json({ error: 'Could not create the order.' }, { status: 400 });
+      }
     }
 
-    if(products.some(p=>items.filter(i=>i.product_id===p.id).reduce((sum,i)=>sum+i.quantity,0)>p.stock_quantity))return NextResponse.json({error:"Quantity exceeds stock"},{status:400});
-    const priceMap = Object.fromEntries(
-      products.map((p) => [p.id, { selling: p.selling_price, cost: p.cost_price }])
-    );
+    const { data, error } = await supabaseAdmin.rpc('place_manual_order', {
+      p_partner_id: partnerId,
+      p_customer_name: customerName,
+      p_customer_phone: normalizedPhone,
+      p_customer_address: customerAddress || null,
+      p_source: source,
+      p_notes: notes || null,
+      p_paid_amount: paidAmount,
+      p_items: validItems,
+    });
 
-    const total_amount = items.reduce(
-      (sum, item) => sum + (priceMap[item.product_id]?.selling ?? 0) * item.quantity,
-      0
-    );
-
-    const paidAmt = Math.max(0, parseFloat(String(paid_amount ?? 0)) || 0);
-    const partner = getPartnerById(session.partnerId);
-
-    // Activity log entry
-    const initialLog = JSON.stringify([{
-      status: "pending",
-      by: partner?.name ?? session.partnerId,
-      at: new Date().toISOString(),
-    }]);
-
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert([{
-        partner_id:       dbPartnerId,
-        customer_name:    customer_name.trim(),
-        customer_phone:   customer_phone?.trim()   || null,
-        customer_address: customer_address?.trim() || null,
-        source:           source || "manual",
-        status:           "pending",
-        notes:            notes?.trim()            || null,
-        total_amount,
-        paid_amount:      paidAmt,
-        activity_log:     initialLog,
-      }])
-      .select()
-      .single();
-
-    if (orderError) {
-      console.error("Order insert error:", orderError);
-      return NextResponse.json({ error: orderError.message }, { status: 500 });
+    if (error) {
+      console.error('[admin/orders] manual transaction failed:', { code: error.code });
+      const message = error.message ?? '';
+      if (message.includes('PRODUCT_OPTION_INVALID')) {
+        return NextResponse.json({ error: 'Choose a valid size for each product.' }, { status: 400 });
+      }
+      if (message.includes('PRODUCT_UNAVAILABLE')) {
+        return NextResponse.json({ error: 'One or more selected products are unavailable in that quantity.' }, { status: 409 });
+      }
+      if (message.includes('PRODUCT_NOT_OWNED')) {
+        return NextResponse.json({ error: 'One or more products do not belong to this partner.' }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Could not create the order. Check the customer and item details.' }, { status: 400 });
     }
 
-    const orderItems = items.map((item) => ({
-      order_id:   order.id,
-      product_id: item.product_id,
-      size:       item.size || null,
-      quantity:   item.quantity,
-      unit_price: priceMap[item.product_id]?.selling ?? 0,
-      cost_price: priceMap[item.product_id]?.cost    ?? 0,
-    }));
-
-    const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-    if (itemsError) return NextResponse.json({ error: itemsError.message }, { status: 500 });
-
-    return NextResponse.json({ success: true, order }, { status: 201 });
-  } catch (err) {
-    console.error("POST /orders error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ success: true, order: data }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+  } catch (error) {
+    if (error instanceof SyntaxError) return NextResponse.json({ error: 'Invalid JSON request.' }, { status: 400 });
+    console.error('[admin/orders] unexpected server error');
+    return NextResponse.json({ error: 'Could not create the order.' }, { status: 500 });
   }
 }
