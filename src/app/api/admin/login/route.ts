@@ -3,20 +3,11 @@ import { DEMO_MODE } from '@/lib/demo-mode';
 import { encodeSession, COOKIE_NAME, COOKIE_MAX_AGE } from '@/lib/session';
 import { PARTNERS } from '@/lib/partners';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { hasSameOrigin } from '@/lib/request-security';
 import { NextResponse, type NextRequest } from 'next/server';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function hasSameOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
-  if (!origin) return true;
-  try {
-    return new URL(origin).origin === request.nextUrl.origin;
-  } catch {
-    return false;
-  }
 }
 
 function matchesPassword(provided: string, expected: string): boolean {
@@ -66,8 +57,9 @@ export async function POST(request: NextRequest) {
     }
 
     const partner = PARTNERS.find((candidate) => candidate.name.toLowerCase() === name.toLowerCase());
-    const expected = partner
-      ? process.env[`ADMIN_PASSWORD_${partner.id.toUpperCase()}`] ?? (DEMO_MODE ? 'aso-demo-2026' : '')
+    const passwordEnvSuffix = partner?.id.replaceAll('-', '_').toUpperCase();
+    const expected = passwordEnvSuffix
+      ? process.env[`ADMIN_PASSWORD_${passwordEnvSuffix}`] ?? (DEMO_MODE ? 'aso-demo-2026' : '')
       : '';
     const passwordMatches = matchesPassword(password, expected);
 

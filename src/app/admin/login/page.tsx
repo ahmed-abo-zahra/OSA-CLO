@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 
-const PARTNERS = ["Safia", "Omaima", "Aisha"];
+const PARTNERS = ["Partner A", "Partner B", "Partner C"];
 
 export default function LoginPage() {
   const router = useRouter();

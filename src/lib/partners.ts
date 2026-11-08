@@ -12,24 +12,24 @@ export interface Partner {
 
 export const PARTNERS: Partner[] = [
   {
-    id: "safia",
+    id: "partner-a",
     dbId: "596c4367-1491-481f-b0f2-1825c2540ebd",
-    name: "Safia",
-    initials: "SF",
+    name: "Partner A",
+    initials: "PA",
     color: "#7C3AED",
   },
   {
-    id: "omaima",
+    id: "partner-b",
     dbId: "2a304931-2230-4960-9e44-b19ed5e0178b",
-    name: "Omaima",
-    initials: "OM",
+    name: "Partner B",
+    initials: "PB",
     color: "#DB2777",
   },
   {
-    id: "aisha",
+    id: "partner-c",
     dbId: "652f4263-d4e3-4bf6-a5c4-778e8a08c710",
-    name: "Aisha",
-    initials: "AI",
+    name: "Partner C",
+    initials: "PC",
     color: "#D97706",
   },
 ];

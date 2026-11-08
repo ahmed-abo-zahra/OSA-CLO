@@ -5,12 +5,9 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import type { CartItem } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { useToast } from "@/context/ToastContext";
 import ProductImage from "@/components/ProductImage";
+import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { DEMO_MODE } from "@/lib/demo-mode";
-import { supabase } from "@/lib/supabase";
-
-const WA_NUMBER = "201038856486";
 
 // ── Egyptian Governorates & Cities ────────────────────────────────────────────
 const EGYPT_GOVERNORATES: Record<string, string[]> = {
@@ -66,8 +63,7 @@ interface FormErrors {
 export default function CheckoutPage() {
   const router = useRouter();
   const { t, lang, isRTL } = useLanguage();
-  const { items, total, clearCart, isHydrated, removeItem } = useCart();
-  const { warning } = useToast();
+  const { items, total, clearCart, isHydrated } = useCart();
 
   const [name,            setName]            = useState("");
   const [phone,           setPhone]           = useState("");
@@ -92,44 +88,6 @@ export default function CheckoutPage() {
   const discountedTotal = Math.max(0, total - discountAmount);
   const availableCities = governorate ? (EGYPT_GOVERNORATES[governorate] ?? []) : [];
 
-  // ── Cart Realtime Sync ──────────────────────────────────────────────────────
-  useEffect(() => {
-    if (DEMO_MODE || !isHydrated || items.length === 0) return;
-
-    const channel = supabase
-      .channel("cart-validation-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "products" },
-        (payload) => {
-          const { eventType, new: newRecord, old: oldRecord } = payload;
-
-          if (eventType === "DELETE") {
-            const deletedId = (oldRecord as { id: string }).id;
-            const deletedItem = items.find((i) => i.productId === deletedId);
-            if (deletedItem) {
-              removeItem(deletedId, deletedItem.size);
-              warning(`"${deletedItem.nameEn}" has been removed from your cart — it's no longer available.`);
-            }
-          }
-
-          if (eventType === "UPDATE") {
-            const updated = newRecord as { id: string; in_stock: boolean; is_available: boolean; stock_quantity: number };
-            if (!updated.in_stock || !updated.is_available || updated.stock_quantity === 0) {
-              const affectedItem = items.find((i) => i.productId === updated.id);
-              if (affectedItem) {
-                removeItem(updated.id, affectedItem.size);
-                warning(`"${affectedItem.nameEn}" is now out of stock and has been removed from your cart.`);
-              }
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [isHydrated, items, removeItem, warning]);
-
   async function applyDiscount() {
     if (!discountCode.trim()) return;
     setDiscountLoading(true);
@@ -142,7 +100,6 @@ export default function CheckoutPage() {
           code: discountCode.trim(),
           items: items.map((item) => ({
             product_id: item.productId,
-            partner_id: item.partnerId,
             quantity: item.quantity,
           })),
         }),
@@ -204,7 +161,6 @@ export default function CheckoutPage() {
           discount_code:    discountCode.trim() || undefined,
           items: items.map((i) => ({
             productId: i.productId,
-            partnerId: i.partnerId,
             size:      i.size,
             color:     i.color,
             quantity:  i.quantity,
@@ -440,13 +396,13 @@ export default function CheckoutPage() {
             </button>
 
             {/* WhatsApp support */}
-            <a
-              href={`https://wa.me/${WA_NUMBER}?text=Hi, I need help with my order.`}
-              target="_blank" rel="noreferrer"
+            {WHATSAPP_NUMBER && <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%2C%20I%20need%20help%20with%20my%20order.`}
+              target="_blank" rel="noopener noreferrer"
               className="text-center text-[10px] text-gray-500 dark:text-gray-400 hover:text-green-600 transition-colors"
             >
-              💬 {t("storefront.checkout.chatOnWhatsApp")}
-            </a>
+              {t("storefront.checkout.chatOnWhatsApp")}
+            </a>}
           </form>
 
           {/* ── Order Summary ─────────────────────────────────────────────── */}

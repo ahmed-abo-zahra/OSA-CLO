@@ -1,6 +1,8 @@
-import { getPartnerById, getPartnerDbId } from '@/lib/partners';
+import { DEMO_MODE } from '@/lib/demo-mode';
+import { getPartnerDbId } from '@/lib/partners';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { COOKIE_NAME, decodeSessionValue } from '@/lib/session';
+import { hasSameOrigin } from '@/lib/request-security';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -10,16 +12,6 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 function getSession(request: NextRequest) {
   return decodeSessionValue(request.cookies.get(COOKIE_NAME)?.value);
-}
-
-function hasSameOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
-  if (!origin) return true;
-  try {
-    return new URL(origin).origin === request.nextUrl.origin;
-  } catch {
-    return false;
-  }
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
@@ -63,6 +55,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Invalid order update.' }, { status: 400 });
     }
     const values = body as { status?: unknown; paid_amount?: unknown };
+    if (values.status === undefined && values.paid_amount === undefined) {
+      return NextResponse.json({ error: 'No order changes were provided.' }, { status: 400 });
+    }
     if (values.status !== undefined && (typeof values.status !== 'string' || !ALLOWED_STATUSES.has(values.status))) {
       return NextResponse.json({ error: 'Invalid order status.' }, { status: 400 });
     }
@@ -73,50 +68,75 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     const partnerId = getPartnerDbId(session.partnerId);
-    const { data: existing, error: lookupError } = await supabaseAdmin
-      .from('orders')
-      .select('id, status, paid_amount, total_amount, activity_log')
-      .eq('id', id)
-      .eq('partner_id', partnerId)
-      .maybeSingle();
+    if (DEMO_MODE) {
+      const { data: current, error: lookupError } = await supabaseAdmin
+        .from('orders')
+        .select('id, partner_id, status, total_amount, paid_amount, activity_log')
+        .eq('id', id)
+        .eq('partner_id', partnerId)
+        .maybeSingle();
+      if (lookupError) {
+        console.error('[admin/orders] demo lookup failed:', { code: lookupError.code });
+        return NextResponse.json({ error: 'Could not load the order.' }, { status: 500 });
+      }
+      if (!current) return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
 
-    if (lookupError) {
-      console.error('[admin/orders] update lookup failed:', { code: lookupError.code });
-      return NextResponse.json({ error: 'Could not update the order.' }, { status: 500 });
+      const paidAmount = typeof values.paid_amount === 'number' ? values.paid_amount : null;
+      if (paidAmount !== null && paidAmount > Number(current.total_amount)) {
+        return NextResponse.json({ error: 'Paid amount cannot exceed the order total.' }, { status: 400 });
+      }
+
+      const updates: Record<string, unknown> = {};
+      if (typeof values.status === 'string') {
+        updates.status = values.status;
+        if (values.status !== current.status) {
+          let activity: unknown[] = [];
+          try {
+            const existing = Array.isArray(current.activity_log)
+              ? current.activity_log
+              : typeof current.activity_log === 'string' ? JSON.parse(current.activity_log) : [];
+            if (Array.isArray(existing)) activity = existing;
+          } catch { activity = []; }
+          updates.activity_log = [
+            ...activity,
+            { status: values.status, by: session.partnerName, at: new Date().toISOString() },
+          ].slice(-100);
+        }
+      }
+      if (paidAmount !== null) updates.paid_amount = paidAmount;
+
+      const { data: updated, error: updateError } = await supabaseAdmin
+        .from('orders')
+        .update(updates)
+        .eq('id', id)
+        .eq('partner_id', partnerId)
+        .select('id, status, paid_amount, total_amount, activity_log, updated_at')
+        .single();
+      if (updateError) {
+        console.error('[admin/orders] demo update failed:', { code: updateError.code });
+        return NextResponse.json({ error: 'Could not update the order.' }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, order: updated }, { headers: { 'Cache-Control': 'no-store' } });
     }
-    if (!existing) return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
 
-    if (typeof values.paid_amount === 'number' && values.paid_amount > Number(existing.total_amount)) {
-      return NextResponse.json({ error: 'Paid amount cannot exceed the order total.' }, { status: 400 });
-    }
-
-    const activityLog = Array.isArray(existing.activity_log) ? [...existing.activity_log] : [];
-    if (typeof values.status === 'string' && values.status !== existing.status) {
-      const partner = getPartnerById(session.partnerId);
-      activityLog.push({
-        status: values.status,
-        by: partner?.name ?? session.partnerId,
-        at: new Date().toISOString(),
-      });
-    }
-
-    const updates: Record<string, unknown> = {
-      activity_log: activityLog,
-      updated_at: new Date().toISOString(),
-    };
-    if (typeof values.status === 'string') updates.status = values.status;
-    if (typeof values.paid_amount === 'number') updates.paid_amount = values.paid_amount;
-
-    const { data: updated, error: updateError } = await supabaseAdmin
-      .from('orders')
-      .update(updates)
-      .eq('id', id)
-      .eq('partner_id', partnerId)
-      .select('id, status, paid_amount, total_amount, activity_log, updated_at')
-      .single();
+    const { data: updated, error: updateError } = await supabaseAdmin.rpc('update_partner_order', {
+      p_order_id: id,
+      p_partner_id: partnerId,
+      p_status: typeof values.status === 'string' ? values.status : null,
+      p_paid_amount: typeof values.paid_amount === 'number' ? values.paid_amount : null,
+    });
 
     if (updateError) {
-      console.error('[admin/orders] update failed:', { code: updateError.code });
+      if (updateError.message.includes('ORDER_NOT_FOUND')) {
+        return NextResponse.json({ error: 'Order not found.' }, { status: 404 });
+      }
+      if (updateError.message.includes('PAID_AMOUNT_EXCEEDS_TOTAL')) {
+        return NextResponse.json({ error: 'Paid amount cannot exceed the order total.' }, { status: 400 });
+      }
+      if (updateError.message.includes('INVALID_ORDER_UPDATE')) {
+        return NextResponse.json({ error: 'Invalid order update.' }, { status: 400 });
+      }
+      console.error('[admin/orders] atomic update failed:', { code: updateError.code });
       return NextResponse.json({ error: 'Could not update the order.' }, { status: 500 });
     }
     return NextResponse.json({ success: true, order: updated }, { headers: { 'Cache-Control': 'no-store' } });

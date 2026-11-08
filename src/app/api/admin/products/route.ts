@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { ALL_SUBCATEGORY_KEYS } from '@/lib/categories';
 import { getPartnerDbId } from '@/lib/partners';
 import { COOKIE_NAME, decodeSessionValue } from '@/lib/session';
+import { hasSameOrigin } from '@/lib/request-security';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { uploadProductImage } from '@/lib/product-images';
 
@@ -17,16 +18,6 @@ function parseList(value: string, maxItems = 20): string[] | null {
   const items = [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))];
   if (items.length > maxItems || items.some((item) => item.length > 40)) return null;
   return items;
-}
-
-function hasSameOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
-  if (!origin) return true;
-  try {
-    return new URL(origin).origin === request.nextUrl.origin;
-  } catch {
-    return false;
-  }
 }
 
 export async function POST(request: NextRequest) {
