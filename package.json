@@ -1,32 +1,39 @@
 {
-  "name": "osha-store",
-  "version": "0.1.0",
+  "name": "aso-clo-store",
+  "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.13.0 <27"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit --incremental false",
+    "validate": "npm run lint && npm run typecheck && node scripts/validate-catalog.mjs && node scripts/validate-frontend.mjs && node scripts/validate-backend.mjs"
   },
   "dependencies": {
-    "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/supabase-js": "^2.106.1",
     "fuse.js": "^7.3.0",
-    "next": "14.2.35",
+    "next": "^16.4.5",
     "next-themes": "^0.4.6",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "recharts": "^3.8.1",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.35",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1"
   }
 }

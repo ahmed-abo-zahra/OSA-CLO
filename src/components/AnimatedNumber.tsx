@@ -28,8 +28,8 @@ export default function AnimatedNumber({
 }: AnimatedNumberProps) {
   const [display, setDisplay] = useState(startFrom); // always start from 0 (or startFrom) on mount
   const prevRef  = useRef(startFrom);                // so first render always animates
-  const rafRef   = useRef<number>();
-  const startRef = useRef<number>();
+  const rafRef   = useRef<number | undefined>(undefined);
+  const startRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const from = prevRef.current;

@@ -134,7 +134,6 @@ export default function WishlistBell() {
                     className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-brand-black/30 transition-colors border-b border-gray-50 dark:border-brand-border/10 last:border-0"
                   >
                     {item.imageUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <div className="w-12 h-16 shrink-0"><ProductImage src={item.imageUrl} alt={item.nameEn} sizes="320px" /></div>
                     )}
                     <div className="flex flex-col gap-0.5 min-w-0">

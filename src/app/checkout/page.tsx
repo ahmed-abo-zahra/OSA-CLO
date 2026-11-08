@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useCart, type CartItem } from "@/context/CartContext";
+import { useCart } from "@/context/CartContext";
+import type { CartItem } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import ProductImage from "@/components/ProductImage";
@@ -41,15 +42,6 @@ const EGYPT_GOVERNORATES: Record<string, string[]> = {
   "البحر الأحمر": ["الغردقة", "سفاجا", "القصير", "مرسى علم", "رأس غارب"],
   "الوادي الجديد": ["الخارجة", "الداخلة", "الفرافرة", "باريس"],
 };
-
-// ── Profile type ──────────────────────────────────────────────────────────────
-interface CustomerProfile {
-  full_name?: string;
-  phone?: string;
-  governorate?: string;
-  city?: string;
-  detailed_address?: string;
-}
 
 // ── Validation helpers ────────────────────────────────────────────────────────
 function isValidPhone(phone: string) {
@@ -97,54 +89,8 @@ export default function CheckoutPage() {
   const [discountLoading, setDiscountLoading] = useState(false);
   const [discountError,   setDiscountError]   = useState("");
 
-  // ── Profile autofill state ─────────────────────────────────────────────────
-  const [profileLoaded,  setProfileLoaded]  = useState(false);
-  const [originalProfile, setOriginalProfile] = useState<CustomerProfile | null>(null);
-
   const discountedTotal = Math.max(0, total - discountAmount);
   const availableCities = governorate ? (EGYPT_GOVERNORATES[governorate] ?? []) : [];
-
-  // Reset city when governorate changes (except during autofill)
-  useEffect(() => { if (!profileLoaded) setCity(""); }, [governorate, profileLoaded]);
-
-  // ── Autofill from customer profile (Google OAuth) ───────────────────────────
-  useEffect(() => {
-    if(DEMO_MODE)return;
-    let cancelled = false;
-
-    async function loadProfile() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user || cancelled) return;
-
-      const { data: profile, error } = await supabase
-        .from('customers')
-        .select('full_name, phone, governorate, city, detailed_address')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error || !profile || cancelled) return;
-
-      // Autofill only fields that have stored values
-      if (profile.full_name && !name) setName(profile.full_name);
-      if (profile.phone && !phone) setPhone(profile.phone);
-      if (profile.governorate && !governorate) setGovernorate(profile.governorate);
-      // City autofill must come after governorate is set (to avoid clearing)
-      if (profile.city && profile.governorate) {
-        // Set governorate first so city doesn't get cleared
-        if (!governorate) setGovernorate(profile.governorate);
-        // Then set city in next tick
-        setTimeout(() => { if (!cancelled) setCity(profile.city); }, 0);
-      }
-      if (profile.detailed_address && !detailedAddress) setDetailedAddress(profile.detailed_address);
-
-      setOriginalProfile(profile);
-      setProfileLoaded(true);
-    }
-
-    loadProfile();
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ── Cart Realtime Sync ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -192,7 +138,14 @@ export default function CheckoutPage() {
       const res  = await fetch("/api/discount/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: discountCode.trim(), order_total: total }),
+        body: JSON.stringify({
+          code: discountCode.trim(),
+          items: items.map((item) => ({
+            product_id: item.productId,
+            partner_id: item.partnerId,
+            quantity: item.quantity,
+          })),
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setDiscountError(data.error || "Invalid code"); setDiscountAmount(0); setDiscountLabel(""); }
@@ -248,7 +201,6 @@ export default function CheckoutPage() {
           customer_address: fullAddress,
           notes:            notes.trim() || undefined,
           payment_type:     payType,
-          discount_amount:  discountAmount,
           discount_code:    discountCode.trim() || undefined,
           items: items.map((i) => ({
             productId: i.productId,
@@ -256,40 +208,12 @@ export default function CheckoutPage() {
             size:      i.size,
             color:     i.color,
             quantity:  i.quantity,
-            price:     i.price,
           })),
         }),
       });
 
       const data = await res.json();
       if (!res.ok) { setErrors({ server: data.error }); setLoading(false); return; }
-
-      // ── Save/update customer profile if anything changed ──────────────────
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const previous = originalProfile ?? {};
-        const hasChanged =
-          name.trim() !== (previous.full_name ?? '') ||
-          phone.trim() !== (previous.phone ?? '') ||
-          governorate !== (previous.governorate ?? '') ||
-          city !== (previous.city ?? '') ||
-          detailedAddress.trim() !== (previous.detailed_address ?? '');
-
-        if (hasChanged) {
-          await supabase.from('customers').upsert(
-            {
-              id: session.user.id,
-              full_name: name.trim(),
-              phone: phone.trim(),
-              governorate,
-              city,
-              detailed_address: detailedAddress.trim(),
-              last_login: new Date().toISOString(),
-            },
-            { onConflict: 'id' }
-          );
-        }
-      }
 
       submitted.current = true;
       clearCart();
@@ -330,15 +254,6 @@ export default function CheckoutPage() {
             </div>
 
             {/* ── Profile Autofill Badge ───────────────────────────────────── */}
-            {profileLoaded && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                <span className="text-green-600 dark:text-green-400 text-sm">✓</span>
-                <span className="text-xs text-green-700 dark:text-green-300 font-medium">
-                  {t("profile.autofillBadge")}
-                </span>
-              </div>
-            )}
-
             {/* Name */}
             <Field label={t("storefront.checkout.customerName")} error={errors.name}>
               <input
@@ -373,7 +288,7 @@ export default function CheckoutPage() {
                 <div className="relative">
                   <select
                     value={governorate}
-                    onChange={(e) => { setGovernorate(e.target.value); setErrors((p) => ({ ...p, governorate: undefined, city: undefined })); }}
+                    onChange={(e) => { setGovernorate(e.target.value); setCity(""); setErrors((p) => ({ ...p, governorate: undefined, city: undefined })); }}
                     className={selectStyle(errors.governorate)}
                   >
                     <option value="">{t("storefront.checkout.selectGovernorate")}</option>
@@ -582,7 +497,6 @@ function OrderSummary({ items, total, discountAmount = 0, discountLabel, paidNow
           <li key={`${item.nameEn}-${item.size}`} className="flex items-center gap-3">
             <div className="w-10 h-12 bg-gray-100 dark:bg-brand-black shrink-0 overflow-hidden">
               {item.imageUrl
-                // eslint-disable-next-line @next/next/no-img-element
                 ? <ProductImage src={item.imageUrl} alt={item.nameEn} sizes="320px" />
                 : <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-gray-300">{item.nameEn.slice(0,2)}</div>
               }

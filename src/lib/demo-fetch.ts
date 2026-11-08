@@ -82,3 +82,80 @@ export function placeDemoOrder(body:Record<string,unknown>){
  for(const [id,count]of Array.from(quantities)){const product=db.products.find(p=>p.id===id)!;product.stock_quantity=Number(product.stock_quantity)-count;product.in_stock=Number(product.stock_quantity)>0;}
  save(db);return {success:true,orderIds,createdAt,demo:true};
 }
+
+
+type DemoManualOrderInput = {
+  partner_id: string;
+  customer_name: string;
+  customer_phone: string | null;
+  customer_address: string | null;
+  source: string;
+  notes: string | null;
+  paid_amount: number;
+  items: { product_id: string; size: string | null; quantity: number }[];
+};
+
+export function placeDemoManualOrder(input: DemoManualOrderInput) {
+  const db = read();
+  const quantities = new Map<string, number>();
+  const selected = input.items.map((item) => {
+    const product = db.products.find((row) => row.id === item.product_id);
+    if (!product || product.partner_id !== input.partner_id || !product.is_available || !product.in_stock) {
+      throw new Error('PRODUCT_UNAVAILABLE');
+    }
+    const requested = (quantities.get(item.product_id) ?? 0) + item.quantity;
+    quantities.set(item.product_id, requested);
+    if (requested > Number(product.stock_quantity)) throw new Error('PRODUCT_UNAVAILABLE');
+    const sizes = Array.isArray(product.sizes) ? product.sizes.map(String) : [];
+    if (sizes.length > 0 && (!item.size || !sizes.includes(item.size))) throw new Error('PRODUCT_OPTION_INVALID');
+    return { product, item };
+  });
+
+  const total = selected.reduce((sum, entry) => sum + Number(entry.product.selling_price) * entry.item.quantity, 0);
+  const paid = Math.min(Math.max(input.paid_amount, 0), total);
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  const order = {
+    id,
+    partner_id: input.partner_id,
+    customer_name: input.customer_name,
+    customer_phone: input.customer_phone,
+    customer_address: input.customer_address,
+    source: input.source,
+    status: 'pending',
+    notes: input.notes,
+    total_amount: total,
+    paid_amount: paid,
+    discount_amount: 0,
+    requested_payment_type: 'full',
+    requested_deposit_amount: total,
+    activity_log: [{ status: 'pending', by: 'Demo partner', at: now }],
+    created_at: now,
+    updated_at: now,
+  };
+
+  db.orders.push(order);
+  for (const { product, item } of selected) {
+    db.order_items.push({
+      id: randomUUID(),
+      order_id: id,
+      product_id: product.id,
+      product_name_en: product.name_en,
+      product_name_ar: product.name_ar ?? null,
+      image_url: product.image_url ?? null,
+      quantity: item.quantity,
+      size: item.size,
+      color: null,
+      unit_price: product.selling_price,
+      cost_price: product.cost_price ?? 0,
+    });
+  }
+  for (const [productId, quantity] of quantities) {
+    const product = db.products.find((row) => row.id === productId)!;
+    product.stock_quantity = Number(product.stock_quantity) - quantity;
+    product.in_stock = Number(product.stock_quantity) > 0;
+  }
+
+  save(db);
+  return order;
+}

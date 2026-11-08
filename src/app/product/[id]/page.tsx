@@ -7,9 +7,8 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import ProductDetailClient, { type PDPProduct } from "./ProductDetailClient";
 
 // ── OpenGraph SEO ─────────────────────────────────────────────────────────────
-export async function generateMetadata(
-  { params }: { params: { id: string } }
-): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const { data } = await supabaseAdmin
     .from("products")
     .select("name_en, name_ar, description, selling_price, image_url, category")
@@ -41,7 +40,8 @@ export async function generateMetadata(
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
-export default async function ProductPage({ params }: { params: { id: string } }) {
+export default async function ProductPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const { data } = await supabaseAdmin
     .from("products")
     .select("id, partner_id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar")
@@ -91,7 +91,6 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 className="group bg-white dark:bg-brand-gray border border-gray-200 dark:border-brand-border/20 hover:border-gray-400 dark:hover:border-brand-border/60 hover:shadow-md transition-all overflow-hidden">
                 <div className="aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-brand-gray">
                   {p.image_url
-                    // eslint-disable-next-line @next/next/no-img-element
                     ? <ProductImage src={p.image_url} alt={p.name_en} />
                     : <div className="w-full h-full flex items-center justify-center text-gray-200 text-2xl font-black">
                         {p.name_en.slice(0, 2).toUpperCase()}

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"; // always fetch fresh data
 
 export default async function DashboardPage() {
   // ── Auth Guard ──────────────────────────────────────────────────────────
-  const session = getSession();
+  const session = await getSession();
   if (!session) redirect("/admin/login");
   const dbPartnerId = getPartnerDbId(session.partnerId);
 

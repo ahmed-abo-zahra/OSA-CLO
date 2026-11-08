@@ -228,7 +228,6 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
             {/* Main image */}
             <div className="group relative aspect-[3/4] bg-gray-100 dark:bg-brand-black overflow-hidden cursor-zoom-in" style={{overflow:"hidden"}}>
               {allImages.length > 0 ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <div className="absolute inset-0">
                 <ProductImage src={allImages[activeImg]} alt={displayName} sizes="1000px" priority />
                 </div>
@@ -281,7 +280,6 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
                     className={`shrink-0 w-16 h-20 overflow-hidden border-2 transition-all ${
                       i === activeImg ? "border-[#1A1A1A]" : "border-transparent opacity-60 hover:opacity-100"
                     }`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <ProductImage src={img} alt={`${displayName} ${i+1}`} sizes="320px" />
                   </button>
                 ))}

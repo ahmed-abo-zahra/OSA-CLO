@@ -1,218 +1,128 @@
-import { DEMO_MODE } from "@/lib/demo-mode";
-import { saveDemoImage } from "@/lib/demo-upload";
-import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
-import { supabaseAdmin } from "@/lib/supabase-admin";
-import { decodeSessionValue, COOKIE_NAME } from "@/lib/session";
-import { getPartnerDbId } from "@/lib/partners";
+import { revalidatePath } from 'next/cache';
+import { NextResponse, type NextRequest } from 'next/server';
+import { ALL_SUBCATEGORY_KEYS } from '@/lib/categories';
+import { getPartnerDbId } from '@/lib/partners';
+import { COOKIE_NAME, decodeSessionValue } from '@/lib/session';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { uploadProductImage } from '@/lib/product-images';
 
-const LOG = (msg: string, data?: unknown) =>
-  console.log(`[POST /api/admin/products] ${msg}`, data ?? "");
+const MAX_MULTIPART_BODY_BYTES = 4_200_000;
 
-function getSessionFromRequest(request: NextRequest) {
-  return decodeSessionValue(request.cookies.get(COOKIE_NAME)?.value);
+function getFormString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === 'string' ? value.trim() : '';
 }
 
-// ── Helper: upload image buffer to Supabase Storage ──────────────────────────
-async function uploadToStorage(
-  file: File,
-  partnerId: string
-): Promise<string | null> {
-  if (DEMO_MODE) return saveDemoImage(file);
+function parseList(value: string, maxItems = 20): string[] | null {
+  const items = [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))];
+  if (items.length > maxItems || items.some((item) => item.length > 40)) return null;
+  return items;
+}
+
+function hasSameOrigin(request: NextRequest): boolean {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
   try {
-    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
-    const fileName = `${partnerId}/${Date.now()}.${ext}`;
-
-    LOG("Converting file to buffer...", { name: file.name, size: file.size, type: file.type });
-
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    LOG("Uploading to Supabase Storage bucket 'product-images'...", { fileName });
-
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from("product-images")
-      .upload(fileName, buffer, {
-        contentType: file.type || "image/jpeg",
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("[POST /api/admin/products] ❌ Storage upload error:", {
-        message: uploadError.message,
-        hint: "Does the 'product-images' bucket exist in Supabase? Check Storage → Buckets.",
-      });
-      return null; // Continue without image — don't block product creation
-    }
-
-    LOG("✅ Upload success:", uploadData.path);
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("product-images").getPublicUrl(uploadData.path);
-
-    LOG("✅ Public URL:", publicUrl);
-    return publicUrl;
-  } catch (imgErr) {
-    console.error("[POST /api/admin/products] ❌ Unexpected image error:", imgErr);
-    return null;
+    return new URL(origin).origin === request.nextUrl.origin;
+  } catch {
+    return false;
   }
 }
 
-// ── POST /api/admin/products — Create a product ───────────────────────────────
 export async function POST(request: NextRequest) {
-  const session = getSessionFromRequest(request);
-  if (!session) {
-    LOG("❌ Unauthorized");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = decodeSessionValue(request.cookies.get(COOKIE_NAME)?.value);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (Number.isFinite(contentLength) && contentLength > MAX_MULTIPART_BODY_BYTES) {
+    return NextResponse.json({ error: 'The total image upload must be 4 MB or smaller.' }, { status: 413 });
   }
 
-  LOG("✅ Session valid:", { partnerId: session.partnerId });
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: 'Expected a multipart form submission.' }, { status: 400 });
+  }
+
+  const nameEn = getFormString(formData, 'name_en');
+  const nameAr = getFormString(formData, 'name_ar');
+  const description = getFormString(formData, 'description');
+  const descriptionAr = getFormString(formData, 'description_ar');
+  const category = getFormString(formData, 'category');
+  const costPrice = Number(getFormString(formData, 'cost_price'));
+  const sellingPrice = Number(getFormString(formData, 'selling_price'));
+  const stockQuantity = Number(getFormString(formData, 'stock_quantity'));
+  const sizes = parseList(getFormString(formData, 'sizes'));
+  const colors = parseList(getFormString(formData, 'colors'));
+  const mainValue = formData.get('image');
+  const mainImage = mainValue instanceof File && mainValue.size > 0 ? mainValue : null;
+  const extraImages = formData.getAll('extra_images').filter((value): value is File => value instanceof File && value.size > 0);
+  const totalImageBytes = (mainImage?.size ?? 0) + extraImages.reduce((sum, image) => sum + image.size, 0);
+
+  if (nameEn.length < 1 || nameEn.length > 160 || nameAr.length > 160) {
+    return NextResponse.json({ error: 'Product names must be within 160 characters.' }, { status: 400 });
+  }
+  if (description.length > 2000 || descriptionAr.length > 2000) {
+    return NextResponse.json({ error: 'Product descriptions must be within 2,000 characters.' }, { status: 400 });
+  }
+  if (!ALL_SUBCATEGORY_KEYS.includes(category)) {
+    return NextResponse.json({ error: 'Choose a supported product category.' }, { status: 400 });
+  }
+  if (!Number.isFinite(costPrice) || costPrice < 0 || !Number.isFinite(sellingPrice) || sellingPrice <= 0) {
+    return NextResponse.json({ error: 'Enter valid cost and selling prices.' }, { status: 400 });
+  }
+  if (!Number.isInteger(stockQuantity) || stockQuantity < 0 || stockQuantity > 100000) {
+    return NextResponse.json({ error: 'Enter a valid stock quantity.' }, { status: 400 });
+  }
+  if (!sizes || !colors || extraImages.length > 5) {
+    return NextResponse.json({ error: 'Use up to 20 sizes/colors and up to 5 extra images.' }, { status: 400 });
+  }
+  if (totalImageBytes > MAX_MULTIPART_BODY_BYTES) {
+    return NextResponse.json({ error: 'The total image upload must be 4 MB or smaller.' }, { status: 413 });
+  }
 
   try {
-    // ── Parse FormData (handles text fields + file upload) ────────────────────
-    let formData: FormData;
-    try {
-      formData = await request.formData();
-      LOG("✅ FormData parsed successfully");
-    } catch (fErr) {
-      console.error("[POST /api/admin/products] ❌ Failed to parse FormData:", fErr);
-      return NextResponse.json(
-        { error: "Invalid request format — expected multipart/form-data" },
-        { status: 400 }
-      );
-    }
+    const partnerId = getPartnerDbId(session.partnerId);
+    const imageUrl = mainImage ? await uploadProductImage(mainImage, session.partnerId) : null;
+    const imageUrls: string[] = [];
+    for (const image of extraImages) imageUrls.push(await uploadProductImage(image, session.partnerId));
 
-    // ── Extract fields ────────────────────────────────────────────────────────
-    const name_en       = (formData.get("name_en")       as string | null)?.trim() ?? "";
-    const name_ar       = (formData.get("name_ar")       as string | null)?.trim() ?? "";
-    const description   = (formData.get("description")   as string | null)?.trim() ?? "";
-    const category      = (formData.get("category")      as string | null)?.trim() ?? "";
-    const cost_price    = (formData.get("cost_price")    as string | null) ?? "";
-    const selling_price = (formData.get("selling_price") as string | null) ?? "";
-    const sizes_raw     = (formData.get("sizes")         as string | null) ?? "";
-    const stock_qty     = (formData.get("stock_quantity") as string | null) ?? "0";
-    const imageFile     = formData.get("image") as File | null;
-    const extraImages    = formData.getAll("extra_images") as File[];
-
-    LOG("📦 Fields received:", {
-      name_en,
-      name_ar,
-      category,
-      cost_price,
-      selling_price,
-      sizes_raw,
-      stock_qty,
-      has_image: !!imageFile && imageFile.size > 0,
-      image_name: imageFile?.name,
-      image_size: imageFile?.size,
-      image_type: imageFile?.type,
-    });
-
-    // ── Validation ────────────────────────────────────────────────────────────
-    if (!name_en) {
-      LOG("❌ Validation failed: name_en missing");
-      return NextResponse.json({ error: "الاسم بالإنجليزية مطلوب" }, { status: 400 });
-    }
-
-    const costNum    = parseFloat(cost_price);
-    const sellingNum = parseFloat(selling_price);
-
-    if (!Number.isFinite(costNum) || costNum < 0) {
-      LOG("❌ Validation failed: cost_price invalid", cost_price);
-      return NextResponse.json({ error: "سعر الشراء غير صالح" }, { status: 400 });
-    }
-    if (!Number.isFinite(sellingNum) || sellingNum <= 0 || !Number.isInteger(Number(stock_qty)) || Number(stock_qty) < 0) {
-      LOG("❌ Validation failed: selling_price invalid", selling_price);
-      return NextResponse.json({ error: "سعر البيع غير صالح" }, { status: 400 });
-    }
-
-    // ── Primary Image Upload ───────────────────────────────────────────────────
-    let image_url: string | null = null;
-    if (imageFile && imageFile.size > 0) {
-      image_url = await uploadToStorage(imageFile, session.partnerId);
-    } else {
-      LOG("ℹ️ No image file attached — skipping upload");
-    }
-
-    // ── Extra Images Upload ───────────────────────────────────────────────────
-    const image_urls: string[] = [];
-    for (const extraFile of extraImages) {
-      if (extraFile && extraFile.size > 0) {
-        const url = await uploadToStorage(extraFile, session.partnerId);
-        if (url) image_urls.push(url);
-      }
-    }
-    LOG(`ℹ️ ${image_urls.length} extra image(s) uploaded`);
-
-
-    // ── Normalize sizes ───────────────────────────────────────────────────────
-    const normalizedSizes = sizes_raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const dbPartnerId = getPartnerDbId(session.partnerId);
-
-    LOG("💾 Inserting into 'products' table...", {
-      partner_id: dbPartnerId,
-      name_en,
-      cost_price: costNum,
-      selling_price: sellingNum,
-      sizes: normalizedSizes,
-      image_url,
-    });
-
-    // ── Insert ────────────────────────────────────────────────────────────────
-    const { data, error: dbError } = await supabaseAdmin
-      .from("products")
-      .insert([
-        {
-          partner_id:    dbPartnerId,
-          name_en:       name_en,
-          name_ar:       name_ar       || null,
-          description:   description   || null,
-          category:      category      || null,
-          cost_price:    costNum,
-          selling_price: sellingNum,
-          sizes:         normalizedSizes,
-          colors: (String(formData.get("colors")??"")).split(",").map(c=>c.trim()).filter(Boolean),
-          stock_quantity: Number(stock_qty),
-          image_url:     image_url,
-          image_urls:    image_urls,
-          is_available:  true,
-          in_stock:      Number(stock_qty)>0,
-        },
-      ])
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .insert({
+        partner_id: partnerId,
+        name_en: nameEn,
+        name_ar: nameAr || null,
+        description: description || null,
+        description_ar: descriptionAr || null,
+        category,
+        cost_price: costPrice,
+        selling_price: sellingPrice,
+        sizes,
+        colors,
+        stock_quantity: stockQuantity,
+        in_stock: stockQuantity > 0,
+        is_available: true,
+        image_url: imageUrl,
+        image_urls: imageUrls,
+      })
       .select()
       .single();
 
-    if (dbError) {
-      console.error("[POST /api/admin/products] ❌ Supabase DB insert error:", {
-        message: dbError.message,
-        code:    dbError.code,
-        details: dbError.details,
-        hint:    dbError.hint,
-      });
-      return NextResponse.json(
-        { error: `خطأ في قاعدة البيانات: ${dbError.message}` },
-        { status: 500 }
-      );
+    if (error) {
+      console.error('[admin/products] create failed:', { code: error.code });
+      return NextResponse.json({ error: 'Could not create the product. Check the details and try again.' }, { status: 400 });
     }
 
-    LOG("✅ Product created successfully:", data.id);
-    // Revalidate the storefront so new visitors also see the new product
-    revalidatePath("/");
-
+    revalidatePath('/');
     return NextResponse.json({ success: true, product: data }, { status: 201 });
-
-  } catch (err) {
-    console.error("[POST /api/admin/products] ❌ Unexpected server error:", err);
-    return NextResponse.json(
-      { error: `Server error: ${err instanceof Error ? err.message : String(err)}` },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.includes('image') || message.includes('Image') || message.includes('JPEG') || message.includes('WebP')) {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+    console.error('[admin/products] create failed unexpectedly');
+    return NextResponse.json({ error: 'Could not create the product.' }, { status: 500 });
   }
 }

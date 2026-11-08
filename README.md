@@ -1,44 +1,120 @@
-# ASO CLO — storefront presentations
+# ASO CLO — متجر إلكتروني ولوحة شركاء
 
-## Framework-free frontend (client brief)
+تطبيق Full Stack لمتجر أزياء متعدد الشركاء، يتضمن واجهة متجر ثنائية اللغة (العربية والإنجليزية)، لوحة إدارة للشركاء، واجهات REST API، وقاعدة بيانات PostgreSQL على Supabase. المشروع الرئيسي مبني بـNext.js وReact وTypeScript ويعمل بخادم Node.js؛ أما `frontend-demo/` فهو عرض ثابت منفصل لا يحتوي على Backend.
 
-Live demo: https://aso-clo-frontend-demo.vercel.app
+## الروابط
 
-The standalone `frontend-demo/` uses HTML5, CSS3 and vanilla ES6 JavaScript with no backend, payment gateway or framework. It includes 120 fictional ASO products, individual WebP photos, bilingual layouts, responsive 1/2/3/4-column grids, filtering, persistent cart, validated contact and checkout. See [setup and product editing instructions](frontend-demo/README.md). This is an ASO portfolio presentation; the original Ket3a prototype files have not been supplied.
+- **التطبيق الرئيسي:** https://aso-clo-platform.vercel.app
+- **العرض الثابت للواجهة:** https://aso-clo-frontend-demo.vercel.app
+- **مستودع GitHub:** https://github.com/ahmed-abo-zahra/OSA-CLO
 
-## Separate Next.js presentation
+> روابط العرض لا تعني أن الدفع الإلكتروني مفعّل. إتمام الطلب يسجل طلبًا غير مدفوع؛ لا توجد بوابة دفع أو تحصيل أموال.
 
-# ASO CLO — isolated presentation demo
+## التقنية والمعمارية
 
-A bilingual Arabic/English clothing store presentation preserving ASO's black, lime and ivory identity. Includes 120 ASO sample products: exactly ten in each of the existing twelve subcategories. Studio imagery is AI-generated for this fictional catalog; these are presentation products, not claims of real inventory or suppliers.
+| الطبقة | التقنية |
+|---|---|
+| واجهة المستخدم | React 19، Next.js 16 App Router، TypeScript، Tailwind CSS |
+| Backend | Node.js عبر Next.js Route Handlers وواجهات REST API |
+| قاعدة البيانات | Supabase PostgreSQL مع migrations محفوظة في `supabase/migrations/` |
+| الصور | Supabase Storage في bucket باسم `product-images`، مع تحقق من نوع الملف ومحتواه وحجمه |
+| المصادقة الإدارية | دخول للشركاء بجلسات HMAC موقعة، cookie من نوع HttpOnly، وكلمات مرور من متغيرات بيئة الخادم |
+| النشر | Vercel للتطبيق الرئيسي؛ النشر الثابت في `frontend-demo/` مستقل عنه |
 
-## Run
+مسار الطلب الإلكتروني يتحقق من الأسعار والملكية والقياسات والألوان والمخزون والخصم داخل PostgreSQL، ثم ينشئ الطلبات ويخصم المخزون ضمن معاملة قاعدة بيانات واحدة. عند احتواء السلة على منتجات من أكثر من شريك، ينشئ النظام طلبًا لكل شريك. الطلب اليدوي في لوحة الإدارة يستخدم معاملة RPC منفصلة أيضًا.
 
-Node.js 20+, then `npm ci`, copy `.env.example` to `.env.local`, `npm run build` and `npm start`. Open http://localhost:3000. Keep `NEXT_PUBLIC_DEMO_MODE=true` for this presentation.
+يُستخدم `SUPABASE_SECRET_KEY` على الخادم فقط. الواجهة العامة لا تستطيع الكتابة مباشرة إلى جداول الطلبات أو المنتجات؛ وصولها المباشر مقيد بـRLS إلى بيانات الكتالوج العامة والتقييمات المعتمدة والإعداد الترويجي المحدد.
 
-Demo admin: `/admin/login`, names `Safia`, `Omaima` or `Aisha`, password `aso-demo-2026`. These credentials only work in demo mode. Each partner accesses their own products and orders; store popup settings are restricted to Safia.
+## الوظائف الرئيسية
 
-## Demo behavior
+- متجر متجاوب عربي/إنجليزي مع دعم RTL، البحث، التصفية، ترتيب المنتجات، تفاصيل المنتج والسلة.
+- Checkout للضيف، والتحقق الخادمي من بيانات العميل والمنتجات والخيارات والمخزون والأسعار والخصومات.
+- تتبع طلب برقم الطلب مع عرض أقل قدر ممكن من البيانات الشخصية وإخفاء اسم العميل.
+- لوحة شريك لإدارة منتجاته وطلباته والخصومات وإعدادات المتجر والتقارير.
+- تسجيل دخول للشركاء الثلاثة: Safia وOmaima وAisha. الجلسة موقعة وتنتهي بعد 12 ساعة، مع تحديد لمحاولات الدخول في قاعدة البيانات.
+- حفظ صور المنتجات في Supabase Storage؛ الأنواع المقبولة JPEG وPNG وWebP.
 
-- Catalog: clothing 50, footwear 30, bags/accessories 20, beauty/home 20. Every item has a unique photographic tile, bilingual ASO name, price, exact photographed color, sizes and stock.
-- Search, category selection, price filtering/sorting, variant selection, persistent cart and checkout.
-- Checkout validates variants, quantities and combined stock, derives prices and ownership on the server, creates an unpaid order per partner, and decrements stock atomically within the single local Node process.
-- Twelve fictional orders initialize the dashboard. Order tracking exposes masked names and no address or phone.
-- Electronic payment, Google login, WhatsApp OTP and live Supabase subscriptions are disabled. The demo cannot collect payment or contact Supabase.
-- Changes persist in ignored `.demo/database.json`; removing that file while the server is stopped restores the bundled fixtures. Uploaded demo pictures live under ignored `public/demo/uploads`.
+**لا توجد حسابات عملاء أو تسجيل دخول Google/WhatsApp في النسخة الحالية.** المشتري يستخدم Checkout كضيف، والمصادقة الموجودة مخصصة لدخول لوحة الشركاء.
 
-The local file database is suitable for a single-process presentation. It is not a production or multi-instance database; filesystem storage on serverless hosting may be ephemeral.
+## المتطلبات
 
-## Verification
+- Node.js `>=22.13.0 <27` (Node.js 22–26).
+- npm.
+- مشروع Supabase جديد أو مخصص لهذا التطبيق.
 
-`node scripts/validate-catalog.mjs` verifies 120 products, ten per subcategory, unique identifiers/photo references, positive prices/stock and required variants/assets.
+## التشغيل المحلي
 
-With the demo running: `node scripts/test-demo-api.mjs` tests unauthorized and forged sessions, partner isolation, variant validation, aggregate stock, server-derived totals and masked tracking. It only permits localhost and restores the local data file after its checks.
+```bash
+npm ci
+cp .env.example .env.local
+```
 
-`npm run lint` and `npm run build` verify source and production compilation.
+للتجربة المعزولة دون اتصال بـSupabase، اجعل `NEXT_PUBLIC_DEMO_MODE=true` في `.env.local` ثم شغّل:
 
-## Before enabling a real store
+```bash
+npm run dev
+```
 
-Use staging Supabase to verify schema (including `colors` and `description_ar`), RLS policies, storage rules and live integrations. Set a strong `ADMIN_SESSION_SECRET` and separate `ADMIN_PASSWORD_SAFIA`, `ADMIN_PASSWORD_OMAIMA`, `ADMIN_PASSWORD_AISHA`; only the service key belongs on the server. Rotate credentials previously committed in the original repository and remove them from history before sharing it publicly.
+افتح http://localhost:3000. دخول العرض المحلي: `Safia` أو `Omaima` أو `Aisha`، وكلمة المرور `aso-demo-2026`. هذه بيانات عرض محلية فقط ولا تصلح للإنتاج. تغييرات العرض تُحفظ في `.demo/database.json`، والصور تحت `public/demo/uploads/`؛ كلاهما مستثنى من Git. وضع العرض يعتمد على ملفات الجهاز ولا يصلح لاستضافة متعددة النسخ.
 
-The legacy live checkout path needs a transactional database/RPC review and real payment integration before production. Demo verification does not establish that live Supabase RLS or payment processing is safe. Do not switch off demo mode and deploy directly to customers.
+## إعداد Supabase
+
+ملف `.env.example` يوضح المتغيرات المطلوبة. للإنتاج المحلي أو Vercel، استخدم:
+
+```dotenv
+NEXT_PUBLIC_DEMO_MODE=false
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
+SUPABASE_SECRET_KEY=<server-only-secret-key>
+ADMIN_SESSION_SECRET=<random-secret-at-least-32-characters>
+ADMIN_PASSWORD_SAFIA=<unique-long-random-password>
+ADMIN_PASSWORD_OMAIMA=<unique-long-random-password>
+ADMIN_PASSWORD_AISHA=<unique-long-random-password>
+```
+
+أنشئ `ADMIN_SESSION_SECRET` عشوائيًا، مثلًا باستخدام `openssl rand -base64 48`، وضع جميع القيم في مخزن الأسرار المحلي أو Vercel. لا تضف `.env.local` إلى Git، ولا تضع المفتاح السري في أي متغير يبدأ بـ`NEXT_PUBLIC_`.
+
+لتطبيق المخطط من مستودع المشروع:
+
+```bash
+npx supabase login
+npx supabase link --project-ref rtokjrupdvftacewvmxm
+npx supabase db push
+```
+
+الترحيلات المسجلة هي `20261108132251_initial_schema.sql` (الجداول وRLS وStorage ودوال المعاملات)، و`20261108132622_seed_sample_catalog.sql` (**120 منتجًا وصورًا تجريبية خيالية** لأغراض العرض)، و`20261108132723_explicit_access_policies.sql` (سياسات رفض صريحة للجداول الحساسة وفهرس إضافي). لا تستخدم الأسعار أو التكلفة أو المخزون التجريبي كبيانات متجر حقيقية؛ استبدلها ببيانات معتمدة قبل تلقي طلبات فعلية.
+
+## الأوامر والفحوص
+
+```bash
+npm run dev        # خادم التطوير
+npm run lint       # ESLint
+npm run typecheck  # TypeScript
+npm run build      # بناء الإنتاج
+npm run validate   # lint + typecheck + فحوص الكتالوج والـAPI
+```
+
+للاختبار المحلي الإضافي، شغّل التطبيق بوضع العرض ثم نفّذ:
+
+```bash
+node scripts/test-demo-api.mjs
+```
+
+هذا الاختبار يعمل على localhost فقط ويختبر الجلسات المزورة وعزل الشركاء والتحقق من الخيارات والكميات والإجماليات والتتبع. وهو لا يثبت إعدادات حساب Supabase أو نشر Vercel الحي.
+
+## النشر على Vercel
+
+اربط مستودع `ahmed-abo-zahra/OSA-CLO` بمشروع Vercel مبني على Next.js، ثم أضف متغيرات الإنتاج الموجودة في `.env.example` إلى إعدادات المشروع. يجب أن تكون `NEXT_PUBLIC_DEMO_MODE=false` في Production، وأن تكون كلمات مرور الشركاء مختلفة وقوية. بعد إضافة المتغيرات وإتمام نشر ناجح، اختبر تسجيل الدخول والمنتجات وCheckout والتتبع في بيئة Preview أولًا، ثم Production.
+
+لا تنشر أي ملف `.env`، ولا تطبع المفاتيح في سجلات CI، ولا تشارك كلمة المرور التجريبية للمستخدمين الحقيقيين.
+
+## العرض الثابت منفصل عن التطبيق الكامل
+
+`frontend-demo/` نسخة HTML وCSS وJavaScript مستقلة لخدمة عرض الواجهة. لا تستخدم قاعدة بيانات أو تسجيل دخول أو Backend، ولا ينبغي احتسابها وحدها بوصفها مشروع Full Stack. التطبيق الرئيسي الذي يحقق المعمارية الكاملة هو تطبيق Next.js في جذر المستودع.
+
+## حدود النسخة الحالية
+
+- لا يوجد دفع إلكتروني؛ الطلبات غير مدفوعة حتى تأكيدها خارج التطبيق.
+- لا توجد حسابات للمشترين؛ Checkout متاح كضيف.
+- البيانات التجريبية والصور المولدة للعرض فقط، وليست مخزونًا أو عروضًا حقيقية.
+- لا تعتمد على وضع `.demo` كقاعدة بيانات إنتاجية أو متعددة النسخ.

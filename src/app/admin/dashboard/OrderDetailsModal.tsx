@@ -271,7 +271,6 @@ export default function OrderDetailsModal({
                             <td className="px-3 py-2.5">
                               <div className="flex items-center gap-2">
                                 {item.products?.image_url && (
-                                  // eslint-disable-next-line @next/next/no-img-element
                                   <div className="w-7 h-7 shrink-0"><ProductImage src={item.products.image_url} alt="Product" sizes="320px" /></div>
                                 )}
                                 <span className="font-semibold text-[#1A1A1A]">{item.products?.name_en ?? "—"}</span>

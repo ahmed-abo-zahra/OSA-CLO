@@ -1,240 +1,241 @@
-import { DEMO_MODE } from "@/lib/demo-mode";
-import { saveDemoImage } from "@/lib/demo-upload";
-import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { supabase } from "@/lib/supabase";
-import { supabaseAdmin } from "@/lib/supabase-admin";
-import { decodeSessionValue, COOKIE_NAME } from "@/lib/session";
-import { getPartnerDbId } from "@/lib/partners";
+import { revalidatePath } from 'next/cache';
+import { NextResponse, type NextRequest } from 'next/server';
+import { ALL_SUBCATEGORY_KEYS } from '@/lib/categories';
+import { getPartnerDbId } from '@/lib/partners';
+import { COOKIE_NAME, decodeSessionValue } from '@/lib/session';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { uploadProductImage } from '@/lib/product-images';
 
-const LOG = (tag: string, msg: string, data?: unknown) =>
-  console.log(`[${tag} /api/admin/products/[id]] ${msg}`, data ?? "");
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MAX_MULTIPART_BODY_BYTES = 4_200_000;
+type RouteContext = { params: Promise<{ id: string }> };
 
 function getSession(request: NextRequest) {
   return decodeSessionValue(request.cookies.get(COOKIE_NAME)?.value);
 }
 
-// ── Helper: upload image buffer to Supabase Storage ──────────────────────────
-async function uploadToStorage(
-  file: File,
-  partnerId: string
-): Promise<string | null> {
-  if (DEMO_MODE) return saveDemoImage(file);
+function getFormString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function parseList(value: string, maxItems = 20): string[] | null {
+  const items = [...new Set(value.split(',').map((item) => item.trim()).filter(Boolean))];
+  if (items.length > maxItems || items.some((item) => item.length > 40)) return null;
+  return items;
+}
+
+function hasSameOrigin(request: NextRequest): boolean {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
   try {
-    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
-    const fileName = `${partnerId}/${Date.now()}.${ext}`;
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-      .from("product-images")
-      .upload(fileName, buffer, {
-        contentType: file.type || "image/jpeg",
-        cacheControl: "3600",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("[PUT /api/admin/products/[id]] ❌ Storage upload error:", uploadError.message);
-      return null;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(uploadData.path);
-
-    return publicUrl;
-  } catch (imgErr) {
-    console.error("[PUT /api/admin/products/[id]] ❌ Unexpected image error:", imgErr);
-    return null;
+    return new URL(origin).origin === request.nextUrl.origin;
+  } catch {
+    return false;
   }
 }
 
-// ── PUT /api/admin/products/[id] — Update a product ─────────────────────────
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+async function getOwnedProduct(id: string, partnerId: string) {
+  const { data, error } = await supabaseAdmin
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  if (error) return { data: null, error };
+  if (!data || data.partner_id !== partnerId) return { data: null, error: null };
+  return { data, error: null };
+}
+
+export async function PUT(request: NextRequest, context: RouteContext) {
   const session = getSession(request);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
+
+  const { id } = await context.params;
+  if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid product ID.' }, { status: 400 });
+  const contentLength = Number(request.headers.get('content-length') ?? 0);
+  if (Number.isFinite(contentLength) && contentLength > MAX_MULTIPART_BODY_BYTES) {
+    return NextResponse.json({ error: 'The total image upload must be 4 MB or smaller.' }, { status: 413 });
   }
 
-  LOG("PUT", `Product ID: ${params.id}, Partner: ${session.partnerId}`);
+  const partnerId = getPartnerDbId(session.partnerId);
+  const { data: existing, error: lookupError } = await getOwnedProduct(id, partnerId);
+  if (lookupError) {
+    console.error('[admin/products] update lookup failed:', { code: lookupError.code });
+    return NextResponse.json({ error: 'Could not load the product.' }, { status: 500 });
+  }
+  if (!existing) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
+
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: 'Expected a multipart form submission.' }, { status: 400 });
+  }
+
+  const nameEn = getFormString(formData, 'name_en');
+  const nameAr = getFormString(formData, 'name_ar');
+  const description = getFormString(formData, 'description');
+  const descriptionAr = getFormString(formData, 'description_ar');
+  const category = getFormString(formData, 'category');
+  const costPrice = Number(getFormString(formData, 'cost_price'));
+  const sellingPrice = Number(getFormString(formData, 'selling_price'));
+  const stockQuantity = Number(getFormString(formData, 'stock_quantity'));
+  const sizes = parseList(formData.has('sizes') ? getFormString(formData, 'sizes') : (existing.sizes ?? []).join(','));
+  const colors = parseList(formData.has('colors') ? getFormString(formData, 'colors') : (existing.colors ?? []).join(','));
+  const imageValue = formData.get('image');
+  const imageFile = imageValue instanceof File && imageValue.size > 0 ? imageValue : null;
+  const extraImages = formData.getAll('extra_images').filter((value): value is File => value instanceof File && value.size > 0);
+  const totalImageBytes = (imageFile?.size ?? 0) + extraImages.reduce((sum, image) => sum + image.size, 0);
+
+  if (nameEn.length < 1 || nameEn.length > 160 || nameAr.length > 160) {
+    return NextResponse.json({ error: 'Product names must be within 160 characters.' }, { status: 400 });
+  }
+  if (description.length > 2000 || descriptionAr.length > 2000) {
+    return NextResponse.json({ error: 'Product descriptions must be within 2,000 characters.' }, { status: 400 });
+  }
+  if (!ALL_SUBCATEGORY_KEYS.includes(category)) {
+    return NextResponse.json({ error: 'Choose a supported product category.' }, { status: 400 });
+  }
+  if (!Number.isFinite(costPrice) || costPrice < 0 || !Number.isFinite(sellingPrice) || sellingPrice <= 0) {
+    return NextResponse.json({ error: 'Enter valid cost and selling prices.' }, { status: 400 });
+  }
+  if (!Number.isInteger(stockQuantity) || stockQuantity < 0 || stockQuantity > 100000 || !sizes || !colors) {
+    return NextResponse.json({ error: 'Enter valid stock, size, and color values.' }, { status: 400 });
+  }
+  if (extraImages.length > 5) return NextResponse.json({ error: 'Use up to five extra images.' }, { status: 400 });
+  if (totalImageBytes > MAX_MULTIPART_BODY_BYTES) {
+    return NextResponse.json({ error: 'The total image upload must be 4 MB or smaller.' }, { status: 413 });
+  }
 
   try {
-    // Parse FormData (same as POST — supports file + text)
-    const formData = await request.formData();
+    const imageUrl = imageFile ? await uploadProductImage(imageFile, session.partnerId) : existing.image_url;
+    const imageUrls: string[] = [...(existing.image_urls ?? [])];
+    for (const image of extraImages) imageUrls.push(await uploadProductImage(image, session.partnerId));
+    const updates: Record<string, unknown> = {
+      name_en: nameEn,
+      name_ar: nameAr || null,
+      description: description || null,
+      category,
+      cost_price: costPrice,
+      selling_price: sellingPrice,
+      sizes,
+      colors,
+      stock_quantity: stockQuantity,
+      in_stock: stockQuantity > 0,
+      image_url: imageUrl,
+      image_urls: imageUrls,
+    };
+    if (formData.has('description_ar')) updates.description_ar = descriptionAr || null;
 
-    const name_en       = (formData.get("name_en")       as string | null)?.trim() ?? "";
-    const name_ar       = (formData.get("name_ar")       as string | null)?.trim() ?? "";
-    const description   = (formData.get("description")   as string | null)?.trim() ?? "";
-    const category      = (formData.get("category")      as string | null)?.trim() ?? "";
-    const cost_price    = (formData.get("cost_price")    as string | null) ?? "";
-    const selling_price = (formData.get("selling_price") as string | null) ?? "";
-    const sizes_raw     = (formData.get("sizes")         as string | null) ?? "";
-    const stock_qty     = (formData.get("stock_quantity") as string | null) ?? "0";
-    const imageFile     = formData.get("image") as File | null;
-
-    LOG("PUT", "Fields:", { name_en, cost_price, selling_price, has_image: !!imageFile && imageFile.size > 0 });
-
-    if (!name_en) {
-      return NextResponse.json({ error: "الاسم بالإنجليزية مطلوب" }, { status: 400 });
-    }
-
-    const costNum    = parseFloat(cost_price);
-    const sellingNum = parseFloat(selling_price);
-
-    if (!Number.isFinite(costNum) || !Number.isFinite(sellingNum) || costNum < 0 || sellingNum <= 0 || !Number.isInteger(Number(stock_qty)) || Number(stock_qty)<0) {
-      return NextResponse.json({ error: "أسعار غير صالحة" }, { status: 400 });
-    }
-
-    // Verify ownership before update
-    const { data: existing } = await supabaseAdmin
-      .from("products")
-      .select("id, partner_id, image_url")
-      .eq("id", params.id)
-      .single();
-
-    const dbPartnerId = getPartnerDbId(session.partnerId);
-
-    if (!existing || existing.partner_id !== dbPartnerId) {
-      LOG("PUT", "❌ Forbidden — wrong partner");
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Handle image: upload new one if provided, keep existing otherwise
-    let image_url: string | null = existing.image_url ?? null;
-    if (imageFile && imageFile.size > 0) {
-      const newUrl = await uploadToStorage(imageFile, session.partnerId);
-      if (newUrl) image_url = newUrl;
-    }
-
-    const normalizedSizes = sizes_raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const { data, error: dbError } = await supabaseAdmin
-      .from("products")
-      .update({
-        name_en:       name_en,
-        name_ar:       name_ar       || null,
-        description:   description   || null,
-        category:      category      || null,
-        cost_price:    costNum,
-        selling_price: sellingNum,
-        sizes:         normalizedSizes,
-        ...(formData.has("colors") ? {colors:String(formData.get("colors")??"").split(",").map(c=>c.trim()).filter(Boolean)} : {}),
-        stock_quantity: Number(stock_qty),
-        in_stock: Number(stock_qty)>0,
-        image_url,
-      })
-      .eq("id", params.id)
-      .eq("partner_id", dbPartnerId)
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .update(updates)
+      .eq('id', id)
+      .eq('partner_id', partnerId)
       .select()
       .single();
-
-    if (dbError) {
-      console.error("[PUT /api/admin/products/[id]] ❌ DB update error:", dbError);
-      return NextResponse.json({ error: dbError.message }, { status: 500 });
-    }
-
-    LOG("PUT", "✅ Product updated:", data.id);
-    revalidatePath("/");
-    revalidatePath(`/product/${params.id}`);
-    revalidatePath(`/product/${params.id}`);
-    return NextResponse.json({ success: true, product: data });
-
-  } catch (err) {
-    console.error("[PUT /api/admin/products/[id]] ❌ Unexpected error:", err);
-    return NextResponse.json(
-      { error: `Server error: ${err instanceof Error ? err.message : String(err)}` },
-      { status: 500 }
-    );
-  }
-}
-
-// ── DELETE /api/admin/products/[id] — Delete a product ──────────────────────
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const session = getSession(request);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  LOG("DELETE", `Product: ${params.id}`);
-
-  try {
-    const dbPartnerId = getPartnerDbId(session.partnerId);
-    const { data: owned } = await supabaseAdmin.from("products").select("id,partner_id").eq("id", params.id).single();
-    if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    if (owned.partner_id !== dbPartnerId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-    const { error } = await supabaseAdmin
-      .from("products")
-      .delete()
-      .eq("id", params.id)
-      .eq("partner_id", dbPartnerId);
 
     if (error) {
-      console.error("[DELETE /api/admin/products/[id]] ❌ DB error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error('[admin/products] update failed:', { code: error.code });
+      return NextResponse.json({ error: 'Could not update the product. Check the details and try again.' }, { status: 400 });
     }
 
-    LOG("DELETE", "✅ Product deleted");
-    revalidatePath("/");
-    revalidatePath(`/product/${params.id}`);
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("[DELETE /api/admin/products/[id]] ❌ Unexpected error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    revalidatePath('/');
+    revalidatePath(`/product/${id}`);
+    return NextResponse.json({ success: true, product: data });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    if (message.includes('image') || message.includes('Image') || message.includes('JPEG') || message.includes('WebP')) {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+    console.error('[admin/products] update failed unexpectedly');
+    return NextResponse.json({ error: 'Could not update the product.' }, { status: 500 });
   }
 }
 
-// ── PATCH /api/admin/products/[id] — Toggle in_stock / is_available ─────────
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   const session = getSession(request);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
+
+  const { id } = await context.params;
+  if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid product ID.' }, { status: 400 });
+
+  const partnerId = getPartnerDbId(session.partnerId);
+  const { data: product, error: lookupError } = await getOwnedProduct(id, partnerId);
+  if (lookupError) {
+    console.error('[admin/products] delete lookup failed:', { code: lookupError.code });
+    return NextResponse.json({ error: 'Could not load the product.' }, { status: 500 });
+  }
+  if (!product) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
+
+  const { error } = await supabaseAdmin
+    .from('products')
+    .delete()
+    .eq('id', id)
+    .eq('partner_id', partnerId);
+  if (error) {
+    console.error('[admin/products] delete failed:', { code: error.code });
+    return NextResponse.json({ error: 'Could not delete the product.' }, { status: 500 });
+  }
+
+  revalidatePath('/');
+  revalidatePath(`/product/${id}`);
+  return NextResponse.json({ success: true });
+}
+
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  const session = getSession(request);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
+
+  const { id } = await context.params;
+  if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid product ID.' }, { status: 400 });
 
   try {
-    const body = await request.json();
-    const { field, value } = body as { field: "in_stock" | "is_available"; value: boolean };
-
-    LOG("PATCH", `Field: ${field} = ${value}`);
-
-    if (!["in_stock", "is_available"].includes(field) || typeof value !== "boolean") {
-      return NextResponse.json({ error: "Invalid field" }, { status: 400 });
+    const body: unknown = await request.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid product update.' }, { status: 400 });
+    }
+    const values = body as { field?: unknown; value?: unknown };
+    if ((values.field !== 'in_stock' && values.field !== 'is_available') || typeof values.value !== 'boolean') {
+      return NextResponse.json({ error: 'Invalid product update.' }, { status: 400 });
     }
 
-    const dbPartnerId = getPartnerDbId(session.partnerId);
-    const { data: owned } = await supabaseAdmin.from("products").select("id,partner_id").eq("id", params.id).single();
-    if (!owned) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    if (owned.partner_id !== dbPartnerId) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const partnerId = getPartnerDbId(session.partnerId);
+    const { data: existing, error: lookupError } = await supabaseAdmin
+      .from('products')
+      .select('id, partner_id, stock_quantity')
+      .eq('id', id)
+      .maybeSingle();
+    if (lookupError) {
+      console.error('[admin/products] toggle lookup failed:', { code: lookupError.code });
+      return NextResponse.json({ error: 'Could not load the product.' }, { status: 500 });
+    }
+    if (!existing || existing.partner_id !== partnerId) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
+    if (values.field === 'in_stock' && values.value && existing.stock_quantity < 1) {
+      return NextResponse.json({ error: 'Add stock before marking the product in stock.' }, { status: 409 });
+    }
 
-    const { data, error: dbError } = await supabaseAdmin
-      .from("products")
-      .update({ [field]: value })
-      .eq("id", params.id)
-      .eq("partner_id", dbPartnerId)
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .update({ [values.field]: values.value })
+      .eq('id', id)
+      .eq('partner_id', partnerId)
       .select()
       .single();
-
-    if (dbError) {
-      console.error("[PATCH /api/admin/products/[id]] ❌ DB error:", dbError);
-      return NextResponse.json({ error: dbError.message }, { status: 500 });
+    if (error) {
+      console.error('[admin/products] toggle update failed:', { code: error.code });
+      return NextResponse.json({ error: 'Could not update the product.' }, { status: 500 });
     }
 
-    LOG("PATCH", "✅ Updated:", { [field]: value });
-    revalidatePath("/");
-    revalidatePath(`/product/${params.id}`);
+    revalidatePath('/');
+    revalidatePath(`/product/${id}`);
     return NextResponse.json({ success: true, product: data });
-
-  } catch (err) {
-    console.error("[PATCH /api/admin/products/[id]] ❌ Unexpected error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error) {
+    if (error instanceof SyntaxError) return NextResponse.json({ error: 'Invalid JSON request.' }, { status: 400 });
+    console.error('[admin/products] toggle failed unexpectedly');
+    return NextResponse.json({ error: 'Could not update the product.' }, { status: 500 });
   }
 }
