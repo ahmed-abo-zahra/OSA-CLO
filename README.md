@@ -4,9 +4,9 @@
 
 ## الروابط
 
-- **التطبيق الرئيسي:** https://osa-clo.vercel.app
+- **التطبيق الرئيسي:** https://aso-clo-platform.vercel.app
 - **العرض الثابت للواجهة:** https://aso-clo-frontend-demo.vercel.app
-- **مستودع GitHub:** https://github.com/ahmedfrhat/OSA-CLO
+- **مستودع GitHub:** https://github.com/ahmed-abo-zahra/OSA-CLO
 
 > روابط العرض لا تعني أن الدفع الإلكتروني مفعّل. إتمام الطلب يسجل طلبًا غير مدفوع؛ لا توجد بوابة دفع أو تحصيل أموال.
 
@@ -38,7 +38,7 @@
 
 ## المتطلبات
 
-- Node.js `>=22.13.0`.
+- Node.js `>=22.13.0 <27` (Node.js 22–26).
 - npm.
 - مشروع Supabase جديد أو مخصص لهذا التطبيق.
 
@@ -104,7 +104,7 @@ node scripts/test-demo-api.mjs
 
 ## النشر على Vercel
 
-اربط مستودع `ahmedfrhat/OSA-CLO` بمشروع Vercel مبني على Next.js، ثم أضف متغيرات الإنتاج الموجودة في `.env.example` إلى إعدادات المشروع. يجب أن تكون `NEXT_PUBLIC_DEMO_MODE=false` في Production، وأن تكون كلمات مرور الشركاء مختلفة وقوية. بعد إضافة المتغيرات وإتمام نشر ناجح، اختبر تسجيل الدخول والمنتجات وCheckout والتتبع في بيئة Preview أولًا، ثم Production.
+اربط مستودع `ahmed-abo-zahra/OSA-CLO` بمشروع Vercel مبني على Next.js، ثم أضف متغيرات الإنتاج الموجودة في `.env.example` إلى إعدادات المشروع. يجب أن تكون `NEXT_PUBLIC_DEMO_MODE=false` في Production، وأن تكون كلمات مرور الشركاء مختلفة وقوية. بعد إضافة المتغيرات وإتمام نشر ناجح، اختبر تسجيل الدخول والمنتجات وCheckout والتتبع في بيئة Preview أولًا، ثم Production.
 
 لا تنشر أي ملف `.env`، ولا تطبع المفاتيح في سجلات CI، ولا تشارك كلمة المرور التجريبية للمستخدمين الحقيقيين.
 
