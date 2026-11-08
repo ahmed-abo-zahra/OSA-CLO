@@ -11,7 +11,7 @@ const exists = async (path) => {
   }
 };
 
-const [schema, checkoutRoute, manualOrderRoute, orderUpdateRoute, orderModal, dashboardShell, adminClient, browserClient, envExample, supabaseConfig, seed, accessMigration, partnerLabelsMigration, hardeningMigration, rateLimitPolicyMigration, productsApi, requestSecurity, rateLimit, discountRoute, reviewsRoute, trackingRoute, storefront, checkoutPage, bulkImport, readme, demoOrders, catalogFiles] = await Promise.all([
+const [schema, checkoutRoute, manualOrderRoute, orderUpdateRoute, orderModal, dashboardShell, adminClient, browserClient, envExample, supabaseConfig, seed, accessMigration, partnerLabelsMigration, hardeningMigration, rateLimitPolicyMigration, productsApi, requestSecurity, rateLimit, discountRoute, reviewsRoute, trackingRoute, storefront, checkoutPage, storefrontPage, productPage, productDetailClient, cartContext, bulkImport, readme, demoOrders, catalogFiles] = await Promise.all([
   read('supabase/migrations/20261108132251_initial_schema.sql'),
   read('src/app/api/checkout/route.ts'),
   read('src/app/api/admin/orders/route.ts'),
@@ -35,6 +35,10 @@ const [schema, checkoutRoute, manualOrderRoute, orderUpdateRoute, orderModal, da
   read('src/app/api/track/[orderId]/route.ts'),
   read('src/components/storefront/StorefrontClient.tsx'),
   read('src/app/checkout/page.tsx'),
+  read('src/app/page.tsx'),
+  read('src/app/product/[id]/page.tsx'),
+  read('src/app/product/[id]/ProductDetailClient.tsx'),
+  read('src/context/CartContext.tsx'),
   read('src/app/admin/dashboard/BulkImport.tsx'),
   read('README.md'),
   read('src/lib/demo-orders.json'),
@@ -88,7 +92,11 @@ add('admin order modal merges partial updates and supports JSONB logs', orderMod
 add('dashboard status changes only after a successful API response', dashboardShell.includes('if (!response.ok)') && dashboardShell.includes('handleOrderStatusChange(orderId, newStatus)'));
 add('products are removed from the public Realtime publication', hardeningMigration.toLowerCase().includes('alter publication supabase_realtime drop table public.products'));
 add('public product grant excludes cost and partner data', publicProductGrant.length > 0 && !/cost_price|partner_id/i.test(publicProductGrant));
-add('public products REST API has an explicit field allowlist', productsApi.includes('PUBLIC_PRODUCT_FIELDS') && !/cost_price/i.test(productsApi));
+add('public products REST API excludes cost and partner ownership', productsApi.includes('PUBLIC_PRODUCT_FIELDS') && !/cost_price|partner_id/i.test(productsApi));
+add('storefront and product pages do not serialize partner IDs', !storefront.includes('partner_id') && !storefrontPage.includes('partner_id') && !productPage.includes('partner_id') && !productDetailClient.includes('partner_id'));
+add('client cart and checkout do not carry partner IDs', !cartContext.includes('partnerId:string') && cartContext.includes('delete safeItem.partnerId') && !checkoutPage.includes('partnerId: i.partnerId') && !checkoutPage.includes('partner_id: item.partnerId'));
+add('checkout derives partner ownership from the product table', checkoutRoute.includes(".select('id, partner_id')") && !checkoutRoute.includes('item.partner_id') && !checkoutRoute.includes('item.partnerId'));
+add('discount validation derives partner ownership server-side', !discountRoute.includes('value.partner_id') && discountRoute.includes('product.partner_id'));
 add('public products REST API filters unavailable inventory', productsApi.includes(".eq('is_available', true)") && productsApi.includes(".eq('in_stock', true)"));
 add('same-origin helper requires Origin or Referer', requestSecurity.includes("headers.get('origin') ?? request.headers.get('referer')") && requestSecurity.includes('request.nextUrl.origin'));
 add('rate limiter fails closed on missing secret or RPC error', rateLimit.includes('status: 503') && rateLimit.includes("rpc('consume_api_rate_limit'"));

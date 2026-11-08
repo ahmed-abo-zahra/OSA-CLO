@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-type NormalizedItem = { productId: string; partnerId: string; quantity: number };
+type NormalizedItem = { productId: string; quantity: number };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -36,14 +36,12 @@ export async function POST(request: NextRequest) {
     const normalizedItems = rawBody.items.map((value): NormalizedItem | null => {
       if (!isRecord(value)) return null;
       const productId = value.product_id;
-      const partnerId = value.partner_id;
       const quantity = value.quantity;
       if (
         typeof productId !== 'string' || !UUID_PATTERN.test(productId) ||
-        typeof partnerId !== 'string' || !UUID_PATTERN.test(partnerId) ||
         typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1 || quantity > 50
       ) return null;
-      return { productId, partnerId, quantity };
+      return { productId, quantity };
     });
 
     if (normalizedItems.some((item) => item === null)) {
@@ -79,13 +77,13 @@ export async function POST(request: NextRequest) {
 
     for (const item of items) {
       const product = productMap.get(item.productId);
-      if (!product || product.partner_id !== item.partnerId || !product.is_available || !product.in_stock) {
+      if (!product || !product.is_available || !product.in_stock) {
         return json({ error: 'One or more products are unavailable.' }, 409);
       }
       requestedByProduct.set(item.productId, (requestedByProduct.get(item.productId) ?? 0) + item.quantity);
       subtotalByPartner.set(
-        item.partnerId,
-        (subtotalByPartner.get(item.partnerId) ?? 0) + Number(product.selling_price) * item.quantity,
+        product.partner_id,
+        (subtotalByPartner.get(product.partner_id) ?? 0) + Number(product.selling_price) * item.quantity,
       );
     }
 

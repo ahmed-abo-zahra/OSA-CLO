@@ -14,7 +14,6 @@ import WishlistButton from "@/components/WishlistButton";
 
 export interface PDPProduct {
   id: string;
-  partner_id: string;
   name_en: string;
   name_ar?: string | null;
   description?: string | null;
@@ -176,7 +175,6 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
     setSizeError(false);
     addItem({
       productId: product.id,
-      partnerId: product.partner_id,
       nameEn:    product.name_en,
       nameAr:    product.name_ar ?? undefined,
       price:     product.selling_price,

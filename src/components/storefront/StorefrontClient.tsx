@@ -16,7 +16,6 @@ import WishlistButton from "@/components/WishlistButton";
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface StorefrontProduct {
   id: string;
-  partner_id: string;
   name_en: string;
   name_ar?: string | null;
   description?: string | null;
@@ -296,7 +295,6 @@ function ProductCard({
     if (hasSizes) return;
     onAdd({
       productId: product.id,
-      partnerId: product.partner_id,
       nameEn:    product.name_en,
       nameAr:    product.name_ar ?? undefined,
       price:     product.selling_price,

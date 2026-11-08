@@ -12,8 +12,6 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3
 type ClientCartItem = {
   product_id?: unknown;
   productId?: unknown;
-  partner_id?: unknown;
-  partnerId?: unknown;
   size?: unknown;
   color?: unknown;
   quantity?: unknown;
@@ -115,13 +113,11 @@ export async function POST(request: NextRequest) {
       if (!isRecord(entry)) return null;
       const item = entry as ClientCartItem;
       const productId = item.product_id ?? item.productId;
-      const partnerId = item.partner_id ?? item.partnerId;
       const quantity = item.quantity;
       const size = item.size ?? null;
       const color = item.color ?? null;
       if (
         typeof productId !== 'string' || !UUID_PATTERN.test(productId) ||
-        typeof partnerId !== 'string' || !UUID_PATTERN.test(partnerId) ||
         typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1 || quantity > 50 ||
         (size !== null && (typeof size !== 'string' || size.length > 40)) ||
         (color !== null && (typeof color !== 'string' || color.length > 80))
@@ -130,7 +126,6 @@ export async function POST(request: NextRequest) {
       }
       return {
         product_id: productId,
-        partner_id: partnerId,
         quantity,
         size: typeof size === 'string' ? size.trim() || null : null,
         color: typeof color === 'string' ? color.trim() || null : null,
@@ -142,6 +137,26 @@ export async function POST(request: NextRequest) {
     }
     const validItems = normalizedItems.filter((item): item is NonNullable<typeof item> => item !== null);
 
+    const productIds = [...new Set(validItems.map((item) => item.product_id))];
+    const { data: productOwners, error: ownerLookupError } = await supabaseAdmin
+      .from('products')
+      .select('id, partner_id')
+      .in('id', productIds);
+    if (ownerLookupError) {
+      console.error('[checkout] product owner lookup failed:', { code: ownerLookupError.code });
+      return NextResponse.json({ error: 'Products are temporarily unavailable.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+    }
+    const partnerByProduct = new Map((productOwners ?? []).map((product) => [product.id, product.partner_id]));
+    const transactionItems = validItems.map((item) => {
+      const partnerId = partnerByProduct.get(item.product_id);
+      if (!partnerId || !UUID_PATTERN.test(partnerId)) return null;
+      return { ...item, partner_id: partnerId };
+    });
+    if (transactionItems.some((item) => item === null)) {
+      return NextResponse.json({ error: 'One or more products are unavailable.' }, { status: 409, headers: { 'Cache-Control': 'no-store' } });
+    }
+    const itemsForTransaction = transactionItems.filter((item): item is NonNullable<typeof item> => item !== null);
+
     const { data, error } = await supabaseAdmin.rpc('place_storefront_order', {
       p_customer_name: customerName,
       p_customer_phone: customerPhone,
@@ -149,7 +164,7 @@ export async function POST(request: NextRequest) {
       p_notes: notes || null,
       p_payment_type: paymentType,
       p_discount_code: discountCode || null,
-      p_items: validItems,
+      p_items: itemsForTransaction,
     });
 
     if (error) {

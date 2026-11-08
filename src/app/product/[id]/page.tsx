@@ -44,7 +44,7 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
   const params = await props.params;
   const { data } = await supabaseAdmin
     .from("products")
-    .select("id, partner_id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar")
+    .select("id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar")
     .eq("id", params.id)
     .eq("is_available", true)
     .single();

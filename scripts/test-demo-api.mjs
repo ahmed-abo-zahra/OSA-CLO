@@ -92,7 +92,7 @@ try {
 
   const checkout = {
     customer_name: 'عميل اختبار', customer_phone: '01000000000', shipping_address: 'عنوان تجريبي القاهرة',
-    items: [{ productId: ownProduct.id, size: ownProduct.sizes[0], color: ownProduct.colors[0], quantity: 1, price: 1 }],
+    items: [{ productId: ownProduct.id, partner_id: 'not-a-real-partner', size: ownProduct.sizes[0], color: ownProduct.colors[0], quantity: 1, price: 1 }],
     discount_amount: 9999,
   };
   expectStatus(await call('/api/checkout', checkout, null, 'POST', null), 403);
@@ -101,6 +101,7 @@ try {
   expectStatus(await call('/api/checkout', { ...checkout, items: [null] }), 400);
   expectStatus(await call('/api/checkout', { ...checkout, items: [{ ...checkout.items[0], color: 'invalid' }] }), 400);
   expectStatus(await call('/api/discount/validate', { code: 'ANY', items: [null] }), 400);
+  expectStatus(await call('/api/discount/validate', { code: 'MISSING', items: [{ product_id: ownProduct.id, partner_id: 'not-a-real-partner', quantity: 1 }] }), 404);
   expectStatus(await call('/api/reviews', { product_id: ownProduct.id, customer_name: 'Test', rating: 5 }, null, 'POST', null), 403);
   expectStatus(await call('/api/checkout', { ...checkout, items: [
     { ...checkout.items[0], quantity: ownProduct.stock_quantity },

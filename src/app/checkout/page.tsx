@@ -100,7 +100,6 @@ export default function CheckoutPage() {
           code: discountCode.trim(),
           items: items.map((item) => ({
             product_id: item.productId,
-            partner_id: item.partnerId,
             quantity: item.quantity,
           })),
         }),
@@ -162,7 +161,6 @@ export default function CheckoutPage() {
           discount_code:    discountCode.trim() || undefined,
           items: items.map((i) => ({
             productId: i.productId,
-            partnerId: i.partnerId,
             size:      i.size,
             color:     i.color,
             quantity:  i.quantity,

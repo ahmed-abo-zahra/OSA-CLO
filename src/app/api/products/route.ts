@@ -6,7 +6,6 @@ const MAX_OFFSET = 100_000;
 
 const PUBLIC_PRODUCT_FIELDS = [
   'id',
-  'partner_id',
   'name_en',
   'name_ar',
   'description',
