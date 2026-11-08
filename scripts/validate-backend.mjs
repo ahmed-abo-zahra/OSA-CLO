@@ -113,6 +113,7 @@ add('local demo fixtures contain no fake customers', demoOrdersParsed.orders.len
 add('obsolete seed endpoint is absent', !(await exists('src/app/api/seed-products/route.ts')));
 add('README explains that the demo catalog remains available', /120 منتج|120 product/i.test(readme) && /portfolio|توضيحي|demo/i.test(readme));
 add('README documents the public products REST API', readme.includes('/api/products'));
+add('README contains the three-partner permissions matrix', [...readme.matchAll(/^\|\s*\*\*Partner [ABC]\*\*\s*\|/gm)].length === 3 && readme.includes('صلاحية تحديث النافذة العامة') && readme.includes('لا يملك تغييره') && readme.includes('لا يستطيع تغيير `partner_id`'));
 
 let failed = false;
 for (const { label, ok } of checks) {
