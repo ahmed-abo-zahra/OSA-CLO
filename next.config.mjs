@@ -16,6 +16,7 @@ if (supabaseUrl) {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   images: {
     remotePatterns: supabaseHostname
       ? [{ protocol: 'https', hostname: supabaseHostname, pathname: '/storage/v1/object/public/**' }]
@@ -28,6 +29,10 @@ const nextConfig = {
       { key: 'X-Frame-Options', value: 'DENY' },
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+      {
+        key: 'Content-Security-Policy',
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app; frame-ancestors 'none';",
+      },
     ];
 
     if (process.env.VERCEL_ENV === 'production') {
@@ -38,9 +43,11 @@ const nextConfig = {
     return [
       { source: '/admin/:path*', headers: privateNoStore },
       { source: '/api/admin/:path*', headers: privateNoStore },
+      { source: '/api/account/:path*', headers: privateNoStore },
       { source: '/api/checkout', headers: privateNoStore },
       { source: '/api/discount/validate', headers: privateNoStore },
       { source: '/api/reviews', headers: privateNoStore },
+      { source: '/api/track', headers: privateNoStore },
       { source: '/api/track/:path*', headers: privateNoStore },
       { source: '/:path*', headers: securityHeaders },
     ];
