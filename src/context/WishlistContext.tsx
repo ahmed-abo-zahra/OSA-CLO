@@ -85,7 +85,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     const ids = currentItems.map((i) => i.productId);
     const { data, error } = await supabase
       .from("products")
-      .select("id, name_en, selling_price, stock_quantity, is_available, in_stock")
+      .select("id, name_en, selling_price, is_available, in_stock")
       .in("id", ids);
 
     if (error || !data) return;
@@ -123,19 +123,6 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Low stock detection (≤ 3 units)
-      const qty = product.stock_quantity ?? 0;
-      if (qty > 0 && qty <= 3) {
-        const notifId = `low-${product.id}-${qty}`;
-        newNotifs.push({
-          id: notifId,
-          productId: product.id,
-          nameEn: product.name_en,
-          type: "low_stock",
-          message_ar: `⚡ ${product.name_en} — فضل بس ${qty} قطعة! الحق قبل ما يخلص`,
-          message_en: `⚡ ${product.name_en} — Only ${qty} left! Grab it before it's gone`,
-        });
-      }
     }
 
     if (newNotifs.length > 0) {

@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { ALL_SUBCATEGORY_KEYS } from "@/lib/categories";
+import { parseProductCsv as parseCSV, type ParsedProduct } from "@/lib/product-csv";
 
 interface Props {
   onSuccess: () => void;
+  categoryKeys: readonly string[];
 }
 
 const TEMPLATE_CSV = "name_en,name_ar,category,cost_price,selling_price,stock_quantity,description\n";
@@ -23,72 +24,7 @@ function downloadTemplate() {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-interface ParsedProduct {
-  name_en: string;
-  name_ar?: string;
-  category?: string;
-  cost_price: number;
-  selling_price: number;
-  stock_quantity: number;
-  description?: string;
-}
-
-function parseCSV(text: string): ParsedProduct[] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let quoted = false;
-  const source = text.replace(/^\uFEFF/, "");
-
-  for (let index = 0; index < source.length; index += 1) {
-    const char = source[index];
-    if (char === '"') {
-      if (quoted && source[index + 1] === '"') {
-        field += '"';
-        index += 1;
-      } else {
-        quoted = !quoted;
-      }
-    } else if (char === "," && !quoted) {
-      row.push(field.trim());
-      field = "";
-    } else if ((char === "\n" || char === "\r") && !quoted) {
-      if (char === "\r" && source[index + 1] === "\n") index += 1;
-      row.push(field.trim());
-      if (row.some((value) => value.length > 0)) rows.push(row);
-      row = [];
-      field = "";
-    } else {
-      field += char;
-    }
-  }
-
-  if (quoted) throw new Error("CSV contains an unclosed quoted field.");
-  if (field.length > 0 || row.length > 0) {
-    row.push(field.trim());
-    if (row.some((value) => value.length > 0)) rows.push(row);
-  }
-  if (rows.length < 2) return [];
-
-  const headers = rows[0].map((header) => header.trim().toLowerCase());
-  const categoryAliases = new Map(ALL_SUBCATEGORY_KEYS.map((key) => [key.replace(/[^a-z0-9]/gi, "").toLowerCase(), key]));
-  return rows.slice(1).map((values) => {
-    const record = Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])) as Record<string, string>;
-    const rawCategory = record.category ?? "";
-    const normalizedCategory = categoryAliases.get(rawCategory.replace(/[^a-z0-9]/gi, "").toLowerCase()) ?? "";
-    return {
-      name_en: record.name_en ?? "",
-      name_ar: record.name_ar ?? "",
-      category: normalizedCategory,
-      cost_price: Number(record.cost_price),
-      selling_price: Number(record.selling_price),
-      stock_quantity: Number(record.stock_quantity),
-      description: record.description ?? "",
-    };
-  });
-}
-
-export default function BulkImport({ onSuccess }: Props) {
+export default function BulkImport({ onSuccess, categoryKeys }: Props) {
   const { t, lang } = useLanguage();
   const [preview, setPreview]   = useState<ParsedProduct[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -110,7 +46,7 @@ export default function BulkImport({ onSuccess }: Props) {
     reader.onload = (ev) => {
       try {
         const text = typeof ev.target?.result === "string" ? ev.target.result : "";
-        const products = parseCSV(text);
+        const products = parseCSV(text, categoryKeys);
         if (products.length > MAX_IMPORT_ROWS) {
           setResult({ success: 0, errors: [`A single import can contain at most ${MAX_IMPORT_ROWS} products.`] });
         } else if (products.length === 0) {
@@ -194,7 +130,7 @@ export default function BulkImport({ onSuccess }: Props) {
         <p className="text-[10px] text-gray-600 dark:text-gray-400 mt-2">{t("admin.bulk.step1desc")}</p>
         <p className="mt-2 break-words text-[10px] text-gray-600 dark:text-gray-400">
           {lang === "ar" ? "الحقول: name_en, name_ar, category, cost_price, selling_price, stock_quantity, description. الحد الأقصى 100 منتج. الفئات: " : "Columns: name_en, name_ar, category, cost_price, selling_price, stock_quantity, description. Maximum 100 products. Categories: "}
-          {ALL_SUBCATEGORY_KEYS.join(", ")}
+          {categoryKeys.join(", ")}
         </p>
       </div>
 

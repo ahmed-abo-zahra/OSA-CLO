@@ -11,9 +11,11 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit --incremental false",
-    "validate": "npm run lint && npm run typecheck && node scripts/validate-catalog.mjs && node scripts/validate-frontend.mjs && node scripts/validate-backend.mjs"
+    "test:security": "node --experimental-strip-types --test scripts/test-trusted-client-ip.mjs scripts/test-request-security.mjs scripts/test-tracking-token.mjs scripts/test-internal-redirect.mjs",
+    "validate": "npm run lint && npm run typecheck && npm run test:security && node scripts/validate-catalog.mjs && node scripts/validate-frontend.mjs && node scripts/validate-backend.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.106.1",
     "fuse.js": "^7.3.0",
     "next": "^16.4.5",

@@ -1,8 +1,8 @@
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 let supabaseHostname;
 
-if (process.env.VERCEL_ENV === 'production' && process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
-  throw new Error('NEXT_PUBLIC_DEMO_MODE must be false for Production deployments.');
+if (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
+  throw new Error('NEXT_PUBLIC_DEMO_MODE must be false for every production build or runtime.');
 }
 
 if (supabaseUrl) {
@@ -34,7 +34,16 @@ const nextConfig = {
       securityHeaders.push({ key: 'Strict-Transport-Security', value: 'max-age=31536000' });
     }
 
-    return [{ source: '/:path*', headers: securityHeaders }];
+    const privateNoStore = [{ key: 'Cache-Control', value: 'private, no-store, max-age=0' }];
+    return [
+      { source: '/admin/:path*', headers: privateNoStore },
+      { source: '/api/admin/:path*', headers: privateNoStore },
+      { source: '/api/checkout', headers: privateNoStore },
+      { source: '/api/discount/validate', headers: privateNoStore },
+      { source: '/api/reviews', headers: privateNoStore },
+      { source: '/api/track/:path*', headers: privateNoStore },
+      { source: '/:path*', headers: securityHeaders },
+    ];
   },
 };
 

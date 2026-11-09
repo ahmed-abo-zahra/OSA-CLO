@@ -22,7 +22,6 @@ export interface StorefrontProduct {
   category?: string | null;
   selling_price: number;
   sizes?: string[] | null;
-  stock_quantity: number;
   image_url?: string | null;
   image_urls?: string[] | null;
   is_available?: boolean;
@@ -31,7 +30,6 @@ export interface StorefrontProduct {
 
 interface Props {
   products: StorefrontProduct[];
-  categories: string[];
   loadError?: boolean;
 }
 
@@ -54,22 +52,30 @@ export default function StorefrontClient({ products: initialProducts, loadError 
   const [category,  setCategory]  = useState("all");
   const [sort, setSort] = useState("featured");
   const [maxPrice, setMaxPrice] = useState("");
-  const [mounted,   setMounted]   = useState(false);
   const [loadFailed, setLoadFailed] = useState(loadError ?? false);
-
-  useEffect(() => { setMounted(true); }, []);
+  const availableCategories = useMemo(
+    () => Array.from(new Set(products.map((product) => product.category).filter((value): value is string => Boolean(value)))),
+    [products],
+  );
 
   // Refresh through a server allowlist; do not expose whole-row Realtime payloads.
   useEffect(() => {
     if (DEMO_MODE) return;
-    const controller = new AbortController();
+    let disposed = false;
+    let inFlight = false;
+    let activeController: AbortController | null = null;
     const refreshCatalog = async () => {
+      if (disposed || inFlight) return;
+      inFlight = true;
+      const controller = new AbortController();
+      activeController = controller;
       try {
         const catalog: StorefrontProduct[] = [];
         let offset = 0;
+        let pageCount = 0;
         while (true) {
           const path = offset === 0 ? "/api/products" : `/api/products?offset=${offset}`;
-          const response = await fetch(path, { cache: "no-store", signal: controller.signal });
+          const response = await fetch(path, { signal: controller.signal });
           if (!response.ok) throw new Error("Catalog refresh failed");
           const payload: unknown = await response.json();
           if (!payload || typeof payload !== "object" || !Array.isArray((payload as { products?: unknown }).products)) {
@@ -77,23 +83,30 @@ export default function StorefrontClient({ products: initialProducts, loadError 
           }
           const page = payload as { products: StorefrontProduct[]; hasMore?: unknown; nextOffset?: unknown };
           catalog.push(...page.products);
+          pageCount += 1;
           if (page.hasMore !== true) break;
-          if (typeof page.nextOffset !== "number" || !Number.isInteger(page.nextOffset) || page.nextOffset <= offset) {
+          if (pageCount >= 20 || typeof page.nextOffset !== "number" || !Number.isInteger(page.nextOffset) || page.nextOffset <= offset || page.nextOffset > 10_000) {
             throw new Error("Invalid catalog pagination response");
           }
           offset = page.nextOffset;
         }
-        setProducts(catalog);
-        setLoadFailed(false);
+        if (!disposed) {
+          setProducts(catalog);
+          setLoadFailed(false);
+        }
       } catch {
-        if (!controller.signal.aborted) setLoadFailed(true);
+        if (!disposed && !controller.signal.aborted) setLoadFailed(true);
+      } finally {
+        inFlight = false;
+        if (activeController === controller) activeController = null;
       }
     };
-    if (loadError) void refreshCatalog();
+    void refreshCatalog();
     const interval = window.setInterval(() => void refreshCatalog(), 60_000);
     window.addEventListener("focus", refreshCatalog);
     return () => {
-      controller.abort();
+      disposed = true;
+      activeController?.abort();
       window.clearInterval(interval);
       window.removeEventListener("focus", refreshCatalog);
     };
@@ -138,23 +151,6 @@ export default function StorefrontClient({ products: initialProducts, loadError 
     await navigator.clipboard.writeText(url);
     info(t("storefront.products.linkCopied"));
   }, [lang, t, info]);
-
-  // Skeleton loading
-  if (!mounted) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-8 sm:gap-x-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i}>
-              <div className="aspect-[3/4] skeleton mb-3" />
-              <div className="h-3.5 skeleton mb-2 w-3/4 rounded" />
-              <div className="h-3.5 skeleton w-1/2 rounded" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
@@ -205,6 +201,7 @@ export default function StorefrontClient({ products: initialProducts, loadError 
         <div className="mb-4">
           <CategoryFilter
             activeCategory={category}
+            categories={availableCategories}
             onSelect={(cat) => {
               setCategory(cat);
               setSearch("");
@@ -286,7 +283,6 @@ function ProductCard({
   onAdd: (item: import("@/context/CartContext").CartItem) => void;
 }) {
   const displayName = lang === "ar" && product.name_ar ? product.name_ar : product.name_en;
-  const isLowStock  = product.stock_quantity > 0 && product.stock_quantity < 5;
   const hasSizes    = (product.sizes?.length ?? 0) > 0;
   // Cache-busted image URL — ensures newly uploaded images show immediately
   const imageSrc    = bustImageCache(product.image_url);
@@ -301,7 +297,6 @@ function ProductCard({
       imageUrl:  product.image_url ?? undefined,
       size:      "",
       quantity:  1,
-      maxStock: product.stock_quantity,
     });
   }
 
@@ -322,11 +317,6 @@ function ProductCard({
 
         {/* Badges — pointer-events-none so they don't block the Link */}
         <div className={`absolute top-2 ${isRTL ? "right-2" : "left-2"} flex flex-col gap-1 pointer-events-none`}>
-          {isLowStock && (
-            <span className="bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 tracking-wide">
-              {t("storefront.products.onlyLeft").replace("{{n}}", String(product.stock_quantity))}
-            </span>
-          )}
           {hasSizes && (
             <span className="bg-brand-black dark:bg-offwhite text-white dark:text-brand-black text-[9px] font-bold px-2 py-0.5 tracking-wide">
               {lang==="ar"?"جاهز للشحن":"READY TO SHIP"}

@@ -9,11 +9,16 @@ import { useLang } from "@/context/LanguageContext";
 interface Props {
   activeCategory: string;
   onSelect: (key: string) => void;
+  categories: string[];
 }
 
-export default function CategoryFilter({ activeCategory, onSelect }: Props) {
+export default function CategoryFilter({ activeCategory, onSelect, categories }: Props) {
   const { lang, isRTL } = useLang();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const availableCategories = new Set(categories);
+  const visibleGroups = CATEGORY_GROUPS
+    .map((group) => ({ ...group, subcategories: group.subcategories.filter((sub) => availableCategories.has(sub.key)) }))
+    .filter((group) => group.subcategories.length > 0);
 
   const label = (en: string, ar: string) => (lang === "ar" ? ar : en);
 
@@ -40,7 +45,7 @@ export default function CategoryFilter({ activeCategory, onSelect }: Props) {
           {label("All", "الكل")}
         </button>
 
-        {CATEGORY_GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.key} className="relative">
             {/* Group pill */}
             <button

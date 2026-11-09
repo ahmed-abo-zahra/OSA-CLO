@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Partner definitions — CHANGE passwords before production deployment!
+// Partner definitions. Credentials are configured only through server-side environment secrets.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface Partner {
@@ -39,5 +39,19 @@ export function getPartnerById(id: string): Partner | null {
 }
 
 export function getPartnerDbId(id: string): string {
-  return getPartnerById(id)?.dbId ?? id;
+  const partner = getPartnerById(id);
+  if (!partner) throw new Error('Unknown partner identifier.');
+  return partner.dbId;
+}
+
+export const PARTNER_CATEGORY_KEYS: Record<string, readonly string[]> = {
+  'partner-a': ['abayas', 'dresses', 'isdals', 'pants', 'tshirts'],
+  'partner-b': ['heels', 'slippers', 'sneakers'],
+  'partner-c': ['accessories', 'girls_bags', 'home_appliances', 'makeup'],
+};
+
+export function getPartnerCategoryKeys(id: string): readonly string[] {
+  const partner = getPartnerById(id);
+  if (!partner) throw new Error('Unknown partner identifier.');
+  return PARTNER_CATEGORY_KEYS[partner.id] ?? [];
 }

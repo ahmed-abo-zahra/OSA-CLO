@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
 import { enforceRateLimit } from '@/lib/rate-limit';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -20,11 +20,10 @@ export async function POST(request: NextRequest) {
   const rateLimitResponse = await enforceRateLimit(request, 'discount-validate', 30, 900);
   if (rateLimitResponse) return rateLimitResponse;
 
-  const contentLength = Number(request.headers.get('content-length') ?? 0);
-  if (Number.isFinite(contentLength) && contentLength > 65536) return json({ error: 'The request is too large.' }, 413);
-
   try {
-    const rawBody: unknown = await request.json();
+    const bodyResult = await readJsonBody(request, 16_384);
+    if (!bodyResult.ok) return json({ error: bodyResult.status === 413 ? 'The request is too large.' : 'Invalid JSON request.' }, bodyResult.status);
+    const rawBody = bodyResult.value;
     if (!isRecord(rawBody)) return json({ error: 'Invalid request.' }, 400);
 
     const code = typeof rawBody.code === 'string' ? rawBody.code.trim().toUpperCase() : '';

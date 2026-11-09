@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
 import { enforceRateLimit } from '@/lib/rate-limit';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -18,11 +18,10 @@ export async function POST(request: NextRequest) {
   const rateLimitResponse = await enforceRateLimit(request, 'review-submit', 3, 3600);
   if (rateLimitResponse) return rateLimitResponse;
 
-  const contentLength = Number(request.headers.get('content-length') ?? 0);
-  if (Number.isFinite(contentLength) && contentLength > 8192) return json({ error: 'The review is too large.' }, 413);
-
   try {
-    const body: unknown = await request.json();
+    const bodyResult = await readJsonBody(request, 8192);
+    if (!bodyResult.ok) return json({ error: bodyResult.status === 413 ? 'The review is too large.' : 'Invalid JSON request.' }, bodyResult.status);
+    const body = bodyResult.value;
     if (!isRecord(body)) return json({ error: 'Invalid review.' }, 400);
 
     const productId = body.product_id;

@@ -1,55 +1,27 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getPublicCatalogPage, PUBLIC_CATALOG_PAGE_SIZE } from '@/lib/catalog-cache';
 
-const PAGE_SIZE = 500;
-const MAX_OFFSET = 100_000;
-
-const PUBLIC_PRODUCT_FIELDS = [
-  'id',
-  'name_en',
-  'name_ar',
-  'description',
-  'description_ar',
-  'category',
-  'selling_price',
-  'sizes',
-  'colors',
-  'stock_quantity',
-  'in_stock',
-  'is_available',
-  'image_url',
-  'image_urls',
-  'created_at',
-  'updated_at',
-].join(', ');
+const MAX_OFFSET = 10_000;
 
 export async function GET(request: NextRequest) {
   const rawOffset = request.nextUrl.searchParams.get('offset');
   const offset = rawOffset === null ? 0 : Number(rawOffset);
-  if (!Number.isInteger(offset) || offset < 0 || offset > MAX_OFFSET) {
+  if (!Number.isInteger(offset) || offset < 0 || offset > MAX_OFFSET || offset % PUBLIC_CATALOG_PAGE_SIZE !== 0) {
     return NextResponse.json({ error: 'Invalid catalog offset.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
   }
 
-  const { data, error } = await supabaseAdmin
-    .from('products')
-    .select(PUBLIC_PRODUCT_FIELDS)
-    .eq('is_available', true)
-    .eq('in_stock', true)
-    .order('created_at', { ascending: false })
-    .range(offset, offset + PAGE_SIZE - 1);
-
-  if (error) {
-    console.error('[products] public catalog lookup failed:', { code: error.code });
+  try {
+    const page = await getPublicCatalogPage(offset);
+    return NextResponse.json(page, {
+      headers: { 'Cache-Control': 'public, max-age=0, s-maxage=30, stale-while-revalidate=30' },
+    });
+  } catch (error) {
+    console.error('[products] public catalog lookup failed:', {
+      code: error instanceof Error ? error.message : 'UNKNOWN',
+    });
     return NextResponse.json(
       { error: 'Products are temporarily unavailable.' },
-      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      { status: 503, headers: { 'Cache-Control': 'private, no-store' } },
     );
   }
-
-  const products = data ?? [];
-  const hasMore = products.length === PAGE_SIZE;
-  return NextResponse.json(
-    { products, hasMore, nextOffset: hasMore ? offset + products.length : null },
-    { headers: { 'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300' } },
-  );
 }

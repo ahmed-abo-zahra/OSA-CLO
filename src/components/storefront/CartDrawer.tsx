@@ -1,7 +1,7 @@
 "use client";
 import { colorLabel } from "@/lib/colors";
 
-import { useCart } from "@/context/CartContext";
+import { MAX_CART_ITEM_QUANTITY, useCart } from "@/context/CartContext";
 import { useLanguage } from "@/context/LanguageContext";
 import ProductImage from "@/components/ProductImage";
 import { useEffect, useRef } from "react";
@@ -107,7 +107,7 @@ export default function CartDrawer() {
                       >−</button>
                       <span className="text-xs font-mono font-bold w-4 text-center">{item.quantity}</span>
                       <button
-                        aria-label={lang==="ar"?"زيادة الكمية":"Increase quantity"} disabled={items.filter(i=>i.productId===item.productId).reduce((s,i)=>s+i.quantity,0)>=(item.maxStock??99)} onClick={() => updateQty(item.productId, item.size, item.quantity + 1, item.color)}
+                        aria-label={lang==="ar"?"زيادة الكمية":"Increase quantity"} disabled={items.filter(i=>i.productId===item.productId).reduce((s,i)=>s+i.quantity,0)>=MAX_CART_ITEM_QUANTITY} onClick={() => updateQty(item.productId, item.size, item.quantity + 1, item.color)}
                         className="w-8 h-11 border border-gray-200 dark:border-brand-border/20 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:border-gray-400 text-sm"
                       >+</button>
                       <button

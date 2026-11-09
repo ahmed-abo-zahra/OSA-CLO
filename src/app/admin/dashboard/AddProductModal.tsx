@@ -3,7 +3,7 @@
 import ProductImage from "@/components/ProductImage";
 import { useState, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { ALL_SUBCATEGORY_KEYS, getSubcategoryLabel } from "@/lib/categories";
+import { getSubcategoryLabel } from "@/lib/categories";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface ProductForModal {
@@ -25,6 +25,7 @@ export interface ProductForModal {
 interface Props {
   product?: ProductForModal; // if provided → Edit mode
   partnerName: string;
+  allowedCategoryKeys: readonly string[];
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -32,10 +33,10 @@ interface Props {
 const SIZE_PRESETS = ["XS", "S", "M", "L", "XL", "XXL", "Oversized", "One Size"];
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function ProductModal({ product, onSuccess, onClose }: Props) {
+export default function ProductModal({ product, onSuccess, onClose, allowedCategoryKeys }: Props) {
   const { t, isRTL, lang } = useLanguage();
   const isEdit = !!product;
-  const allowedCategories = ALL_SUBCATEGORY_KEYS;
+  const allowedCategories = allowedCategoryKeys;
 
   const fileRef      = useRef<HTMLInputElement>(null);
   const extraFileRef  = useRef<HTMLInputElement>(null);

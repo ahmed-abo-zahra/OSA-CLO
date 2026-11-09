@@ -3,7 +3,8 @@ import { DEMO_MODE } from '@/lib/demo-mode';
 import { encodeSession, COOKIE_NAME, COOKIE_MAX_AGE } from '@/lib/session';
 import { PARTNERS } from '@/lib/partners';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
+import { getTrustedClientIp } from '@/lib/trusted-client-ip';
 import { NextResponse, type NextRequest } from 'next/server';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -16,11 +17,19 @@ function matchesPassword(provided: string, expected: string): boolean {
   return timingSafeEqual(providedDigest, expectedDigest);
 }
 
-function loginKeyHash(request: NextRequest): string {
+function loginKeyHash(request: NextRequest): string | null {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret || secret.length < 32) throw new Error('ADMIN_SESSION_SECRET is not configured.');
-  const ip = request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
-  return createHmac('sha256', secret).update(ip).digest('hex');
+  const ip = getTrustedClientIp(request.headers);
+  if (!ip) return null;
+  return createHmac('sha256', secret).update('admin-login-ip:v1:').update(ip).digest('hex');
+}
+
+function loginAccountKeyHash(name: string): string {
+  const secret = process.env.ADMIN_SESSION_SECRET;
+  if (!secret || secret.length < 32) throw new Error('ADMIN_SESSION_SECRET is not configured.');
+  const normalizedName = name.normalize('NFKC').trim().toLowerCase();
+  return createHmac('sha256', secret).update('admin-login-account:v1:').update(normalizedName).digest('hex');
 }
 
 export async function POST(request: NextRequest) {
@@ -29,18 +38,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const rawBody: unknown = await request.json();
-    if (!isRecord(rawBody)) return NextResponse.json({ error: 'Name and password are required.' }, { status: 400 });
-
-    const name = typeof rawBody.name === 'string' ? rawBody.name.trim() : '';
-    const password = typeof rawBody.password === 'string' ? rawBody.password : '';
-    if (!name || !password || password.length > 256) {
-      return NextResponse.json({ error: 'Name and password are required.' }, { status: 400 });
-    }
-
     let keyHash: string | null = null;
     if (!DEMO_MODE) {
       keyHash = loginKeyHash(request);
+      if (!keyHash) {
+        return NextResponse.json({ error: 'Login is temporarily unavailable.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+      }
       const { data: allowed, error: limitError } = await supabaseAdmin.rpc('consume_admin_login_attempt', {
         p_key_hash: keyHash,
       });
@@ -56,10 +59,40 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const bodyResult = await readJsonBody(request, 8192);
+    if (!bodyResult.ok) {
+      return NextResponse.json({ error: bodyResult.status === 413 ? 'Login request is too large.' : 'Invalid JSON request.' }, { status: bodyResult.status });
+    }
+    const rawBody = bodyResult.value;
+    if (!isRecord(rawBody)) return NextResponse.json({ error: 'Name and password are required.' }, { status: 400 });
+
+    const name = typeof rawBody.name === 'string' ? rawBody.name.trim() : '';
+    const password = typeof rawBody.password === 'string' ? rawBody.password : '';
+    if (!name || name.length > 80 || !password || password.length > 256) {
+      return NextResponse.json({ error: 'Name and password are required.' }, { status: 400 });
+    }
+
+    let accountKeyHash: string | null = null;
+    if (!DEMO_MODE) {
+      accountKeyHash = loginAccountKeyHash(name);
+      const { data: accountAllowed, error: accountLimitError } = await supabaseAdmin.rpc('consume_api_rate_limit', {
+        p_key_hash: accountKeyHash,
+        p_limit: 30,
+        p_window_seconds: 900,
+      });
+      if (accountLimitError) {
+        console.error('[admin/login] account rate limiter unavailable:', { code: accountLimitError.code });
+        return NextResponse.json({ error: 'Login is temporarily unavailable.' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+      }
+      if (accountAllowed !== true) {
+        return NextResponse.json({ error: 'Too many login attempts. Try again in 15 minutes.' }, { status: 429, headers: { 'Retry-After': '900', 'Cache-Control': 'no-store' } });
+      }
+    }
+
     const partner = PARTNERS.find((candidate) => candidate.name.toLowerCase() === name.toLowerCase());
     const passwordEnvSuffix = partner?.id.replaceAll('-', '_').toUpperCase();
     const expected = passwordEnvSuffix
-      ? process.env[`ADMIN_PASSWORD_${passwordEnvSuffix}`] ?? (DEMO_MODE ? 'aso-demo-2026' : '')
+      ? process.env[`ADMIN_PASSWORD_${passwordEnvSuffix}`] ?? (DEMO_MODE && process.env.NODE_ENV !== 'production' ? 'aso-demo-2026' : '')
       : '';
     const passwordMatches = matchesPassword(password, expected);
 

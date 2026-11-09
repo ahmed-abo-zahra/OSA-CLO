@@ -8,6 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import ProductImage from "@/components/ProductImage";
 import { WHATSAPP_NUMBER } from "@/lib/contact";
 import { DEMO_MODE } from "@/lib/demo-mode";
+import { TRACKING_TOKEN_PATTERN } from "@/lib/tracking-token-format";
 
 // ── Egyptian Governorates & Cities ────────────────────────────────────────────
 const EGYPT_GOVERNORATES: Record<string, string[]> = {
@@ -48,7 +49,8 @@ function isLettersOnly(name: string) {
   return /^[\u0600-\u06FF\u0750-\u077Fa-zA-Z\s''\-]+$/.test(name.trim());
 }
 
-type PayType = "full" | "deposit";
+const IDEMPOTENCY_STORAGE_KEY = "aso_checkout_idempotency_key";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 interface FormErrors {
   name?: string;
@@ -71,12 +73,34 @@ export default function CheckoutPage() {
   const [city,            setCity]            = useState("");
   const [detailedAddress, setDetailedAddress] = useState("");
   const [notes,           setNotes]           = useState("");
-  const [payType,         setPayType]         = useState<PayType>("full");
   const [terms,           setTerms]           = useState(false);
   const [errors,          setErrors]          = useState<FormErrors>({});
   const [loading,         setLoading]         = useState(false);
 
   const submitted = useRef(false);
+  const idempotencyKey = useRef<string | null>(null);
+
+  function getIdempotencyKey() {
+    if (idempotencyKey.current) return idempotencyKey.current;
+    try {
+      const saved = sessionStorage.getItem(IDEMPOTENCY_STORAGE_KEY);
+      if (saved && UUID_PATTERN.test(saved)) {
+        idempotencyKey.current = saved;
+        return saved;
+      }
+    } catch {
+      // Fall back to an in-memory key if browser storage is disabled.
+    }
+    const created = crypto.randomUUID();
+    idempotencyKey.current = created;
+    try { sessionStorage.setItem(IDEMPOTENCY_STORAGE_KEY, created); } catch { /* in-memory retry remains available */ }
+    return created;
+  }
+
+  function clearIdempotencyKey() {
+    idempotencyKey.current = null;
+    try { sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY); } catch { /* storage may be disabled */ }
+  }
 
   // Discount
   const [discountCode,    setDiscountCode]    = useState("");
@@ -85,7 +109,6 @@ export default function CheckoutPage() {
   const [discountLoading, setDiscountLoading] = useState(false);
   const [discountError,   setDiscountError]   = useState("");
 
-  const discountedTotal = Math.max(0, total - discountAmount);
   const availableCities = governorate ? (EGYPT_GOVERNORATES[governorate] ?? []) : [];
 
   async function applyDiscount() {
@@ -119,10 +142,6 @@ export default function CheckoutPage() {
     if (isHydrated && items.length === 0 && !submitted.current) router.push("/");
   }, [isHydrated, items.length, router]);
 
-  const paidNow   = payType === "deposit" ? Math.round(discountedTotal * 0.5) : discountedTotal;
-  const remaining = discountedTotal - paidNow;
-  const fmtP = (n: number) => `EGP ${n.toLocaleString("en-EG")}`;
-
   // Compose the full address for storage
   const fullAddress = [governorate, city, detailedAddress.trim()].filter(Boolean).join(" — ");
 
@@ -151,13 +170,13 @@ export default function CheckoutPage() {
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": getIdempotencyKey() },
         body: JSON.stringify({
           customer_name:    name.trim(),
           customer_phone:   phone.trim(),
           customer_address: fullAddress,
           notes:            notes.trim() || undefined,
-          payment_type:     payType,
+          payment_type:     "full",
           discount_code:    discountCode.trim() || undefined,
           items: items.map((i) => ({
             productId: i.productId,
@@ -169,12 +188,24 @@ export default function CheckoutPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) { setErrors({ server: data.error }); setLoading(false); return; }
+      if (!res.ok) {
+        if (data.code === "IDEMPOTENCY_KEY_REUSED") clearIdempotencyKey();
+        setErrors({ server: data.error }); setLoading(false); return;
+      }
+
+      const trackingTokens = Array.isArray(data.trackingTokens)
+        ? data.trackingTokens.filter((token: unknown): token is string => typeof token === "string" && TRACKING_TOKEN_PATTERN.test(token))
+        : [];
+      if (trackingTokens.length === 0 || trackingTokens.length > 8) {
+        setErrors({ server: t("storefront.checkout.errors.serverError") });
+        setLoading(false);
+        return;
+      }
 
       submitted.current = true;
+      clearIdempotencyKey();
       clearCart();
-      const ids = (data.orderIds as string[]).join(",");
-      router.push(`/order/success?ids=${ids}`);
+      router.push(`/order/success#track=${encodeURIComponent(trackingTokens.join(","))}`);
 
     } catch {
       setErrors({ server: t("storefront.checkout.errors.serverError") });
@@ -304,46 +335,12 @@ export default function CheckoutPage() {
               />
             </Field>
 
-            {/* Payment Method */}
-            <div className="flex flex-col gap-2">
-              {DEMO_MODE && <p role="note" className="text-sm mb-4 p-3 border border-brand-border">{lang==='ar'?'طلب تجريبي فقط. لا تدفع أو تحول أي مبلغ؛ الدفع الإلكتروني غير مفعل.':'Demo order only. Do not pay or transfer money; online payment is disabled.'}</p>}
-              {!DEMO_MODE && <label className="label-style">{t("storefront.checkout.payment")}</label>}
-
-              {!DEMO_MODE && <>
-              {/* Vodafone Cash badge */}
-              <div className="flex items-center gap-2 px-4 py-3 border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-                <span className="text-lg">📱</span>
-                <div>
-                  <p className="text-xs font-bold text-brand-black dark:text-offwhite">{t("storefront.checkout.vodafoneCash")}</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{t("storefront.checkout.onlyPaymentMethod")}</p>
-                </div>
-                <span className="ml-auto text-[10px] font-bold text-green-600 border border-green-200 bg-green-50 px-2 py-0.5">{t("storefront.checkout.active")}</span>
-              </div>
-
-              {/* Full vs Deposit toggle */}
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <button type="button" onClick={() => setPayType("full")}
-                  className={`py-3 text-[11px] font-bold tracking-wide border transition-all active:scale-[0.98]
-                    ${payType === "full" ? "bg-brand-black dark:bg-offwhite text-white dark:text-brand-black border-brand-black dark:border-offwhite" : "border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30"}`}>
-                  {t("storefront.checkout.payFull")}
-                </button>
-                <button type="button" onClick={() => setPayType("deposit")}
-                  className={`py-3 text-[11px] font-bold tracking-wide border transition-all active:scale-[0.98]
-                    ${payType === "deposit" ? "bg-brand-black dark:bg-offwhite text-white dark:text-brand-black border-brand-black dark:border-offwhite" : "border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/30"}`}>
-                  {t("storefront.checkout.payDeposit")}
-                </button>
-              </div>
-
-                </>}
-            {/* Deposit breakdown */}
-              {payType === "deposit" && (
-                <div className="grid grid-cols-3 gap-2 border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 p-3">
-                  <FinLine label={t("storefront.checkout.total")}     value={fmtP(total)}     />
-                  <FinLine label={t("storefront.checkout.paidNow")}   value={fmtP(paidNow)}   highlight />
-                  <FinLine label={t("storefront.checkout.remaining")} value={fmtP(remaining)} warning />
-                </div>
-              )}
-            </div>
+            {/* Payment collection is not integrated; never imply that money was collected. */}
+            <p role="note" className="text-xs leading-relaxed p-3 border border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+              {DEMO_MODE
+                ? (lang === "ar" ? "طلب تجريبي فقط. لا تدفع أو تحوّل أي مبلغ؛ الدفع الإلكتروني غير مفعّل." : "Demo order only. Do not pay or transfer money; online payment is disabled.")
+                : (lang === "ar" ? "سيُسجَّل الطلب كغير مدفوع. لا يتم تحصيل أي مبلغ من خلال هذا الموقع؛ انتظر تأكيد المتجر وتعليمات دفع موثقة." : "This order will be recorded as unpaid. This site does not collect payment; wait for store confirmation and verified payment instructions.")}
+            </p>
 
             {/* Terms */}
             <label className={`flex items-start gap-3 cursor-pointer group ${errors.terms ? "text-red-600" : ""}`}>
@@ -406,7 +403,7 @@ export default function CheckoutPage() {
           </form>
 
           {/* ── Order Summary ─────────────────────────────────────────────── */}
-          <OrderSummary items={items} total={total} discountAmount={discountAmount} discountLabel={discountLabel} paidNow={paidNow} payType={payType} lang={lang} />
+          <OrderSummary items={items} total={total} discountAmount={discountAmount} discountLabel={discountLabel} lang={lang} />
         </div>
       </div>
     </div>
@@ -424,22 +421,11 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   );
 }
 
-function FinLine({ label, value, highlight, warning }: { label: string; value: string; highlight?: boolean; warning?: boolean }) {
-  return (
-    <div className="text-center">
-      <p className="text-[9px] font-bold tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-0.5">{label}</p>
-      <p className={`text-sm font-black font-mono ${highlight ? "text-blue-700 dark:text-blue-400" : warning ? "text-orange-600 dark:text-orange-400" : "text-brand-black dark:text-offwhite"}`}>{value}</p>
-    </div>
-  );
-}
-
-function OrderSummary({ items, total, discountAmount = 0, discountLabel, paidNow, payType, lang }: {
+function OrderSummary({ items, total, discountAmount = 0, discountLabel, lang }: {
   items: CartItem[];
   total: number;
   discountAmount?: number;
   discountLabel?: string;
-  paidNow: number;
-  payType: PayType;
   lang: string;
 }) {
   const { t } = useLanguage();
@@ -481,18 +467,6 @@ function OrderSummary({ items, total, discountAmount = 0, discountLabel, paidNow
           <span className="font-bold text-brand-black dark:text-offwhite">{t("storefront.checkout.total")}</span>
           <span className="font-mono font-black text-brand-black dark:text-offwhite">{fmtP(finalTotal)}</span>
         </div>
-        {payType === "deposit" && (
-          <>
-            <div className="flex justify-between text-xs">
-              <span className="text-blue-600">{t("storefront.checkout.dueNow")}</span>
-              <span className="font-mono font-bold text-blue-700">{fmtP(paidNow)}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-orange-600">{t("storefront.checkout.onDelivery")}</span>
-              <span className="font-mono font-bold text-orange-600">{fmtP(finalTotal - paidNow)}</span>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

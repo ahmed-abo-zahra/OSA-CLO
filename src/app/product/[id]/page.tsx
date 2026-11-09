@@ -3,17 +3,16 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProductImage from "@/components/ProductImage";
 import Link from "next/link";
+import { getPublicProduct } from "@/lib/catalog-cache";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import ProductDetailClient, { type PDPProduct } from "./ProductDetailClient";
+
+export const revalidate = 30;
 
 // ── OpenGraph SEO ─────────────────────────────────────────────────────────────
 export async function generateMetadata(props: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const params = await props.params;
-  const { data } = await supabaseAdmin
-    .from("products")
-    .select("name_en, name_ar, description, selling_price, image_url, category")
-    .eq("id", params.id)
-    .single();
+  const data = await getPublicProduct(params.id);
 
   if (!data) return { title: "Product Not Found — ASO CLO" };
 
@@ -42,19 +41,14 @@ export async function generateMetadata(props: { params: Promise<{ id: string }> 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default async function ProductPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const { data } = await supabaseAdmin
-    .from("products")
-    .select("id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar")
-    .eq("id", params.id)
-    .eq("is_available", true)
-    .single();
+  const data = await getPublicProduct(params.id);
 
   if (!data) notFound();
 
   // ── Upsell: fetch 4 related products from same category ──────────────────
   const { data: relatedRaw } = await supabaseAdmin
     .from("products")
-    .select("id, name_en, name_ar, selling_price, image_url, category, stock_quantity")
+    .select("id, name_en, name_ar, selling_price, image_url, category")
     .eq("is_available", true)
     .eq("in_stock", true)
     .eq("category", data.category ?? "")
@@ -66,7 +60,7 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
   if (related.length < 2) {
     const { data: fallback } = await supabaseAdmin
       .from("products")
-      .select("id, name_en, name_ar, selling_price, image_url, category, stock_quantity")
+      .select("id, name_en, name_ar, selling_price, image_url, category")
       .eq("is_available", true)
       .eq("in_stock", true)
       .neq("id", data.id)
@@ -102,11 +96,6 @@ export default async function ProductPage(props: { params: Promise<{ id: string 
                   <p className="text-[11px] font-mono font-bold text-brand-black dark:text-offwhite mt-1">
                     EGP {p.selling_price.toLocaleString("en-EG")}
                   </p>
-                  {(p.stock_quantity ?? 0) < 5 && (p.stock_quantity ?? 0) > 0 && (
-                    <span className="text-[9px] font-bold text-red-500 mt-0.5 block">
-                      Only {p.stock_quantity} left!
-                    </span>
-                  )}
                 </div>
               </Link>
             ))}

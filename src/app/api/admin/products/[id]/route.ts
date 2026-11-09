@@ -1,9 +1,9 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
 import { ALL_SUBCATEGORY_KEYS } from '@/lib/categories';
-import { getPartnerDbId } from '@/lib/partners';
+import { getPartnerCategoryKeys, getPartnerDbId } from '@/lib/partners';
 import { COOKIE_NAME, decodeSessionValue } from '@/lib/session';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readFormDataBody, readJsonBody } from '@/lib/request-security';
+import { invalidatePublicCatalog } from '@/lib/catalog-cache';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { uploadProductImage } from '@/lib/product-images';
 
@@ -44,10 +44,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   const { id } = await context.params;
   if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid product ID.' }, { status: 400 });
-  const contentLength = Number(request.headers.get('content-length') ?? 0);
-  if (Number.isFinite(contentLength) && contentLength > MAX_MULTIPART_BODY_BYTES) {
-    return NextResponse.json({ error: 'The total image upload must be 4 MB or smaller.' }, { status: 413 });
-  }
 
   const partnerId = getPartnerDbId(session.partnerId);
   const { data: existing, error: lookupError } = await getOwnedProduct(id, partnerId);
@@ -57,12 +53,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
   if (!existing) return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
 
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json({ error: 'Expected a multipart form submission.' }, { status: 400 });
+  const bodyResult = await readFormDataBody(request, MAX_MULTIPART_BODY_BYTES);
+  if (!bodyResult.ok) {
+    return NextResponse.json({ error: bodyResult.status === 413 ? 'The total image upload must be 4 MB or smaller.' : 'Expected a valid multipart form submission.' }, { status: bodyResult.status });
   }
+  const formData = bodyResult.value;
 
   const nameEn = getFormString(formData, 'name_en');
   const nameAr = getFormString(formData, 'name_ar');
@@ -87,6 +82,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
   if (!ALL_SUBCATEGORY_KEYS.includes(category)) {
     return NextResponse.json({ error: 'Choose a supported product category.' }, { status: 400 });
+  }
+  if (!getPartnerCategoryKeys(session.partnerId).includes(category)) {
+    return NextResponse.json({ error: 'This partner cannot manage products in that category.' }, { status: 403 });
   }
   if (!Number.isFinite(costPrice) || costPrice < 0 || !Number.isFinite(sellingPrice) || sellingPrice <= 0) {
     return NextResponse.json({ error: 'Enter valid cost and selling prices.' }, { status: 400 });
@@ -132,8 +130,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Could not update the product. Check the details and try again.' }, { status: 400 });
     }
 
-    revalidatePath('/');
-    revalidatePath(`/product/${id}`);
+    invalidatePublicCatalog([id]);
     return NextResponse.json({ success: true, product: data });
   } catch (error) {
     const message = error instanceof Error ? error.message : '';
@@ -171,8 +168,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: 'Could not delete the product.' }, { status: 500 });
   }
 
-  revalidatePath('/');
-  revalidatePath(`/product/${id}`);
+  invalidatePublicCatalog([id]);
   return NextResponse.json({ success: true });
 }
 
@@ -185,7 +181,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   if (!UUID_PATTERN.test(id)) return NextResponse.json({ error: 'Invalid product ID.' }, { status: 400 });
 
   try {
-    const body: unknown = await request.json();
+    const bodyResult = await readJsonBody(request, 4096);
+    if (!bodyResult.ok) return NextResponse.json({ error: bodyResult.status === 413 ? 'Product update is too large.' : 'Invalid JSON request.' }, { status: bodyResult.status });
+    const body = bodyResult.value;
     if (!body || typeof body !== 'object' || Array.isArray(body)) {
       return NextResponse.json({ error: 'Invalid product update.' }, { status: 400 });
     }
@@ -221,8 +219,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Could not update the product.' }, { status: 500 });
     }
 
-    revalidatePath('/');
-    revalidatePath(`/product/${id}`);
+    invalidatePublicCatalog([id]);
     return NextResponse.json({ success: true, product: data });
   } catch (error) {
     if (error instanceof SyntaxError) return NextResponse.json({ error: 'Invalid JSON request.' }, { status: 400 });

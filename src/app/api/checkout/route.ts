@@ -1,8 +1,12 @@
 import { DEMO_MODE } from '@/lib/demo-mode';
 import { placeDemoOrder } from '@/lib/demo-fetch';
-import { hasSameOrigin } from '@/lib/request-security';
+import { invalidatePublicCatalog } from '@/lib/catalog-cache';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
 import { enforceRateLimit } from '@/lib/rate-limit';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { createCheckoutRequestHash } from '@/lib/checkout-idempotency';
+import { assertTrackingTokenConfigured, createTrackingToken } from '@/lib/tracking-token';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +37,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function validationError(code: string): { status: number; message: string } {
+  if (code.includes('CUSTOMER_AUTH_REQUIRED')) return { status: 401, message: 'Sign in again before placing this order.' };
+  if (code.includes('IDEMPOTENCY_KEY_REUSED')) return { status: 409, message: 'This checkout key was already used for different order details. Review the order and submit again.' };
+  if (code.includes('IDEMPOTENCY_CUSTOMER_MISMATCH')) return { status: 409, message: 'This checkout key is already linked to a different account. Start a new checkout.' };
+  if (code.includes('IDEMPOTENCY_RECORD_UNAVAILABLE') || code.includes('CHECKOUT_TRANSACTION_FAILED')) return { status: 503, message: 'The order could not be completed yet. Please retry with the same checkout key.' };
+  if (code.includes('INVALID_IDEMPOTENCY_KEY')) return { status: 400, message: 'The checkout request key is invalid. Please retry.' };
   if (code.includes('PRODUCT_OPTION_INVALID')) {
     return { status: 400, message: 'Choose a valid size and color for each product.' };
   }
@@ -58,13 +67,17 @@ export async function POST(request: NextRequest) {
   }
   const rateLimitResponse = await enforceRateLimit(request, 'checkout', 10, 900);
   if (rateLimitResponse) return rateLimitResponse;
-  const contentLength = Number(request.headers.get('content-length') ?? 0);
-  if (Number.isFinite(contentLength) && contentLength > 65536) {
-    return NextResponse.json({ error: 'The order request is too large.' }, { status: 413 });
-  }
-
   try {
-    const rawBody: unknown = await request.json();
+    assertTrackingTokenConfigured();
+    const idempotencyKey = request.headers.get('idempotency-key')?.trim() ?? '';
+    if (!UUID_PATTERN.test(idempotencyKey)) {
+      return NextResponse.json({ error: 'A valid Idempotency-Key header is required.' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+    }
+    const bodyResult = await readJsonBody(request, 65_536);
+    if (!bodyResult.ok) {
+      return NextResponse.json({ error: bodyResult.status === 413 ? 'The order request is too large.' : 'Invalid JSON request.' }, { status: bodyResult.status });
+    }
+    const rawBody = bodyResult.value;
     if (!isRecord(rawBody)) {
       return NextResponse.json({ error: 'Invalid order details.' }, { status: 400 });
     }
@@ -72,15 +85,17 @@ export async function POST(request: NextRequest) {
 
     if (DEMO_MODE) {
       try {
-        const demoResult = placeDemoOrder(body);
-        return NextResponse.json(demoResult, {
+        const demoResult = placeDemoOrder(body, { key: idempotencyKey });
+        const { orderIds: demoOrderIds, ...publicDemoResult } = demoResult;
+        return NextResponse.json({ ...publicDemoResult, trackingTokens: demoOrderIds.map((orderId) => createTrackingToken(orderId)) }, {
           status: 201,
           headers: { 'Cache-Control': 'no-store' },
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Invalid order details.';
-        const status = message.includes('unavailable') || message.includes('available stock') ? 409 : 400;
-        return NextResponse.json({ error: message }, { status });
+        const idempotencyConflict = message.includes('IDEMPOTENCY_KEY_REUSED');
+        const status = idempotencyConflict || message.includes('unavailable') || message.includes('available stock') ? 409 : 400;
+        return NextResponse.json({ error: idempotencyConflict ? 'This checkout key was already used for different order details. Review the order and submit again.' : message, ...(idempotencyConflict ? { code: 'IDEMPOTENCY_KEY_REUSED' } : {}) }, { status, headers: { 'Cache-Control': 'no-store' } });
       }
     }
 
@@ -95,9 +110,10 @@ export async function POST(request: NextRequest) {
     if (customerName.length < 2 || customerName.length > 120) {
       return NextResponse.json({ error: 'Enter a valid customer name.' }, { status: 400 });
     }
-    if (!/^(010|011|012|015)\d{8}$/.test(customerPhone.replace(/[^0-9]/g, ''))) {
+    if (/[^0-9\s\-()]/.test(customerPhone) || !/^(010|011|012|015)\d{8}$/.test(customerPhone.replace(/[\s\-()]/g, ''))) {
       return NextResponse.json({ error: 'Enter a valid Egyptian mobile number.' }, { status: 400 });
     }
+    const normalizedCustomerPhone = customerPhone.replace(/[\s\-()]/g, '');
     if (customerAddress.length < 5 || customerAddress.length > 500) {
       return NextResponse.json({ error: 'Enter a valid delivery address.' }, { status: 400 });
     }
@@ -125,7 +141,7 @@ export async function POST(request: NextRequest) {
         return null;
       }
       return {
-        product_id: productId,
+        product_id: productId.toLowerCase(),
         quantity,
         size: typeof size === 'string' ? size.trim() || null : null,
         color: typeof color === 'string' ? color.trim() || null : null,
@@ -136,6 +152,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'One or more cart items are invalid.' }, { status: 400 });
     }
     const validItems = normalizedItems.filter((item): item is NonNullable<typeof item> => item !== null);
+    const variantKeys = new Set<string>();
+    for (const item of validItems) {
+      const key = `${item.product_id}\0${item.size ?? ''}\0${item.color ?? ''}`;
+      if (variantKeys.has(key)) {
+        return NextResponse.json({ error: 'Combine duplicate product variants into one cart line.' }, { status: 400 });
+      }
+      variantKeys.add(key);
+    }
 
     const productIds = [...new Set(validItems.map((item) => item.product_id))];
     const { data: productOwners, error: ownerLookupError } = await supabaseAdmin
@@ -157,20 +181,45 @@ export async function POST(request: NextRequest) {
     }
     const itemsForTransaction = transactionItems.filter((item): item is NonNullable<typeof item> => item !== null);
 
-    const { data, error } = await supabaseAdmin.rpc('place_storefront_order', {
+    const requestHash = createCheckoutRequestHash({
+      customerName,
+      customerPhone: normalizedCustomerPhone,
+      customerAddress,
+      notes: notes || null,
+      paymentType,
+      discountCode: discountCode || null,
+      items: itemsForTransaction.map(({ product_id, quantity, size, color }) => ({ product_id, quantity, size, color })),
+    });
+
+    let customerId: string | null = null;
+    const hasCustomerSession = request.cookies.getAll().some(({ name }) => /^sb-[a-z0-9]+-auth-token(?:\.\d+)?$/i.test(name));
+    if (hasCustomerSession) {
+      const authClient = await createSupabaseServerClient();
+      const { data: { user }, error: authError } = await authClient.auth.getUser();
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Your sign-in has expired. Sign in again before placing this order.' }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
+      }
+      customerId = user.id;
+    }
+
+    const rpcArguments = {
+      p_idempotency_key: idempotencyKey,
+      p_request_hash: requestHash,
+      p_customer_id: customerId,
       p_customer_name: customerName,
-      p_customer_phone: customerPhone,
+      p_customer_phone: normalizedCustomerPhone,
       p_customer_address: customerAddress,
       p_notes: notes || null,
       p_payment_type: paymentType,
       p_discount_code: discountCode || null,
       p_items: itemsForTransaction,
-    });
+    };
+    const { data, error } = await supabaseAdmin.rpc('place_storefront_order_idempotent_for_customer', rpcArguments);
 
     if (error) {
       console.error('[checkout] order transaction failed:', { code: error.code });
       const mapped = validationError(`${error.message} ${error.code ?? ''}`);
-      return NextResponse.json({ error: mapped.message }, { status: mapped.status });
+      return NextResponse.json({ error: mapped.message, ...(error.message.includes('IDEMPOTENCY_KEY_REUSED') ? { code: 'IDEMPOTENCY_KEY_REUSED' } : {}) }, { status: mapped.status });
     }
 
     const result = isRecord(data) ? data : {};
@@ -184,10 +233,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'The order could not be completed. Please try again.' }, { status: 500 });
     }
 
+    invalidatePublicCatalog(productIds);
+
     return NextResponse.json(
       {
         success: true,
-        orderIds,
+        trackingTokens: orderIds.map((orderId) => createTrackingToken(orderId)),
         createdAt: typeof firstOrder?.created_at === 'string' ? firstOrder.created_at : new Date().toISOString(),
         discountAmount: typeof result.discountAmount === 'number' ? result.discountAmount : 0,
         message: 'Order received. No online payment was collected.',

@@ -1,9 +1,9 @@
-import { revalidatePath } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
+import { invalidatePublicCatalog } from '@/lib/catalog-cache';
 import { ALL_SUBCATEGORY_KEYS } from '@/lib/categories';
-import { getPartnerDbId } from '@/lib/partners';
+import { getPartnerCategoryKeys, getPartnerDbId } from '@/lib/partners';
 import { COOKIE_NAME, decodeSessionValue } from '@/lib/session';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readFormDataBody } from '@/lib/request-security';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { uploadProductImage } from '@/lib/product-images';
 
@@ -24,17 +24,11 @@ export async function POST(request: NextRequest) {
   const session = decodeSessionValue(request.cookies.get(COOKIE_NAME)?.value);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
-  const contentLength = Number(request.headers.get('content-length') ?? 0);
-  if (Number.isFinite(contentLength) && contentLength > MAX_MULTIPART_BODY_BYTES) {
-    return NextResponse.json({ error: 'The total image upload must be 4 MB or smaller.' }, { status: 413 });
+  const bodyResult = await readFormDataBody(request, MAX_MULTIPART_BODY_BYTES);
+  if (!bodyResult.ok) {
+    return NextResponse.json({ error: bodyResult.status === 413 ? 'The total image upload must be 4 MB or smaller.' : 'Expected a valid multipart form submission.' }, { status: bodyResult.status });
   }
-
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json({ error: 'Expected a multipart form submission.' }, { status: 400 });
-  }
+  const formData = bodyResult.value;
 
   const nameEn = getFormString(formData, 'name_en');
   const nameAr = getFormString(formData, 'name_ar');
@@ -59,6 +53,9 @@ export async function POST(request: NextRequest) {
   }
   if (!ALL_SUBCATEGORY_KEYS.includes(category)) {
     return NextResponse.json({ error: 'Choose a supported product category.' }, { status: 400 });
+  }
+  if (!getPartnerCategoryKeys(session.partnerId).includes(category)) {
+    return NextResponse.json({ error: 'This partner cannot manage products in that category.' }, { status: 403 });
   }
   if (!Number.isFinite(costPrice) || costPrice < 0 || !Number.isFinite(sellingPrice) || sellingPrice <= 0) {
     return NextResponse.json({ error: 'Enter valid cost and selling prices.' }, { status: 400 });
@@ -106,7 +103,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Could not create the product. Check the details and try again.' }, { status: 400 });
     }
 
-    revalidatePath('/');
+    invalidatePublicCatalog([data.id]);
     return NextResponse.json({ success: true, product: data }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : '';

@@ -1,6 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { DEMO_MODE } from '@/lib/demo-mode';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getTrustedClientIp } from '@/lib/trusted-client-ip';
 import { NextResponse, type NextRequest } from 'next/server';
 
 /** Returns null when allowed, otherwise a ready-to-return HTTP response. */
@@ -21,11 +22,14 @@ export async function enforceRateLimit(
     );
   }
 
-  // Vercel overwrites these headers with the public client IP on direct deployments.
-  // If an upstream proxy is introduced, it must overwrite forwarded-IP headers too.
-  const ip = request.headers.get('x-real-ip')?.trim()
-    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || 'unknown';
+  const ip = getTrustedClientIp(request.headers);
+  if (!ip) {
+    console.error('[rate-limit] trusted client IP is unavailable.');
+    return NextResponse.json(
+      { error: 'This service is temporarily unavailable.' },
+      { status: 503, headers: { 'Cache-Control': 'no-store' } },
+    );
+  }
   const keyHash = createHmac('sha256', secret).update(`${scope}:${ip}`).digest('hex');
 
   const { data: allowed, error } = await supabaseAdmin.rpc('consume_api_rate_limit', {
