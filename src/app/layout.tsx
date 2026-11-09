@@ -11,6 +11,7 @@ import CartDrawer from "@/components/storefront/CartDrawer";
 import Analytics from "@/components/Analytics";
 import PWAInstall from "@/components/PWAInstall";
 import PageTransitionLoader from "@/components/PageTransitionLoader";
+import SecurityConsoleNotice from "@/components/SecurityConsoleNotice";
 
 const cairo = localFont({ src: "./fonts/Cairo.ttf", variable: "--font-cairo", weight: "200 1000", display: "swap" });
 
@@ -61,6 +62,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Analytics />
+        <SecurityConsoleNotice />
 
         <ThemeProvider>
           <LanguageProvider>

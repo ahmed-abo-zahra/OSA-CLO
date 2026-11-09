@@ -335,11 +335,11 @@ export default function CheckoutPage() {
               />
             </Field>
 
-            {/* Payment collection is not integrated; never imply that money was collected. */}
-            <p role="note" className="text-xs leading-relaxed p-3 border border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-              {DEMO_MODE
-                ? (lang === "ar" ? "طلب تجريبي فقط. لا تدفع أو تحوّل أي مبلغ؛ الدفع الإلكتروني غير مفعّل." : "Demo order only. Do not pay or transfer money; online payment is disabled.")
-                : (lang === "ar" ? "سيُسجَّل الطلب كغير مدفوع. لا يتم تحصيل أي مبلغ من خلال هذا الموقع؛ انتظر تأكيد المتجر وتعليمات دفع موثقة." : "This order will be recorded as unpaid. This site does not collect payment; wait for store confirmation and verified payment instructions.")}
+            {/* Commercial payment notice */}
+            <p role="note" className="text-xs leading-relaxed p-3 border border-emerald-300 bg-emerald-50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100">
+              {lang === "ar"
+                ? "الدفع عند الاستلام أو عبر تأكيد المتجر الرسمي. سيتم تسجيل طلبك ومراجعته والتواصل معك لتأكيد الشحن والتسليم."
+                : "Cash on delivery or verified store confirmation. Your order will be recorded, verified, and confirmed with you directly."}
             </p>
 
             {/* Terms */}

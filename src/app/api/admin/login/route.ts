@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     const name = typeof rawBody.name === 'string' ? rawBody.name.trim() : '';
     const password = typeof rawBody.password === 'string' ? rawBody.password : '';
-    if (!name || name.length > 80 || !password || password.length > 256) {
+    if (!name || name.length > 80 || !/^[a-zA-Z0-9_\s-]{1,60}$/.test(name) || !password || password.length > 256) {
       return NextResponse.json({ error: 'Name and password are required.' }, { status: 400 });
     }
 
