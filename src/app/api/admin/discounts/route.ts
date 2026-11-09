@@ -1,5 +1,5 @@
 import { getPartnerDbId } from '@/lib/partners';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
 import { getSession } from '@/lib/session';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse, type NextRequest } from 'next/server';
@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
 
   try {
-    const rawBody: unknown = await request.json();
+    const bodyResult = await readJsonBody(request, 16_384);
+    if (!bodyResult.ok) return NextResponse.json({ error: bodyResult.status === 413 ? 'Discount request is too large.' : 'Invalid JSON request.' }, { status: bodyResult.status });
+    const rawBody = bodyResult.value;
     if (!isRecord(rawBody)) return NextResponse.json({ error: 'Invalid discount details.' }, { status: 400 });
 
     const code = typeof rawBody.code === 'string' ? rawBody.code.trim().toUpperCase() : '';

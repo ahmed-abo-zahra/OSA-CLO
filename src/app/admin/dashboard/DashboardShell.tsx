@@ -7,7 +7,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
 } from "recharts";
-import { getPartnerById } from "@/lib/partners";
+import { getPartnerById, getPartnerCategoryKeys } from "@/lib/partners";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 import AddProductModal, { type ProductForModal } from "./AddProductModal";
@@ -148,6 +148,7 @@ export default function DashboardShell({ session, products: initProducts, orders
   const { t, lang, setLang, isRTL } = useLanguage();
   const { error: showToastError } = useToast();
   const partner = getPartnerById(session.partnerId);
+  const categoryKeys = getPartnerCategoryKeys(session.partnerId);
 
   const [products, setProducts] = useState<Product[]>(initProducts);
   const [orders, setOrders]     = useState<Order[]>(initOrders);
@@ -621,7 +622,7 @@ export default function DashboardShell({ session, products: initProducts, orders
 
         {/* ── BULK IMPORT ──────────────────────────────────────────────────────── */}
         {activeTab === "import" && (
-          <BulkImport onSuccess={refresh} />
+          <BulkImport onSuccess={refresh} categoryKeys={categoryKeys} />
         )}
       </main>
 
@@ -673,6 +674,7 @@ export default function DashboardShell({ session, products: initProducts, orders
       {(showAddProduct || editProduct) && (
         <AddProductModal
           partnerName={session.partnerName}
+          allowedCategoryKeys={categoryKeys}
           product={editProduct as ProductForModal | undefined}
           onSuccess={() => { setShowAddProduct(false); setEditProduct(null); refresh(); }}
           onClose={() => { setShowAddProduct(false); setEditProduct(null); }}

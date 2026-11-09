@@ -2,7 +2,9 @@ import { DEMO_MODE } from '@/lib/demo-mode';
 import { placeDemoManualOrder } from '@/lib/demo-fetch';
 import { decodeSessionValue, COOKIE_NAME } from '@/lib/session';
 import { getPartnerDbId } from '@/lib/partners';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
+import { invalidatePublicCatalog } from '@/lib/catalog-cache';
+import { assertTrackingTokenConfigured, createTrackingToken } from '@/lib/tracking-token';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -25,7 +27,10 @@ export async function POST(request: NextRequest) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
 
   try {
-    const rawBody: unknown = await request.json();
+    assertTrackingTokenConfigured();
+    const bodyResult = await readJsonBody(request, 65_536);
+    if (!bodyResult.ok) return NextResponse.json({ error: bodyResult.status === 413 ? 'Order request is too large.' : 'Invalid JSON request.' }, { status: bodyResult.status });
+    const rawBody = bodyResult.value;
     if (!isRecord(rawBody)) return NextResponse.json({ error: 'Invalid order details.' }, { status: 400 });
 
     const customerName = typeof rawBody.customer_name === 'string' ? rawBody.customer_name.trim() : '';
@@ -92,7 +97,7 @@ export async function POST(request: NextRequest) {
           paid_amount: paidAmount,
           items: validItems,
         });
-        return NextResponse.json({ success: true, order, demo: true }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+        return NextResponse.json({ success: true, order, trackingToken: createTrackingToken(order.id), demo: true }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
       } catch (error) {
         const message = error instanceof Error ? error.message : '';
         if (message.includes('PRODUCT_OPTION_INVALID')) {
@@ -100,6 +105,9 @@ export async function POST(request: NextRequest) {
         }
         if (message.includes('PRODUCT_UNAVAILABLE')) {
           return NextResponse.json({ error: 'One or more selected products are unavailable in that quantity.' }, { status: 409 });
+        }
+        if (message.includes('CATEGORY_NOT_ASSIGNED_TO_PARTNER') || message.includes('PRODUCT_NOT_OWNED')) {
+          return NextResponse.json({ error: 'One or more products are outside this partner’s assigned catalog.' }, { status: 403 });
         }
         return NextResponse.json({ error: 'Could not create the order.' }, { status: 400 });
       }
@@ -128,10 +136,16 @@ export async function POST(request: NextRequest) {
       if (message.includes('PRODUCT_NOT_OWNED')) {
         return NextResponse.json({ error: 'One or more products do not belong to this partner.' }, { status: 400 });
       }
+      if (message.includes('CATEGORY_NOT_ASSIGNED_TO_PARTNER')) {
+        return NextResponse.json({ error: 'One or more products are outside this partner’s assigned catalog.' }, { status: 403 });
+      }
       return NextResponse.json({ error: 'Could not create the order. Check the customer and item details.' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, order: data }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
+    invalidatePublicCatalog(validItems.map((item) => item.product_id));
+    const trackingToken = isRecord(data) && typeof data.id === 'string' ? createTrackingToken(data.id) : null;
+    if (!trackingToken) return NextResponse.json({ error: 'The order could not be prepared for tracking.' }, { status: 500, headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ success: true, order: data, trackingToken }, { status: 201, headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof SyntaxError) return NextResponse.json({ error: 'Invalid JSON request.' }, { status: 400 });
     console.error('[admin/orders] unexpected server error');

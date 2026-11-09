@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/session';
-import { hasSameOrigin } from '@/lib/request-security';
+import { hasSameOrigin, readJsonBody } from '@/lib/request-security';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -46,7 +46,9 @@ export async function PUT(request: NextRequest) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: 'Cross-origin requests are not allowed.' }, { status: 403 });
 
   try {
-    const value: unknown = await request.json();
+    const bodyResult = await readJsonBody(request, 16_384);
+    if (!bodyResult.ok) return NextResponse.json({ error: bodyResult.status === 413 ? 'Settings request is too large.' : 'Invalid JSON request.' }, { status: bodyResult.status });
+    const value = bodyResult.value;
     if (!isRecord(value)) return NextResponse.json({ error: 'Invalid settings.' }, { status: 400 });
 
     const fields = [

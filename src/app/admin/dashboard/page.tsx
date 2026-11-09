@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
-import { getPartnerDbId } from "@/lib/partners";
+import { getPartnerCategoryKeys, getPartnerDbId } from "@/lib/partners";
 import DashboardShell from "./DashboardShell";
 
 export const dynamic = "force-dynamic"; // always fetch fresh data
@@ -22,6 +22,7 @@ export default async function DashboardPage() {
 
   if (!isSuperAdmin) {
     productsQuery = productsQuery.eq("partner_id", dbPartnerId);
+    productsQuery = productsQuery.in("category", [...getPartnerCategoryKeys(session.partnerId)]);
   }
 
   const { data: products } = await productsQuery;

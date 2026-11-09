@@ -6,7 +6,15 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/ToastContext";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface ActivityEntry { status: string; by: string; at: string; }
+interface ActivityEntry {
+  status: string;
+  by: string;
+  at: string;
+  type?: string;
+  previous_paid_amount?: number;
+  paid_amount?: number;
+  reason?: string;
+}
 
 interface OrderItem {
   id: string;
@@ -73,6 +81,7 @@ export default function OrderDetailsModal({
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [editingPaid, setEditingPaid]   = useState(false);
   const [paidInput, setPaidInput]       = useState("");
+  const [changeReason, setChangeReason] = useState("");
   const [showInvoice, setShowInvoice]   = useState(false);
 
   const loadOrder = useCallback(async () => {
@@ -120,11 +129,15 @@ export default function OrderDetailsModal({
   async function handlePaidSave() {
     if (!order) return;
     const amount = parseFloat(paidInput) || 0;
+    if (amount < Number(order.paid_amount ?? 0) && changeReason.trim().length < 5) {
+      showToastError(lang === "ar" ? "اكتب سببًا من 5 أحرف على الأقل لخفض المبلغ المسجل." : "Enter a reason of at least five characters to reduce the recorded payment.");
+      return;
+    }
     try {
       const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paid_amount: amount }),
+        body: JSON.stringify({ paid_amount: amount, ...(changeReason.trim() ? { change_reason: changeReason.trim() } : {}) }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -133,6 +146,7 @@ export default function OrderDetailsModal({
       }
       setOrder((current) => current ? { ...current, ...data.order } : current);
       setPaidInput(String(data.order?.paid_amount ?? amount));
+      setChangeReason("");
       onPaidAmountChange(orderId, amount);
       setEditingPaid(false);
     } catch {
@@ -328,15 +342,28 @@ export default function OrderDetailsModal({
                   <div>
                     <p className="text-[10px] text-gray-400">{t("admin.orderDetails.paid")}</p>
                     {editingPaid ? (
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <input
-                          type="number" min="0" value={paidInput}
-                          onChange={(e) => setPaidInput(e.target.value)}
-                          className="w-20 border border-gray-300 px-1.5 py-0.5 text-xs font-mono"
-                          autoFocus
-                        />
-                        <button onClick={handlePaidSave} className="text-[10px] font-bold text-green-600 hover:text-green-700">✓</button>
-                        <button onClick={() => setEditingPaid(false)} className="text-[10px] text-gray-400 hover:text-gray-600">✕</button>
+                      <div className="flex flex-col gap-1 mt-0.5">
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number" min="0" value={paidInput}
+                            onChange={(e) => setPaidInput(e.target.value)}
+                            className="w-20 border border-gray-300 px-1.5 py-0.5 text-xs font-mono"
+                            autoFocus
+                          />
+                          <button onClick={handlePaidSave} className="text-[10px] font-bold text-green-600 hover:text-green-700">✓</button>
+                          <button onClick={() => { setEditingPaid(false); setChangeReason(""); }} className="text-[10px] text-gray-400 hover:text-gray-600">✕</button>
+                        </div>
+                        {Number(paidInput) < paid && (
+                          <input
+                            type="text"
+                            value={changeReason}
+                            onChange={(event) => setChangeReason(event.target.value)}
+                            maxLength={300}
+                            aria-label={lang === "ar" ? "سبب خفض المبلغ المسجل" : "Reason for reducing recorded payment"}
+                            placeholder={lang === "ar" ? "سبب التعديل (إلزامي)" : "Reason for adjustment (required)"}
+                            className="w-full min-w-36 border border-amber-300 px-1.5 py-1 text-[10px]"
+                          />
+                        )}
                       </div>
                     ) : (
                       <button onClick={() => setEditingPaid(true)} className="text-sm font-bold text-green-700 hover:underline">
@@ -370,8 +397,20 @@ export default function OrderDetailsModal({
                       <div key={i} className="flex items-start gap-2 text-[11px]">
                         <span className="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0" />
                         <span className="text-gray-500 dark:text-gray-400">
-                          {t("admin.orderDetails.statusChanged")}{" "}
-                          <strong className="text-[#1A1A1A]">{sl(entry.status)}</strong>
+                          {entry.type === "payment_adjustment" ? (
+                            <>
+                              {lang === "ar" ? "تعديل المبلغ المسجل من" : "Payment adjusted from"}{" "}
+                              <strong className="text-[#1A1A1A]">EGP {Number(entry.previous_paid_amount ?? 0).toLocaleString("en-EG")}</strong>
+                              {lang === "ar" ? " إلى " : " to "}
+                              <strong className="text-[#1A1A1A]">EGP {Number(entry.paid_amount ?? 0).toLocaleString("en-EG")}</strong>
+                              {entry.reason ? ` — ${entry.reason}` : ""}
+                            </>
+                          ) : (
+                            <>
+                              {t("admin.orderDetails.statusChanged")}{" "}
+                              <strong className="text-[#1A1A1A]">{sl(entry.status)}</strong>
+                            </>
+                          )}
                           {" "}{t("admin.orderDetails.by")}{" "}
                           <strong className="text-[#1A1A1A]">{entry.by}</strong>
                           {" — "}

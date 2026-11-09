@@ -42,6 +42,7 @@ export default function Header() {
     { href: "/", label: t("nav_shop") },
     { href: "/#collections", label: t("nav_collections") },
     { href: "/track", label: t("nav_track") },
+    { href: "/account", label: isRTL ? "حسابي" : "Account" },
   ];
 
   return (

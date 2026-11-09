@@ -2,6 +2,8 @@ import 'server-only';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { getPartnerCategoryKeys } from '@/lib/partners';
+import { createCheckoutRequestHash } from '@/lib/checkout-idempotency';
 import products from './demo-products.json';
 import demoOrders from './demo-orders.json';
 
@@ -11,7 +13,7 @@ const dir = join(process.cwd(), '.demo');
 const file = join(dir, 'database.json');
 function read(): Database {
   if (existsSync(file)) return JSON.parse(readFileSync(file, 'utf8'));
-  return { products: structuredClone(products), orders: structuredClone(demoOrders.orders), order_items: structuredClone(demoOrders.order_items), discount_codes: [], store_settings: [], reviews: [] };
+  return { products: structuredClone(products), orders: structuredClone(demoOrders.orders), order_items: structuredClone(demoOrders.order_items), discount_codes: [], store_settings: [], reviews: [], checkout_idempotency: [] };
 }
 function save(db: Database) { mkdirSync(dir, { recursive: true }); writeFileSync(file, JSON.stringify(db)); }
 function match(row: Row, query: URLSearchParams): boolean {
@@ -64,12 +66,35 @@ export const demoFetch: typeof fetch = async (input, init) => {
   return new Response(JSON.stringify(single ? result[0] : result),{status:method==='POST'?201:200,headers:{'Content-Type':'application/json','Content-Range':`0-${Math.max(0,result.length-1)}/${result.length}`}});
 };
 
-export function placeDemoOrder(body:Record<string,unknown>){
- const name=String(body.customer_name??'').trim(),phone=String(body.customer_phone??'').trim(),address=String(body.shipping_address??body.customer_address??'').trim();
- if(!name||!/^01[0125]\d{8}$/.test(phone)||!address)throw new Error('Customer name, valid Egyptian phone and address are required.');
- const items=body.items as {productId?:string;product_id?:string;size?:string;color?:string;quantity:number}[];
- if(!Array.isArray(items)||!items.length)throw new Error('Cart is empty.');
- const db=read();const quantities=new Map<string,number>();
+export function placeDemoOrder(body:Record<string,unknown>, idempotency?: { key: string }){
+ const name=String(body.customer_name??'').trim(),phone=String(body.customer_phone??'').trim(),address=String(body.customer_address??body.shipping_address??'').trim();
+ const normalizedPhone=phone.replace(/[\s\-()]/g,'');
+ const paymentType=body.payment_type;
+ const notes=typeof body.notes==='string'?body.notes.trim():'';
+ const discountCode=typeof body.discount_code==='string'?body.discount_code.trim().toUpperCase():'';
+ if(name.length<2||name.length>120||!/^01[0125]\d{8}$/.test(normalizedPhone)||address.length<5||address.length>500)throw new Error('Enter valid customer details.');
+ if(paymentType!=='full'&&paymentType!=='deposit')throw new Error('Invalid payment type.');
+ if(notes.length>500||discountCode.length>50)throw new Error('Invalid order details.');
+ const items=body.items as {productId?:string;product_id?:string;size?:string|null;color?:string|null;quantity:number}[];
+ if(!Array.isArray(items)||!items.length||items.length>100)throw new Error('Cart must contain between 1 and 100 items.');
+ const variantKeys=new Set<string>();
+ for(const value of items){
+  if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('One or more cart items are invalid.');
+  const item=value as {productId?:unknown;product_id?:unknown;size?:unknown;color?:unknown;quantity?:unknown};
+  const productId=item.productId??item.product_id;
+  if(typeof productId!=='string'||!/^([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i.test(productId)||!Number.isInteger(item.quantity)||Number(item.quantity)<1||Number(item.quantity)>50)throw new Error('One or more cart items are invalid.');
+  if(item.size!==undefined&&item.size!==null&&(typeof item.size!=='string'||item.size.length>40))throw new Error('One or more cart items are invalid.');
+  if(item.color!==undefined&&item.color!==null&&(typeof item.color!=='string'||item.color.length>80))throw new Error('One or more cart items are invalid.');
+  const variantKey=`${productId}\0${typeof item.size==='string'?item.size.trim():''}\0${typeof item.color==='string'?item.color.trim():''}`;
+  if(variantKeys.has(variantKey))throw new Error('Combine duplicate product variants into one cart line.');
+  variantKeys.add(variantKey);
+ }
+ const canonicalItems=items.map(value=>{const item=value as {productId?:unknown;product_id?:unknown;size?:unknown;color?:unknown;quantity?:unknown};return {product_id:String(item.productId??item.product_id).toLowerCase(),quantity:Number(item.quantity),size:typeof item.size==='string'?item.size.trim()||null:null,color:typeof item.color==='string'?item.color.trim()||null:null};});
+ const requestHash=idempotency?createCheckoutRequestHash({customerName:name,customerPhone:normalizedPhone,customerAddress:address,notes:notes||null,paymentType,discountCode:discountCode||null,items:canonicalItems}):null;
+ const db=read();db.checkout_idempotency??=[];
+ const previous=idempotency?db.checkout_idempotency.find(row=>row.idempotency_key===idempotency.key):undefined;
+ if(previous){if(previous.request_hash!==requestHash)throw new Error('IDEMPOTENCY_KEY_REUSED');return previous.response as {success:true;orderIds:string[];createdAt:string;demo:true};}
+ const quantities=new Map<string,number>();
  const normalized=items.map(item=>{const product=db.products.find(p=>p.id===(item.productId??item.product_id));if(!product||!product.is_available||!product.in_stock)throw new Error('Product is unavailable.');if(!Number.isInteger(item.quantity)||item.quantity<1)throw new Error('Invalid quantity.');
  if((product.sizes as string[])?.length&&!(product.sizes as string[]).includes(item.size??''))throw new Error('Select an available size.');
  if((product.colors as string[])?.length&&!(product.colors as string[]).includes(item.color??''))throw new Error('Select an available color.');
@@ -80,9 +105,88 @@ export function placeDemoOrder(body:Record<string,unknown>){
  db.orders.push({id,partner_id:partnerId,customer_name:name,customer_phone:phone,customer_address:address,shipping_address:address,source:'online_store',order_source:'online_store',status:'pending',payment_status:'pending',total_amount:total,paid_amount:0,deposit_amount:0,created_at:createdAt,updated_at:createdAt,notes:'Demo order — no payment collected',activity_log:JSON.stringify([{status:'pending',by:'Demo checkout',at:createdAt}])});
  for(const {product,item} of group)db.order_items.push({id:randomUUID(),order_id:id,product_id:product.id,partner_id:partnerId,quantity:item.quantity,size:item.size,color:item.color,unit_price:product.selling_price,cost_price:product.cost_price,selling_price_at_time:product.selling_price,cost_price_at_time:product.cost_price});}
  for(const [id,count]of Array.from(quantities)){const product=db.products.find(p=>p.id===id)!;product.stock_quantity=Number(product.stock_quantity)-count;product.in_stock=Number(product.stock_quantity)>0;}
- save(db);return {success:true,orderIds,createdAt,demo:true};
+ const response={success:true as const,orderIds,createdAt,demo:true as const};
+ if(idempotency)db.checkout_idempotency.push({idempotency_key:idempotency.key,request_hash:requestHash!,response});
+ save(db);return response;
 }
 
+
+type DemoOrderUpdateInput = {
+  order_id: string;
+  partner_id: string;
+  partner_name: string;
+  status?: string | null;
+  paid_amount?: number | null;
+  change_reason?: string | null;
+};
+
+export function updateDemoOrder(input: DemoOrderUpdateInput) {
+  const db = read();
+  const order = db.orders.find((row) => row.id === input.order_id && row.partner_id === input.partner_id);
+  if (!order) throw new Error('ORDER_NOT_FOUND');
+  const nextStatus = input.status ?? null;
+  const nextPaid = input.paid_amount ?? null;
+  if (nextPaid !== null && nextPaid > Number(order.total_amount)) throw new Error('PAID_AMOUNT_EXCEEDS_TOTAL');
+
+  const statusChanged = nextStatus !== null && nextStatus !== order.status;
+  const paymentChanged = nextPaid !== null && nextPaid !== Number(order.paid_amount ?? 0);
+  if (statusChanged && !(
+    (order.status === 'pending' && ['processing', 'cancelled'].includes(nextStatus!)) ||
+    (order.status === 'processing' && ['shipped', 'cancelled'].includes(nextStatus!)) ||
+    (order.status === 'shipped' && nextStatus === 'closed')
+  )) throw new Error('INVALID_STATUS_TRANSITION');
+  const reason = input.change_reason?.trim() ?? '';
+  if (paymentChanged && nextPaid! < Number(order.paid_amount ?? 0) && reason.length < 5) {
+    throw new Error('PAYMENT_DECREASE_REQUIRES_REASON');
+  }
+  if (statusChanged && nextStatus === 'cancelled' && Number(order.paid_amount ?? 0) > 0) {
+    throw new Error('PAYMENT_REFUND_REQUIRED');
+  }
+
+  const now = new Date().toISOString();
+  let activity: Row[] = [];
+  try {
+    const parsed = Array.isArray(order.activity_log)
+      ? order.activity_log
+      : typeof order.activity_log === 'string' ? JSON.parse(order.activity_log) : [];
+    if (Array.isArray(parsed)) activity = parsed;
+  } catch { activity = []; }
+
+  if (statusChanged && nextStatus === 'cancelled') {
+    const quantities = new Map<string, number>();
+    for (const item of db.order_items.filter((row) => row.order_id === input.order_id)) {
+      const productId = String(item.product_id ?? '');
+      if (productId) quantities.set(productId, (quantities.get(productId) ?? 0) + Number(item.quantity ?? 0));
+    }
+    for (const [productId, quantity] of quantities) {
+      const product = db.products.find((row) => row.id === productId);
+      if (product) {
+        product.stock_quantity = Number(product.stock_quantity ?? 0) + quantity;
+        product.in_stock = Boolean(product.is_available) && Number(product.stock_quantity) > 0;
+      }
+    }
+  }
+  if (statusChanged) activity.push({ type: 'status_change', status: nextStatus!, previous_status: order.status, by: input.partner_name, at: now });
+  if (paymentChanged) activity.push({
+    type: 'payment_adjustment', status: 'payment_adjusted',
+    previous_paid_amount: Number(order.paid_amount ?? 0), paid_amount: nextPaid!,
+    reason: reason || 'Payment recorded by partner', by: input.partner_name, at: now,
+  });
+
+  if (nextStatus !== null) order.status = nextStatus;
+  if (nextPaid !== null) order.paid_amount = nextPaid;
+  order.activity_log = activity.slice(-100);
+  order.updated_at = now;
+  save(db);
+  return {
+    id: String(order.id),
+    status: String(order.status),
+    paid_amount: Number(order.paid_amount ?? 0),
+    total_amount: Number(order.total_amount ?? 0),
+    activity_log: order.activity_log,
+    updated_at: String(order.updated_at),
+  };
+}
 
 type DemoManualOrderInput = {
   partner_id: string;
@@ -100,9 +204,11 @@ export function placeDemoManualOrder(input: DemoManualOrderInput) {
   const quantities = new Map<string, number>();
   const selected = input.items.map((item) => {
     const product = db.products.find((row) => row.id === item.product_id);
-    if (!product || product.partner_id !== input.partner_id || !product.is_available || !product.in_stock) {
+    if (!product || !product.is_available || !product.in_stock) {
       throw new Error('PRODUCT_UNAVAILABLE');
     }
+    if (product.partner_id !== input.partner_id) throw new Error('PRODUCT_NOT_OWNED');
+    if (!getPartnerCategoryKeys(input.partner_id).includes(String(product.category))) throw new Error('CATEGORY_NOT_ASSIGNED_TO_PARTNER');
     const requested = (quantities.get(item.product_id) ?? 0) + item.quantity;
     quantities.set(item.product_id, requested);
     if (requested > Number(product.stock_quantity)) throw new Error('PRODUCT_UNAVAILABLE');

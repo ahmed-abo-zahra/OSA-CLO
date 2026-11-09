@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getPublicCatalogPage, type PublicCatalogProduct } from "@/lib/catalog-cache";
 import StorefrontClient from "@/components/storefront/StorefrontClient";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "ASO CLO — The New Standard in Streetwear",
@@ -16,22 +16,15 @@ export const metadata: Metadata = {
 };
 
 export default async function StorefrontPage() {
-  const { data: products, error } = await supabaseAdmin
-    .from("products")
-    .select("id, name_en, name_ar, description, category, selling_price, sizes, stock_quantity, image_url, image_urls, colors, description_ar, is_available, in_stock")
-    .eq("is_available", true)
-    .eq("in_stock", true)
-    .order("created_at", { ascending: false });
-
-  const categories = Array.from(
-    new Set(
-      (products ?? [])
-        .map((p) => p.category)
-        .filter((c): c is string => Boolean(c))
-    )
-  );
+  let products: PublicCatalogProduct[] = [];
+  let loadError = false;
+  try {
+    products = (await getPublicCatalogPage(0)).products;
+  } catch {
+    loadError = true;
+  }
 
   return (
-    <StorefrontClient products={products ?? []} categories={categories} loadError={Boolean(error)} />
+    <StorefrontClient products={products} loadError={loadError} />
   );
 }

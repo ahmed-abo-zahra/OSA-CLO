@@ -20,7 +20,7 @@ export interface PDPProduct {
   category?: string | null;
   selling_price: number;
   sizes?: string[] | null;
-  stock_quantity: number;
+  in_stock: boolean;
   colors?: string[];
   description_ar?: string;
   image_url?: string | null;
@@ -167,10 +167,9 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
 
   const displayName = lang === "ar" && product.name_ar ? product.name_ar : product.name_en;
   const hasSizes    = (product.sizes?.length ?? 0) > 0;
-  const isLowStock  = product.stock_quantity > 0 && product.stock_quantity < 5;
 
   function handleAddToCart() {
-    if (product.stock_quantity<=0)return;
+    if (!product.in_stock) return;
     if (hasSizes && !selectedSize) { setSizeError(true); return; }
     setSizeError(false);
     addItem({
@@ -182,7 +181,6 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
       size:      selectedSize,
       quantity:  1,
       color: selectedColor,
-      maxStock: product.stock_quantity,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -293,11 +291,6 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
                   {getSubcategoryLabel(product.category,lang)}
                 </span>
               )}
-              {isLowStock && (
-                <span className="text-[10px] font-bold bg-orange-500 text-white px-2 py-0.5 tracking-wide">
-                  {t("storefront.products.onlyLeft").replace("{{n}}", String(product.stock_quantity))}
-                </span>
-              )}
             </div>
 
             {/* Name */}
@@ -361,13 +354,13 @@ export default function ProductDetailClient({ product }: { product: PDPProduct }
             )}
 
             <div className="space-y-3">
-              <p className="text-xs text-brand-muted">{lang==="ar"?`المخزون: ${product.stock_quantity} قطعة`:`In stock: ${product.stock_quantity} pieces`}</p>
+              <p className="text-xs text-brand-muted">{product.in_stock ? (lang === "ar" ? "متاح للطلب" : "Available") : (lang === "ar" ? "غير متاح حاليًا" : "Currently unavailable")}</p>
               {product.colors?.length ? <fieldset><legend className="text-xs font-bold mb-2">{lang==="ar"?"اللون":"Color"}</legend><div className="flex flex-wrap gap-2">{product.colors.map(color=><button key={color} type="button" aria-pressed={selectedColor===color} onClick={()=>setSelectedColor(color)} className={`px-4 py-2 border text-xs ${selectedColor===color?'bg-brand-black text-white dark:bg-offwhite dark:text-brand-black':'border-brand-border'}`}>{colorLabel(color,lang)}</button>)}</div></fieldset> : null}
             </div>
             {/* CTAs */}
             <div className="flex flex-col gap-3 pt-2">
               <button
-                disabled={product.stock_quantity<=0} onClick={handleAddToCart}
+                disabled={!product.in_stock} onClick={handleAddToCart}
                 className={`w-full py-4 text-xs font-black tracking-[0.15em] uppercase transition-all
                   ${added
                     ? "bg-green-600 text-white"
